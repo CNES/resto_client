@@ -23,7 +23,6 @@ from resto_client.requests.utils import AccesDeniedError
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .authentication_credentials import AuthenticationCredentials
-from .authentication_token import AuthenticationToken
 from .base_service import BaseService
 from .service_access import AuthenticationServiceAccess
 
@@ -45,9 +44,8 @@ class AuthenticationService(BaseService):
         :param password: user password
         """
         super(AuthenticationService, self).__init__(auth_access)
-        # Credentials and token need to exist before calling  update_after_url_change
+        # Credentials need to exist before calling  update_after_url_change
         self.credentials = AuthenticationCredentials(self)
-        self.token = AuthenticationToken(self)
         self.update_after_url_change()
 
         # Need to set username before password because username update will reset password
@@ -56,7 +54,6 @@ class AuthenticationService(BaseService):
 
     def reset(self) -> None:
         self.credentials.reset()
-        self.token.reset()
         super(AuthenticationService, self).reset()
 
     @property
@@ -91,7 +88,6 @@ class AuthenticationService(BaseService):
         auth_service_access = AuthenticationServiceAccess.persisted()
         instance = cls(auth_access=auth_service_access)
         instance.credentials = AuthenticationCredentials.persisted(instance)
-        instance.token = AuthenticationToken.persisted(instance)
         return instance
 
     def update_after_url_change(self) -> None:
@@ -100,7 +96,6 @@ class AuthenticationService(BaseService):
         """
         self.credentials = AuthenticationCredentials(authentication_service=self)
         self.credentials.set(username=None)
-        self.token.reset()
 
     def get_http_basic_auth(self) -> HTTPBasicAuth:
         """
@@ -114,23 +109,16 @@ class AuthenticationService(BaseService):
         """
         return self.credentials.auth_data
 
-    def update_after_credentials_change(self) -> None:
-        """
-        Callback function to be called by the setter of username. Reset the password and the
-        token to None following a username change.
-        """
-        self.token.reset()
-
     def update_authorization_header(self, headers: dict, token_required: bool) -> None:
         """
-        Update the Authorization header if the token is not None
+        Update the Authorization header if possible
 
         :param headers: the headers into which the Authorization header must be recorded.
         :param token_required: If True ensure to retrieve an Authorization header, otherwise
                                provide it only if a valid token can be retrieved silently.
         """
-        username_defined = self.credentials.username is not None
-        self.token.update_authorization_header(headers, token_required, username_defined)
+        self.credentials.update_authorization_header(headers, token_required)
+
 
 # ++++++++ From here we have the supported request to the service ++++++++++++
 
@@ -153,7 +141,9 @@ class AuthenticationService(BaseService):
         """
         :returns: True if the token is still valid
         """
-        return CheckTokenRequest(self, self.token.token).run()
+        if self.credentials.token_value is not None:
+            return CheckTokenRequest(self, self.credentials.token_value).run()
+        return False
 
     def revoke_token(self) -> Optional[requests.Response]:
         """
@@ -161,6 +151,6 @@ class AuthenticationService(BaseService):
 
         :returns: unknown result at the moment (not working)
         """
-        if self.token.token is not None:
+        if self.credentials.token_value is not None:
             return RevokeTokenRequest(self).run()
         return None

@@ -21,6 +21,8 @@ from requests.auth import HTTPBasicAuth
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
+from .authentication_token import AuthenticationToken
+
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
@@ -42,6 +44,7 @@ class AuthenticationCredentials():
         self._parent_service = authentication_service
 
         self._password: Optional[str] = None
+        self._token = AuthenticationToken(authentication_service)
 
     def set(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
         """
@@ -60,14 +63,17 @@ class AuthenticationCredentials():
                 # Reset both username and password regardless of their previous value.
                 self.username = None  # type: ignore
                 self._password = None
+                self._token.token = None  # type: ignore
             else:
                 # Set password only, whatever existing username value (None or defined)
                 self._password = password
+                self._token.token = None  # type: ignore
         else:
             username = self._check_username(username)  # normalize username
             # Set username and password if new username is different from stored one.
             if username != self.username:
                 self.username = username    # type: ignore # will trigger password reset
+                self._token.token = None  # type: ignore
             self._password = password  # set password either to None or to a defined value
 
     def reset(self) -> None:
@@ -86,9 +92,16 @@ class AuthenticationCredentials():
         :param authentication_service: authentication service onto which these credentials are valid
         :returns: a credentials instance from the persisted username
         """
-        # We only need to create a standard instance, as persisted username will be retrieved at
-        # first get(), if it exists.
+        # We only need to create a standard instance, as persisted username and tokenwill be
+        # retrieved at first get(), if they exists.
         return cls(authentication_service)
+
+    @property
+    def token_value(self) -> Optional[str]:
+        """
+        :return: the token value associated to these credentials, or None if not avaliable.
+        """
+        return self._token.token
 
     @property  # type: ignore
     @managed_getter()
@@ -110,7 +123,7 @@ class AuthenticationCredentials():
         _ = username  # to avoid pylint warning
 
         self._password = None  # reset password
-        self._parent_service.update_after_credentials_change()  # propagate for token reset
+        self._token.reset()  # reset token
 
     def _check_username(self, username: str) -> str:
         """
@@ -163,6 +176,17 @@ class AuthenticationCredentials():
         """
         self._ensure_credentials()
         return HTTPBasicAuth(self.username, self._password)
+
+    def update_authorization_header(self, headers: dict, token_required: bool) -> None:
+        """
+        Update the Authorization headers if possible
+
+        :param headers: the headers into which the Authorization header must be recorded.
+        :param token_required: If True ensure to retrieve an Authorization header, otherwise
+                               provide it only if a valid token can be retrieved silently.
+        """
+        username_defined = self.username is not None
+        self._token.update_authorization_header(headers, token_required, username_defined)
 
     def __str__(self) -> str:
         return 'username: {} / password: {}'.format(self.username, self._password)
