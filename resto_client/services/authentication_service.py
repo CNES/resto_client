@@ -88,7 +88,7 @@ class AuthenticationService(BaseService):
         :returns: an authentication service from the persisted authentication access description.
         """
         # Retrieve persisted access to the authentication service
-        auth_service_access = AuthenticationServiceAccess.get_persisted_access()
+        auth_service_access = AuthenticationServiceAccess.persisted()
         instance = cls(auth_access=auth_service_access)
         instance.credentials = AuthenticationCredentials.persisted(instance)
         instance.token = AuthenticationToken.persisted(instance)
