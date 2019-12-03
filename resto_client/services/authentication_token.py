@@ -14,8 +14,10 @@
 """
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
+from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
+
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
@@ -27,7 +29,7 @@ class AuthenticationToken():
     """
     properties_storage = RESTO_CLIENT_SETTINGS
 
-    def __init__(self, authentication_service: 'AuthenticationService') -> None:
+    def __init__(self, authentication_service: 'Optional[AuthenticationService]'=None) -> None:
         """
         Constructor
 
@@ -42,17 +44,15 @@ class AuthenticationToken():
         self.token = None  # type: ignore
 
     @classmethod
-    def persisted(cls, authentication_service: 'AuthenticationService') -> 'AuthenticationToken':
+    def persisted(cls) -> 'AuthenticationToken':
         """
-        Create an instance from persisted attributes (token), connected to a provided
-        authentication service.
+        Create an instance from persisted attributes (token), without connection to an
+        authentication service (to be established after creation, and before use).
 
-        :param authentication_service: authentication service onto which this token is valid
         :returns: a token instance from the persisted token
         """
-        persisted_token_value = cls.properties_storage.get('token')
-        instance = cls(authentication_service)
-        instance.token = persisted_token_value  # type: ignore
+        instance = cls()
+        instance.token = cls.properties_storage.get('token')  # type: ignore
         return instance
 
     @property  # type: ignore
@@ -81,16 +81,20 @@ class AuthenticationToken():
         _ = unused_arg  # to avoid pylint warning
         # Trigger content retrieval from persisted value, if any
         new_token = self.token
-        if not self.valid_token():
-            new_token = self._parent_service.get_token()
+        if self._parent_service is not None:
+            if not self.valid_token():
+                new_token = self._parent_service.get_token()
         return new_token
 
     def valid_token(self) -> bool:
         """
         :returns: True if the token is still valid, False otherwise
+        :raises RestoClientDesignError: when token cannot be validated (parent service is None).
         """
         if self.token is None:
             return False
+        if self._parent_service is None:
+            raise RestoClientDesignError('Cannot validate token when no parent service defined')
         return self._parent_service.check_token()
 
     def update_authorization_header(self,
