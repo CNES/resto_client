@@ -52,7 +52,7 @@ def cli_unset_account(args: argparse.Namespace) -> None:
     """
     _ = args  # to avoid pylint warning
     service = AuthenticationService.persisted()
-    service.credentials.username = None  # type: ignore
+    service.credentials.set()  # reset username (and password)
 
 
 def cli_unset_download_dir(args: argparse.Namespace) -> None:
