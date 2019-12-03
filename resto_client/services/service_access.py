@@ -86,7 +86,7 @@ class ServiceAccess(ABC):
         return '{}_protocol'.format(cls.service_type())
 
     @classmethod
-    def get_persisted_access(cls: Type[SA]) -> SA:
+    def persisted(cls: Type[SA]) -> SA:
         """
 
         :returns: the persisted access for this service

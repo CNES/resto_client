@@ -110,7 +110,7 @@ class RestoService(BaseService):
         # Retrieve persisted authentication service
         auth_service = AuthenticationService.persisted()
         # Retrieve persisted access to the resto service
-        resto_service_access = RestoServiceAccess.get_persisted_access()
+        resto_service_access = RestoServiceAccess.persisted()
         resto_service = cls(resto_access=resto_service_access, auth_service=auth_service)
         persisted_coll_manager = RestoCollectionsManager.persisted(resto_service)
         resto_service.set_collection_mgr(persisted_coll_manager)
