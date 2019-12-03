@@ -99,7 +99,7 @@ class AuthenticationCredentials():
     @property
     def token_value(self) -> Optional[str]:
         """
-        :return: the token value associated to these credentials, or None if not avaliable.
+        :return: the token value associated to these credentials, or None if not available.
         """
         return self._token.token
 
@@ -189,4 +189,6 @@ class AuthenticationCredentials():
         self._token.update_authorization_header(headers, token_required, username_defined)
 
     def __str__(self) -> str:
-        return 'username: {} / password: {}'.format(self.username, self._password)
+        return 'username: {} / password: {} \ntoken: {}'.format(self.username,
+                                                                self._password,
+                                                                self._token.token)
