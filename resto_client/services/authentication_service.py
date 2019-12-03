@@ -104,11 +104,12 @@ class AuthenticationService(BaseService):
         """
         return self.credentials.http_basic_auth
 
-    def get_auth_data(self) -> Dict[str, Optional[str]]:
+    @property
+    def authorization_data(self) -> Dict[str, Optional[str]]:
         """
         :returns: the authorization data for the service
         """
-        return self.credentials.auth_data
+        return self.credentials.authorization_data
 
     def update_authorization_header(self, headers: dict, token_required: bool) -> None:
         """
