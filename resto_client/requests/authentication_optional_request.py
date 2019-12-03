@@ -26,7 +26,7 @@ class AuthenticationOptionalRequest(BaseRequest):
     """
      Base class for several Resto Requests which can request Authentication
     """
-    token_required = False
+    authentication_required = False
 
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """
@@ -36,7 +36,8 @@ class AuthenticationOptionalRequest(BaseRequest):
         """
         super(AuthenticationOptionalRequest, self).set_headers(dict_input)
         if dict_input is None:
-            self.auth_service.update_authorization_header(self.headers, self.token_required)
+            self.auth_service.update_authorization_header(self.headers,
+                                                          self.authentication_required)
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, str, None, Response]:

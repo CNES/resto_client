@@ -97,7 +97,8 @@ class AuthenticationService(BaseService):
         self.credentials = AuthenticationCredentials(authentication_service=self)
         self.credentials.set(username=None)
 
-    def get_http_basic_auth(self) -> HTTPBasicAuth:
+    @property
+    def http_basic_auth(self) -> HTTPBasicAuth:
         """
         :returns: the basic HTTP authorization for the service
         """

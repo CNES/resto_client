@@ -98,9 +98,9 @@ class BaseRequest(ABC):
         """
 
     @property
-    def authorization(self) -> HTTPBasicAuth:
+    def http_basic_auth(self) -> HTTPBasicAuth:
         """
-        :returns: None, the default authorization for the service
+        :returns: None, the default basic HTTP authorization for the service
         """
 
     @property
@@ -119,7 +119,7 @@ class BaseRequest(ABC):
             headers_with_json.update(self.headers)
         headers_with_json.update({'Accept': 'application/json'})
         result = get_response(self.get_url(), self.request_action,
-                              headers=headers_with_json, auth=self.authorization)
+                              headers=headers_with_json, auth=self.http_basic_auth)
         return result.json()
 
     def post_as_text(self, stream: bool=False) -> Optional[str]:
@@ -140,7 +140,7 @@ class BaseRequest(ABC):
         """
 
         try:
-            result = post(self.get_url(), headers=self.headers, auth=self.authorization,
+            result = post(self.get_url(), headers=self.headers, auth=self.http_basic_auth,
                           stream=stream, data=self.authorization_data)
             result.raise_for_status()
         except (HTTPError, SSLError) as excp:
