@@ -93,7 +93,7 @@ class AuthenticationCredentials():
         persisted_token = AuthenticationToken.persisted()
         instance = cls(authentication_service)
         instance.username = persisted_username  # type: ignore
-        persisted_token._parent_service = authentication_service
+        persisted_token.set_service(authentication_service)
         instance._token = persisted_token
         return instance
 

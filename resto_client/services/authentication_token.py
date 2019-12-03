@@ -43,6 +43,14 @@ class AuthenticationToken():
         """
         self.token = None  # type: ignore
 
+    def set_service(self, authentication_service: 'AuthenticationService') -> None:
+        """
+        Set the authentication service to which this token is connected.
+
+        :param authentication_service: parent authentication service for this token.
+        """
+        self._parent_service = authentication_service
+
     @classmethod
     def persisted(cls) -> 'AuthenticationToken':
         """
