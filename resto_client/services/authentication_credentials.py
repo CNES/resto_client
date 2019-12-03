@@ -161,7 +161,7 @@ class AuthenticationCredentials():
             self._password = AuthenticationCredentials.asking_input['hidden'](msg)
 
     @property
-    def auth_data(self) -> Dict[str, Optional[str]]:
+    def authorization_data(self) -> Dict[str, Optional[str]]:
         """
         :returns: the authorization data for the service
         """

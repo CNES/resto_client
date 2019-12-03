@@ -39,9 +39,9 @@ class AuthenticationRequiredRequest(AuthenticationOptionalRequest):
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:
         """
-        :returns: the authorization for the service
+        :returns: the authorization data for the service
         """
-        return self.auth_service.get_auth_data()
+        return self.auth_service.authorization_data
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, str, None, Response]:

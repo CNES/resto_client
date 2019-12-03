@@ -98,15 +98,15 @@ class BaseRequest(ABC):
         """
 
     @property
-    def http_basic_auth(self) -> HTTPBasicAuth:
+    def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
         """
-        :returns: None, the default basic HTTP authorization for the service
+        The default basic HTTP authorization for the service (None)
         """
 
     @property
-    def authorization_data(self) -> Dict[str, Optional[str]]:
+    def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
         """
-        :returns: None, data input to get authorization for the service
+        The default authorization data for the service (None)
         """
 
     def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
