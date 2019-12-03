@@ -172,7 +172,7 @@ class AuthenticationCredentials():
     @property
     def http_basic_auth(self) -> HTTPBasicAuth:
         """
-        :returns: the authorization for the service
+        :returns: the basic HTTP authorization for the service
         """
         self._ensure_credentials()
         return HTTPBasicAuth(self.username, self._password)
