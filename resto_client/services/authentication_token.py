@@ -15,7 +15,6 @@
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
 from resto_client.generic.property_decoration import managed_getter, managed_setter
-
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 if TYPE_CHECKING:
@@ -48,12 +47,13 @@ class AuthenticationToken():
         Create an instance from persisted attributes (token), connected to a provided
         authentication service.
 
-        :param authentication_service: authentication service onto which this token valid
+        :param authentication_service: authentication service onto which this token is valid
         :returns: a token instance from the persisted token
         """
-        # We only need to create a standard instance, as persisted token will be retrieved at
-        # first get(), if it exists.
-        return cls(authentication_service)
+        persisted_token_value = cls.properties_storage.get('token')
+        instance = cls(authentication_service)
+        instance.token = persisted_token_value  # type: ignore
+        return instance
 
     @property  # type: ignore
     @managed_getter()
