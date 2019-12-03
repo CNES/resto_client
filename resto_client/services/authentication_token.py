@@ -82,7 +82,7 @@ class AuthenticationToken():
         # Trigger content retrieval from persisted value, if any
         new_token = self.token
         if not self.valid_token():
-            new_token = self._parent_service.get_token()  # type: ignore
+            new_token = self._parent_service.get_token()
         return new_token
 
     def valid_token(self) -> bool:
@@ -106,7 +106,7 @@ class AuthenticationToken():
         :param username_defined: True if a username is defined in the service credentials.
         """
         if token_required:
-            self.token = 'A fake token value to trigger get_token()'   # type: ignore
+            self.token = 'A fake token value to trigger get_token()'  # type: ignore
         else:
             # If the token is valid use it, otherwise renew it if the username is not None
             if not self.valid_token():
