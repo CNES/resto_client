@@ -185,6 +185,12 @@ class ServiceAccess(ABC):
         """
         return ServiceAccess.check_url(base_url, type(self).__name__)
 
+    def has_same_url(self, other: 'ServiceAccess') -> bool:
+        """
+        :returns: True if other service access has the same base URL than this one, False otherwise.
+        """
+        return self.base_url == other.base_url
+
     @property  # type: ignore
     @managed_getter()
     def protocol(self) -> Optional[str]:
