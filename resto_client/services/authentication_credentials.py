@@ -60,21 +60,16 @@ class AuthenticationCredentials():
         """
         if username is None:
             if password is None:
-                # Reset both username and password regardless of their previous value.
+                # Reset username because no new password specified
                 self.username = None  # type: ignore
-                self._password = None
-                self._token.reset()
-            else:
-                # Set password only, whatever existing username value (None or defined)
-                self._password = password
-                self._token.reset()
+            self._token.reset()
         else:
             username = self._check_username(username)  # normalize username
             # Set username and password if new username is different from stored one.
             if username != self.username:
                 self.username = username    # type: ignore # will trigger password reset
                 self._token.reset()
-            self._password = password  # set password either to None or to a defined value
+        self._password = password  # set password either to None or to a defined value
 
     def reset(self) -> None:
         """
