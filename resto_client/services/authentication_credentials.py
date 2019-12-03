@@ -89,7 +89,12 @@ class AuthenticationCredentials():
         """
         # We only need to create a standard instance, as persisted username and tokenwill be
         # retrieved at first get(), if they exists.
-        return cls(authentication_service)
+        persisted_username = cls.properties_storage.get('username')
+        persisted_token = AuthenticationToken.persisted(authentication_service)
+        instance = cls(authentication_service)
+        instance.username = persisted_username  # type: ignore
+        instance._token = persisted_token
+        return instance
 
     @property
     def token_value(self) -> Optional[str]:
