@@ -133,7 +133,7 @@ class AuthenticationService(BaseService):
             new_token = GetTokenRequest(self).run()
         except AccesDeniedError as excp:
             # prevent from saving username by reset
-            self.credentials.username = None  # type:ignore
+            self.credentials.set()  # reset username and password
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, the username was reset.'
             raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp
