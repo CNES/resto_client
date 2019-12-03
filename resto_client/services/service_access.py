@@ -109,13 +109,8 @@ class ServiceAccess(ABC):
         :param service_protocol: the protocol implemented by the service.
         """
         self.properties_name_prefix = self.service_type()
-
         self._parent_service = None
-
-        service_url = self.check_url(service_url, type(self).__name__)
-        service_protocol = self._check_protocol(service_protocol)
         self.detected_protocol: Optional[str] = None
-
         self.base_url = service_url  # type: ignore
         self.protocol = service_protocol  # type: ignore
 
