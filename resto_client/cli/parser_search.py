@@ -15,7 +15,7 @@
 from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
-from collections import OrderedDict
+from copy import deepcopy
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -46,24 +46,26 @@ def get_table_help_criteria() -> str:
         resto_criteria = RestoCriteria(resto_protocol)
         title_help = "Current {} server supports the following criteria (defined in the Resto API):"
         title_help = title_help.format(resto_protocol)
-        dict_to_order = resto_criteria.criteria_keys
+        dict_to_print = resto_criteria.criteria_keys
     except RestoClientNoPersistedAccess:
         title_help = "Criteria supported by all servers (more available when a server is selected):"
-        dict_to_order = COMMON_CRITERIA_KEYS
+        dict_to_print = COMMON_CRITERIA_KEYS
 
-    dict_to_print = OrderedDict(sorted(dict_to_order.items(), key=lambda t: t[0]))
     criteria_table = PrettyTable()
     criteria_table.title = title_help
-    criteria_table.field_names = ['Criteria Key', 'Constraint']
-    criteria_table.align['Constraint'] = 'l'
+    criteria_table.field_names = ['Criteria Key', 'Info']
+    criteria_table.align['Info'] = 'l'
     criteria_table.align['Criteria Key'] = 'l'
     for key, value in dict_to_print.items():
-        value_to_print = value
-        if isinstance(value[-1], dict):
-            if 'def' in value[-1]:
-                value_to_print = value[-1]['def']
-        criteria_table.add_row([key, value_to_print])
-    print_help = criteria_table.get_string()
+        if value['type'] == 'group':
+            new_dict_to_print = deepcopy(value)
+            del new_dict_to_print['type']
+            for sub_key, sub_value in new_dict_to_print.items():
+                if sub_value['help'] != 'no_display':
+                    criteria_table.add_row([sub_key, sub_value['help']])
+        else:
+            criteria_table.add_row([key, value['help']])
+    print_help = criteria_table.get_string(sortby="Criteria Key")
     return print_help
 
 

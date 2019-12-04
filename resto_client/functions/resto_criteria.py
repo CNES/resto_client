@@ -19,90 +19,191 @@ from shapely.errors import WKTReadingError
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
 from resto_client.generic.basic_types import (SquareInterval, DateYMD, GeometryWKT, AscOrDesc,
-                                              Polarisation)
+                                              Polarisation, SquareDateYMD)
 
-CriteriaDictType = Dict[str, Sequence[Any]]
+CriteriaDictType = Dict[str, dict]
+COVER_TEXT = ' expressed in percent [n1,n2['
+INTERVAL_TXT = '{} of the time slice of {}. Format should follow RFC-3339'
+LATLON_TXT = 'expressed in decimal degrees (EPSG:4326) - should be used with'
 COMMON_CRITERIA_KEYS: CriteriaDictType
-COMMON_CRITERIA_KEYS = {'box': (str, {'def': 'Accept a Geometry object'}), 'identifier': (str,),
-                        'lang': (str,),
-                        'parentIdentifier': (str,), 'q': (str,),
+COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
+                                "Defined by 'west, south, east, north' coordinates of longitude,"
+                                " latitude, in decimal degrees (EPSG:4326)"},
+                        'identifier': {'type': str, 'help':
+                                       'Valid UUID or ID according to RFC 4122'},
+                        'lang': {'type': str, 'help':
+                                 'Two letters language code according to ISO 639-1'},
+                        'parentIdentifier': {'type': str, 'help': 'deprecated'},
+                        'q': {'type': str, 'help': 'Free text search / Keywords'},
 
-                        'platform': ('list', str), 'instrument': ('list', str),
-                        'processingLevel': ('list', str), 'productType': ('list', str),
-                        'sensorMode': ('list', str), 'organisationName': ('list', str),
+                        'platform': {'type': 'list', 'sub_type': str, 'help':
+                                     'Acquisition platform'},
+                        'instrument': {'type': 'list', 'sub_type': str, 'help':
+                                       'Satellite Instrument'},
+                        'processingLevel': {'type': 'list', 'sub_type': str, 'help':
+                                            'e.g. L1A, ORTHO'},
+                        'productType': {'type': 'list', 'sub_type': str, 'help':
+                                        'e.g. changes, landuse, etc'},
+                        'sensorMode': {'type': 'list', 'sub_type': str, 'help':
+                                       'Shooting mode of the instrument'},
+                        'organisationName': {'type': 'list', 'sub_type': str, 'help':
+                                             'e.g. CNES'},
 
-                        'index': (int,), 'maxRecords': (int,), 'orbitNumber': (int,),
-                        'page': (int,),
+                        'index': {'type': int, 'help': 'Search page will begin at this index'},
+                        'maxRecords': {'type': int, 'help':
+                                       'Number of results returned per page (default 50)'},
+                        'orbitNumber': {'type': int, 'help': 'Orbit Number (for satellite)'},
+                        'page': {'type': int, 'help': 'Number of the page to display'},
 
-                        'geometry': (GeometryWKT,),
+                        'geometry': {'type': GeometryWKT, 'help':
+                                     "Defined in Well Known Text standard (WKT) with "
+                                     "coordinates in decimal degrees (EPSG:4326)"},
 
-                        'startDate': (DateYMD,), 'completionDate': (DateYMD,),
-                        'updated': (DateYMD,),
+                        'startDate': {'type': DateYMD, 'help':
+                                      INTERVAL_TXT.format('Beginning', 'the search query')},
+                        'completionDate': {'type': DateYMD, 'help':
+                                           INTERVAL_TXT.format('End', 'the search query')},
 
-                        'resolution': (SquareInterval,), 'cloudCover': (SquareInterval,),
-                        'snowCover': (SquareInterval,), 'cultivatedCover': (SquareInterval,),
-                        'desertCover': (SquareInterval,), 'floodedCover': (SquareInterval,),
-                        'forestCover': (SquareInterval,), 'herbaceousCover': (SquareInterval,),
-                        'iceCover': (SquareInterval,), 'urbanCover': (SquareInterval,),
-                        'waterCover': (SquareInterval,),
+                        'updated': {'type': SquareDateYMD, 'help':
+                                    'Time slice of last update of the data updatedFrom:updatedTo'},
 
-                        'geomPoint': ('group', {'lat': float, 'lon': float}),
-                        'geomSurface': ('group', {'lat': float, 'lon': float, 'radius': float}),
+                        'resolution': {'type': SquareInterval, 'help':
+                                       'Spatial resolution expressed in meters [n1,n2['},
+                        'cloudCover': {'type': SquareInterval, 'help':
+                                       'Cloud cover' + COVER_TEXT},
+                        'snowCover': {'type': SquareInterval, 'help':
+                                      'Snow cover' + COVER_TEXT},
+                        'cultivatedCover': {'type': SquareInterval, 'help':
+                                            'Cultivated area' + COVER_TEXT},
+                        'desertCover': {'type': SquareInterval, 'help':
+                                        'Desert area' + COVER_TEXT},
+                        'floodedCover': {'type': SquareInterval, 'help':
+                                         'Flooded area' + COVER_TEXT},
+                        'forestCover': {'type': SquareInterval, 'help': 'Forest area' + COVER_TEXT},
+                        'herbaceousCover': {'type': SquareInterval, 'help':
+                                            'Herbaceous area' + COVER_TEXT},
+                        'iceCover': {'type': SquareInterval, 'help': 'Ice area' + COVER_TEXT},
+                        'urbanCover': {'type': SquareInterval, 'help': 'Urban area' + COVER_TEXT},
+                        'waterCover': {'type': SquareInterval, 'help': 'Water area' + COVER_TEXT},
 
-                        'region': ('region',)
+                        'geomPoint': {'type': 'group',
+                                      'lat': {'type': float,
+                                              'help': 'Latitude ' + LATLON_TXT + ' lon'},
+                                      'lon': {'type': float,
+                                              'help': 'Longitude ' + LATLON_TXT + ' lat'}
+                                      },
+                        'geomSurface': {'type': 'group',
+                                        'lat': {'type': float, 'help': 'no_display'},
+                                        'lon': {'type': float, 'help': 'no_display'},
+                                        'radius': {'type': float, 'help':
+                                                   "Expressed in meters - "
+                                                   "should be used with lon and lat"}
+                                        },
+
+                        'region': {'type': 'region', 'help': 'Nickname of .shp from zones folder'},
                         }
 
 DOTCLOUD_KEYS: CriteriaDictType
-DOTCLOUD_KEYS = {'identifiers': (str,), 'producerProductId': (str,), 'location': (str,),
-                 'metadataVisibility': (str,),
+DOTCLOUD_KEYS = {
+                'identifiers': {'type': str, 'help': 'Accept multi identifier i1,i2,etc.'},
+                'producerProductId': {'type': str, 'help': 'Producer product identifier'},
+                'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
+                'metadataVisibility': {'type': str, 'help': 'Hiden access of product'},
 
-                 'productMode': ('list', str), 'license': ('list', str),
-                 'dotcloudType': ('list', str), 'dotcloudSubType': ('list', str),
+                'productMode': {'type': 'list', 'sub_type': str, 'help': 'Product production mode'},
+                'license': {'type': 'list', 'sub_type': str, 'help': 'Idetifier of applied license'},
+                'dotcloudType': {'type': 'list', 'sub_type': str, 'help':
+                                 'Dotcloud Product Type e.g. eo_image'},
+                'dotcloudSubType': {'type': 'list', 'sub_type': str, 'help':
+                                    'Dotcloud Product Sub-type e.g. optical'},
 
-                 'publishedFrom': (DateYMD,), 'publishedTo': (DateYMD,),
-                 'updatedFrom': (DateYMD,), 'updatedTo': (DateYMD,),
+                'publishedFrom': {'type': DateYMD, 'help':
+                                  INTERVAL_TXT.format('Beginning', "the product's publication")},
+                'publishedTo': {'type': DateYMD, 'help':
+                                INTERVAL_TXT.format('End', "the product's publication")},
+                'updatedFrom': {'type': DateYMD, 'help':
+                                INTERVAL_TXT.format('Beginning', "the product's update")},
+                'updatedTo': {'type': DateYMD, 'help':
+                              INTERVAL_TXT.format('End', "the product's update")},
 
-                 'incidenceAngle': (SquareInterval,),
+                'incidenceAngle': {'type': SquareInterval, 'help':
+                                   'Satellite incidence angle [n1,n2['},
 
-                 'onlyDownloadableProduct': (bool,)
+                'onlyDownloadableProduct': {'type': bool, 'help':
+                                            "True or False : show only downlodable product for "
+                                            "the current account"},
                  }
 
 PEPS_VERSION_KEYS: CriteriaDictType
-PEPS_VERSION_KEYS = {'latitudeBand': (str,), 'mgrsGSquare': (str,), 'realtime': (str,),
-                     's2TakeId': (str,), 'isNrt': (str,), 'location': (str,),
-                     'resolution': (str,),  # resolution overwritten but not working on peps
+PEPS_VERSION_KEYS = {'latitudeBand': {'type': str, 'help': ''},
+                     'mgrsGSquare': {'type': str, 'help': ''},
+                     'realtime': {'type': str, 'help': ''},
+                     's2TakeId': {'type': str, 'help': ''},
+                     'isNrt': {'type': str, 'help': ''},
+                     'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
+                     # resolution overwritten but not working on peps
+                     'resolution': {'type': str, 'help': 'not working on peps'},
 
-                     'relativeOrbitNumber': (int,),
+                     'relativeOrbitNumber': {'type': int, 'help': 'Should be an integer'},
 
-                     'orbitDirection': (AscOrDesc,),
-                     'polarisation': (Polarisation,),
+                     'orbitDirection': {'type': AscOrDesc, 'help': 'ascending or descending'},
+                     'polarisation': {'type': Polarisation, 'help':
+                                      "For Radar : 'HH', 'VV', 'HH HV' or 'VV VH'"},
 
-                     'publishedBegin': (DateYMD,), 'publishedEnd': (DateYMD,),
+                     'publishedBegin': {'type': DateYMD, 'help':
+                                        INTERVAL_TXT.format('Beginning',
+                                                            "the product's publication")},
+                     'publishedEnd': {'type': DateYMD, 'help':
+                                      INTERVAL_TXT.format('End', "the product's publication")},
                      }
 
 THEIA_VERSION_KEYS: CriteriaDictType
-THEIA_VERSION_KEYS = {'location': (str,), 'locationVECTOR': (str,), 'locationRASTER': (str,),
-                      'typeOSO': (str,), 'OSOsite': (str,), 'OSOcountry': (str,),
-                      'country': (str,), 'name': (str,), 'state': (str,),
-                      'zonegeo': (str,),
+THEIA_VERSION_KEYS = {'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
+                      'locationVECTOR': {'type': str, 'help': ''},
+                      'locationRASTER': {'type': str, 'help': ''},
+                      'typeOSO': {'type': str, 'help': ''},
+                      'OSOsite': {'type': str, 'help': ''},
+                      'OSOcountry': {'type': str, 'help': ''},
+                      'country': {'type': str, 'help': ''},
+                      'name': {'type': str, 'help': ''},
+                      'state': {'type': str, 'help': ''},
+                      'tileId': {'type': str, 'help': "e.g. T31TCJ"},
+                      'zonegeo': {'type': str, 'help': ''},
 
-                      'relativeOrbitNumber': (int,), 'year': (int,),
-                      'nbColInterpolationErrorMax': (int,),
-                      'percentSaturatedPixelsMax': (int,), 'percentNoDataPixelsMax': (int,),
-                      'percentGroundUsefulPixels': (int,), 'percentUsefulPixelsMin': (int,),
+                      'relativeOrbitNumber': {'type': int, 'help': ''},
+                      'year': {'type': int, 'help': ''},
+                      'nbColInterpolationErrorMax': {'type': int, 'help': ''},
+                      'percentSaturatedPixelsMax': {'type': int, 'help': ''},
+                      'percentNoDataPixelsMax': {'type': int, 'help': ''},
+                      'percentGroundUsefulPixels': {'type': int, 'help': ''},
+                      'percentUsefulPixelsMin': {'type': int, 'help': ''},
                       }
 
 CREODIAS_VERSION_KEYS: CriteriaDictType
-CREODIAS_VERSION_KEYS = {'bands': (str,), 'cycle': (str,), 'missionTakeId': (str,),
-                         'productIdentifier': (str,), 'product_id': (str,), 'phase': (str,),
-                         'swath': (str,), 'sortParam': (str,), 'status': (str,),
-                         'row': (str,), 'path': (str,), 'version': (str,), 'name': (str,),
+CREODIAS_VERSION_KEYS = {'bands': {'type': str, 'help': ''},
+                         'cycle': {'type': str, 'help': ''},
+                         'missionTakeId': {'type': str, 'help': ''},
+                         'productIdentifier': {'type': str, 'help': ''},
+                         'product_id': {'type': str, 'help': ''},
+                         'phase': {'type': str, 'help': ''},
+                         'swath': {'type': str, 'help': ''},
+                         'sortParam': {'type': str, 'help': ''},
+                         'status': {'type': str, 'help': ''},
+                         'row': {'type': str, 'help': ''},
+                         'path': {'type': str, 'help': ''},
+                         'version': {'type': str, 'help': ''},
+                         'name': {'type': str, 'help': ''},
 
-                         'dataset': (int,),
+                         'dataset': {'type': int, 'help': ''},
 
-                         'sortOrder': (AscOrDesc,),
+                         'sortOrder': {'type': AscOrDesc, 'help': 'ascending or descending'},
 
-                         'publishedAfter': (DateYMD,), 'publishedBefore': (DateYMD,),
+                         'publishedAfter': {'type': DateYMD, 'help':
+                                            INTERVAL_TXT.format('Beginning',
+                                                                "the product's publication")},
+                         'publishedBefore': {'type': DateYMD, 'help':
+                                             INTERVAL_TXT.format('End',
+                                                                 "the product's publication")},
                          }
 
 SPECIFIC_CRITERIA_KEYS: Dict[str, CriteriaDictType]
@@ -161,22 +262,12 @@ class RestoCriteria(dict):
 
         :param value: value to store as criterion
         :param key: name of the criterion
-        :raises RestoClientUserError: when a criterion has a wrong type
+        :raises RestoClientUserError: when a criterion is not supported on the server
         :raises RestoClientDesignError: when a group type criteria entry does not provide a dict.
         """
-        if key not in self.criteria_keys:
-            # Search for the same criterion without case sensitive and rewrite it
-            for key_to_test in self.criteria_keys:
-                if key.lower() == key_to_test.lower():
-                    key = key_to_test
-                    break
-            # if not found raise criterion error
-            else:
-                msg = 'Criterion {} not supported by this resto server'.format(key)
-                msg += ', choose from the following list: {}'.format(self.criteria_keys)
-                raise RestoClientUserError(msg)
+        key = self._retrieve_criterion(key)
 
-        auth_key_type = self.criteria_keys[key][0]
+        auth_key_type = self.criteria_keys[key]['type']
 
         # if key is has direct recording type (no list or group)
         if isinstance(auth_key_type, type):
@@ -184,7 +275,7 @@ class RestoCriteria(dict):
             super(RestoCriteria, self).__setitem__(key, value)
             self._manage_geometry()
         elif auth_key_type == 'list':
-            auth_key_type = self.criteria_keys[key][1]
+            auth_key_type = self.criteria_keys[key]['sub_type']
             # if can be list but is single
             if not isinstance(value, list):
                 test_criterion(key, value, auth_key_type)
@@ -201,7 +292,7 @@ class RestoCriteria(dict):
             for criterion, value_item in value.items():
                 # Test the key in group item
                 try:
-                    auth_key_type = self.criteria_keys[key][1][criterion]
+                    auth_key_type = self.criteria_keys[key][criterion]["type"]
                 except KeyError:
                     msg = 'Criterion {} in {} not supported by this resto server'
                     raise RestoClientUserError(msg.format(criterion, key))
@@ -214,7 +305,7 @@ class RestoCriteria(dict):
             else:
                 raise RestoClientDesignError('region must be a str or None')
 
-    def update(self, criteria: dict) -> None:
+    def update(self, criteria: dict) -> None:  # type:ignore
         """
         Update the Criteria dict with new criteria and test them
 
@@ -239,3 +330,22 @@ class RestoCriteria(dict):
             shape_bbox = geojson_zone_to_bbox(geojson_file)
             geometry_criteria = str(shape_bbox)
             self['geometry'] = geometry_criteria
+
+    def _retrieve_criterion(self, key: str) -> str:
+        """
+        If key not found in criteria_keys, search for the same criterion without case sensitive
+        and rewrite it
+
+        :param key: key to test
+        :raises RestoClientUserError: when key is unknow
+        :returns: key suitable for the current server
+        """
+        if key not in self.criteria_keys:
+            for key_to_test in self.criteria_keys:
+                if key.lower() == key_to_test.lower():
+                    return key_to_test
+            # if not found raise criterion error
+            msg = 'Criterion {} not supported by this resto server'.format(key)
+            msg += ', choose from the following list: {}'.format(self.criteria_keys)
+            raise RestoClientUserError(msg)
+        return key
