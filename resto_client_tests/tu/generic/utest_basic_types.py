@@ -17,7 +17,7 @@ import unittest
 from shapely.errors import WKTReadingError
 
 from resto_client.generic.basic_types import (GeometryWKT, DateYMD, SquareInterval, TestList,
-                                              AscOrDesc, Polarisation)
+                                              AscOrDesc, Polarisation, SquareDateYMD)
 
 
 class UTestBasicTypes(unittest.TestCase):
@@ -50,6 +50,29 @@ class UTestBasicTypes(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             DateYMD("dert")
         expected_msg = 'time data \'dert\' does not match format \'%Y-%m-%d\''
+        self.assertEqual(expected_msg, str(context.exception))
+
+    def test_n_square_date_ymd(self) -> None:
+        """
+        Unit test of SquareDateYMD in nominal cases
+        """
+        self.assertEqual(type(SquareDateYMD("2019-01-01:2019-02-02")), SquareDateYMD)
+
+    def test_d_square_date_ymd(self) -> None:
+        """
+        Unit test of SquareDateYMD in degraded cases
+        """
+        with self.assertRaises(ValueError) as context:
+            SquareDateYMD("2019-01-01")
+        expected_msg = '2019-01-01 has a wrong format, expected : Date1:Date2'
+        self.assertEqual(expected_msg, str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            SquareDateYMD("2019-01-01:toto")
+        expected_msg = 'toto in interval 2019-01-01:toto has an unexpected type, should be DateYMD'
+        self.assertEqual(expected_msg, str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            SquareDateYMD("toto:2019-01-01")
+        expected_msg = 'toto in interval toto:2019-01-01 has an unexpected type, should be DateYMD'
         self.assertEqual(expected_msg, str(context.exception))
 
     def test_n_geometry_wkt(self) -> None:
@@ -116,8 +139,8 @@ class UTestBasicTypes(unittest.TestCase):
         Unit test of TestList in degraded cases
         """
         with self.assertRaises(ValueError) as context:
-            TestList("str_wrong", (1, 2))
-        expected_msg = 'str_wrong has a wrong value, expected in (1, 2)'
+            TestList("str_wrong", ('1', '2'))
+        expected_msg = "str_wrong has a wrong value, expected in ('1', '2')"
         self.assertEqual(expected_msg, str(context.exception))
 
     def test_n_asc_or_desc(self) -> None:
