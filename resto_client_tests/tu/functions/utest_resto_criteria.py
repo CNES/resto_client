@@ -61,9 +61,9 @@ class UTestRestoCriteria(unittest.TestCase):
         """
         Unit test of class construction
         """
-        resto_criteria = RestoCriteria('dotcloud', identifier=2010)
+        resto_criteria = RestoCriteria('dotcloud', identifier='2010')
         self.assertTrue(hasattr(resto_criteria, 'criteria_keys'))
-        self.assertDictEqual(resto_criteria, {'identifier': 2010})
+        self.assertDictEqual(resto_criteria, {'identifier': '2010'})
 
     def test_d_init_of_resto_criteria(self) -> None:
         """
@@ -171,3 +171,19 @@ class UTestRestoCriteria(unittest.TestCase):
             resto_criteria['wrong_crit'] = 1
         expected_msg = 'Criterion wrong_crit not supported by this resto server'
         self.assertIn(expected_msg, str(context.exception))
+
+    def test_n_retrieve_criterion(self) -> None:
+        """
+        Unit test of _retrieve_criterion with standard criterion
+        """
+        resto_criteria = RestoCriteria('dotcloud')
+        resto_criteria['idenTIFier'] = 2010
+        self.assertEqual(resto_criteria['identifier'], 2010)
+
+    def test_d_retrieve_criterion(self) -> None:
+        """
+        Unit test of _retrieve_criterion in degraded cases
+        """
+        resto_criteria = RestoCriteria('dotcloud')
+        resto_criteria['idenTIFier'] = 2010
+        self.assertEqual(resto_criteria['identifier'], 2010)
