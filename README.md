@@ -1,11 +1,11 @@
 # Resto_client: a client to access resto servers
 
-[![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://pypi.org/project/requests/)
-[![PyPI version shields.io](https://img.shields.io/pypi/v/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
-[![Python versions](https://img.shields.io/pypi/pyversions/requests.svg)](https://pypi.python.org/pypi/ansicolortags/)
-[![Only 32 Kb](https://badge-size.herokuapp.com/Naereen/StrapDown.js/master/strapdown.min.js)](https://github.com/Naereen/StrapDown.js/blob/master/strapdown.min.js)
-[![GitHub All Releases](https://img.shields.io/github/downloads/atom/atom/total)](https://github.com/psf/requests/graphs/contributors)
-[![Contributors](https://img.shields.io/github/contributors/psf/requests.svg)](https://github.com/psf/requests/graphs/contributors)
+[![PyPI license](https://img.shields.io/pypi/l/resto_client.svg)](https://pypi.org/project/resto_client/)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/resto_client.svg)](https://pypi.org/project/resto_client/)
+[![Python versions](https://img.shields.io/pypi/pyversions/resto_client.svg)](https://pypi.org/project/resto_client/)
+
+[![GitHub All Releases](https://img.shields.io/github/downloads/CNES/resto_client/total)](https://github.com/CNES/resto_client/graphs/contributors)
+[![GitHub contributors](https://img.shields.io/github/contributors/CNES/resto_client)](https://github.com/CNES/resto_client/graphs/contributors)
 
 **resto_client** is a python package which gives you access to several remote sensing image servers which are based on the [resto](https://github.com/jjrom/resto/tree/2.x) open source server.
 
