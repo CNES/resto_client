@@ -13,6 +13,8 @@
    limitations under the License.
 """
 from urllib.parse import urlparse, urlunparse
+from mimetypes import guess_extension, MimeTypes
+from typing import Optional
 
 
 def contract_url(full_url: str) -> str:
@@ -46,3 +48,18 @@ def is_valid_url(url: str) -> bool:
         return all([result.scheme, result.netloc])
     except ValueError:
         return False
+
+
+def guess_extension_with_charset(content_type: str) -> Optional[str]:
+    """
+    Guess proper extension to use, even if charset is present in content_type
+
+    :param content_type: content_type to check
+    :returns: extension
+    """
+    guess_from = content_type
+    for kind_of_mimetype in MimeTypes().types_map_inv:
+        for key in kind_of_mimetype:
+            if content_type.startswith(str(key)):
+                guess_from = str(key)
+    return guess_extension(guess_from.strip())
