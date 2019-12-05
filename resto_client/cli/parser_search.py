@@ -61,7 +61,7 @@ def get_table_help_criteria() -> str:
             new_dict_to_print = deepcopy(value)
             del new_dict_to_print['type']
             for sub_key, sub_value in new_dict_to_print.items():
-                if sub_value['help'] != 'no_display':
+                if sub_value['help'] is not None:
                     criteria_table.add_row([sub_key, sub_value['help']])
         else:
             criteria_table.add_row([key, value['help']])

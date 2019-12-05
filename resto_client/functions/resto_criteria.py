@@ -93,8 +93,8 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                                               'help': 'Longitude ' + LATLON_TXT + ' lat'}
                                       },
                         'geomSurface': {'type': 'group',
-                                        'lat': {'type': float, 'help': 'no_display'},
-                                        'lon': {'type': float, 'help': 'no_display'},
+                                        'lat': {'type': float, 'help': None},
+                                        'lon': {'type': float, 'help': None},
                                         'radius': {'type': float, 'help':
                                                    "Expressed in meters - "
                                                    "should be used with lon and lat"}
@@ -111,7 +111,8 @@ DOTCLOUD_KEYS = {
                 'metadataVisibility': {'type': str, 'help': 'Hiden access of product'},
 
                 'productMode': {'type': 'list', 'sub_type': str, 'help': 'Product production mode'},
-                'license': {'type': 'list', 'sub_type': str, 'help': 'Idetifier of applied license'},
+                'license': {'type': 'list', 'sub_type': str, 'help':
+                            'Idetifier of applied license'},
                 'dotcloudType': {'type': 'list', 'sub_type': str, 'help':
                                  'Dotcloud Product Type e.g. eo_image'},
                 'dotcloudSubType': {'type': 'list', 'sub_type': str, 'help':
