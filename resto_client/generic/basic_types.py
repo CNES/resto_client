@@ -56,7 +56,11 @@ class DateYMDInterval():  # pylint: disable=too-few-public-methods
             except ValueError:
                 msg = '{} in interval {} has an unexpected type, should be DateYMD'
                 raise ValueError(msg.format(date_unic, date_interval_text))
-
+        date1 = datetime.strptime(interval[0], "%Y-%m-%d")  # time.strptime(interval[0], "%d/%m/%Y")
+        date2 = datetime.strptime(interval[1], "%Y-%m-%d")  # time.strptime(interval[1], "%d/%m/%Y")
+        if date1 > date2:
+            msg_error = 'First date must be anterior to Second one in interval, Here :{}>{}'
+            raise ValueError(msg_error.format(date1, date2))
 
 class GeometryWKT():  # pylint: disable=too-few-public-methods
     """

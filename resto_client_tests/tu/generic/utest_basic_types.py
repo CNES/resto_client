@@ -52,13 +52,13 @@ class UTestBasicTypes(unittest.TestCase):
         expected_msg = 'time data \'dert\' does not match format \'%Y-%m-%d\''
         self.assertEqual(expected_msg, str(context.exception))
 
-    def test_n_square_date_ymd(self) -> None:
+    def test_n_date_ymd_interval(self) -> None:
         """
         Unit test of DateYMDInterval in nominal cases
         """
-        self.assertEqual(type(DateYMDInterval("2019-01-01:2019-02-02")), DateYMDInterval)
+        self.assertEqual(type(DateYMDInterval("2019-01-01f:2019-02-02")), DateYMDInterval)
 
-    def test_d_square_date_ymd(self) -> None:
+    def test_d_date_ymd_interval(self) -> None:
         """
         Unit test of DateYMDInterval in degraded cases
         """
@@ -74,6 +74,10 @@ class UTestBasicTypes(unittest.TestCase):
             DateYMDInterval("toto:2019-01-01")
         expected_msg = 'toto in interval toto:2019-01-01 has an unexpected type, should be DateYMD'
         self.assertEqual(expected_msg, str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            DateYMDInterval("2019-01-03:2019-01-01")
+        expected_msg = 'First date must be anterior to Second one in interval, Here :{}>{}'
+        self.assertEqual(expected_msg.format('2019-01-03 00:00:00', '2019-01-01 00:00:00'), str(context.exception))
 
     def test_n_geometry_wkt(self) -> None:
         """
