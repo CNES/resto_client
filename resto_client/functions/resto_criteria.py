@@ -19,7 +19,7 @@ from shapely.errors import WKTReadingError
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
 from resto_client.generic.basic_types import (SquareInterval, DateYMD, GeometryWKT, AscOrDesc,
-                                              Polarisation, SquareDateYMD)
+                                              Polarisation, DateYMDInterval)
 
 CriteriaDictType = Dict[str, dict]
 COVER_TEXT = ' expressed in percent [n1,n2['
@@ -64,7 +64,7 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                         'completionDate': {'type': DateYMD, 'help':
                                            INTERVAL_TXT.format('End', 'the search query')},
 
-                        'updated': {'type': SquareDateYMD, 'help':
+                        'updated': {'type': DateYMDInterval, 'help':
                                     'Time slice of last update of the data updatedFrom:updatedTo'},
 
                         'resolution': {'type': SquareInterval, 'help':

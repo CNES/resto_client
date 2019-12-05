@@ -34,27 +34,28 @@ class DateYMD():  # pylint: disable=too-few-public-methods
         datetime.strptime(date_text, "%Y-%m-%d").strftime('%Y-%m-%d')
 
 
-class SquareDateYMD():  # pylint: disable=too-few-public-methods
+class DateYMDInterval():  # pylint: disable=too-few-public-methods
     """
     A class to test input Date Interval in order to have a proper format
     """
 
-    def __init__(self, date_text: str) -> None:
+    def __init__(self, date_interval_text: str) -> None:
         """
         Test the input in order to have a proper %Y-%m-%d:%Y-%m-%d format
 
-        :param date_text: date in str format to test
+        :param date_interval_text: date in str format to test
         """
-        interval = date_text.split(':')
+        interval = date_interval_text.split(':')
         # Test that two numbers are given
         if len(interval) != 2:
-            raise ValueError('{} has a wrong format, expected : Date1:Date2'.format(date_text))
+            msg_error = '{} has a wrong format, expected : Date1:Date2'
+            raise ValueError(msg_error.format(date_interval_text))
         for date_unic in interval:
             try:
                 DateYMD(date_unic)
             except ValueError:
                 msg = '{} in interval {} has an unexpected type, should be DateYMD'
-                raise ValueError(msg.format(date_unic, date_text))
+                raise ValueError(msg.format(date_unic, date_interval_text))
 
 
 class GeometryWKT():  # pylint: disable=too-few-public-methods
