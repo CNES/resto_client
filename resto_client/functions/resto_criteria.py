@@ -22,15 +22,15 @@ from resto_client.generic.basic_types import (SquareInterval, DateYMD, GeometryW
                                               Polarisation, DateYMDInterval)
 
 CriteriaDictType = Dict[str, dict]
-COVER_TEXT = ' expressed in percent [n1,n2['
+COVER_TEXT = ' expressed as a percentage and using brackets. e.g. [n1,n2[ '
 INTERVAL_TXT = '{} of the time slice of {}. Format should follow RFC-3339'
-LATLON_TXT = 'expressed in decimal degrees (EPSG:4326) - should be used with'
+LATLON_TXT = 'expressed in decimal degrees (EPSG:4326) - must be used with'
 COMMON_CRITERIA_KEYS: CriteriaDictType
 COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                                 "Defined by 'west, south, east, north' coordinates of longitude,"
                                 " latitude, in decimal degrees (EPSG:4326)"},
                         'identifier': {'type': str, 'help':
-                                       'Valid UUID or ID according to RFC 4122'},
+                                       'Valid ID or UUID according to RFC 4122'},
                         'lang': {'type': str, 'help':
                                  'Two letters language code according to ISO 639-1'},
                         'parentIdentifier': {'type': str, 'help': 'deprecated'},
@@ -45,11 +45,11 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                         'productType': {'type': 'list', 'sub_type': str, 'help':
                                         'e.g. changes, landuse, etc'},
                         'sensorMode': {'type': 'list', 'sub_type': str, 'help':
-                                       'Shooting mode of the instrument'},
+                                       'Acquisition mode of the instrument'},
                         'organisationName': {'type': 'list', 'sub_type': str, 'help':
                                              'e.g. CNES'},
 
-                        'index': {'type': int, 'help': 'Search page will begin at this index'},
+                        'index': {'type': int, 'help': 'Results page will begin at this index'},
                         'maxRecords': {'type': int, 'help':
                                        'Number of results returned per page (default 50)'},
                         'orbitNumber': {'type': int, 'help': 'Orbit Number (for satellite)'},
@@ -68,7 +68,8 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                                     'Time slice of last update of the data updatedFrom:updatedTo'},
 
                         'resolution': {'type': SquareInterval, 'help':
-                                       'Spatial resolution expressed in meters [n1,n2['},
+                                       "Spatial resolution expressed in meter and using brackets."
+                                       " e.g.  [n1,n2["},
                         'cloudCover': {'type': SquareInterval, 'help':
                                        'Cloud cover' + COVER_TEXT},
                         'snowCover': {'type': SquareInterval, 'help':
@@ -96,23 +97,23 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                                         'lat': {'type': float, 'help': None},
                                         'lon': {'type': float, 'help': None},
                                         'radius': {'type': float, 'help':
-                                                   "Expressed in meters - "
+                                                   "Expressed in meter - "
                                                    "should be used with lon and lat"}
                                         },
 
-                        'region': {'type': 'region', 'help': 'Nickname of .shp from zones folder'},
+                        'region': {'type': 'region', 'help': 'Shortame of .shp from zones folder'},
                         }
 
 DOTCLOUD_KEYS: CriteriaDictType
 DOTCLOUD_KEYS = {
-                'identifiers': {'type': str, 'help': 'Accept multi identifier i1,i2,etc.'},
+                'identifiers': {'type': str, 'help': 'Accept multiple identifier i1,i2,etc.'},
                 'producerProductId': {'type': str, 'help': 'Producer product identifier'},
                 'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
                 'metadataVisibility': {'type': str, 'help': 'Hiden access of product'},
 
                 'productMode': {'type': 'list', 'sub_type': str, 'help': 'Product production mode'},
                 'license': {'type': 'list', 'sub_type': str, 'help':
-                            'Idetifier of applied license'},
+                            'Identifier of applied license'},
                 'dotcloudType': {'type': 'list', 'sub_type': str, 'help':
                                  'Dotcloud Product Type e.g. eo_image'},
                 'dotcloudSubType': {'type': 'list', 'sub_type': str, 'help':
@@ -131,7 +132,7 @@ DOTCLOUD_KEYS = {
                                    'Satellite incidence angle [n1,n2['},
 
                 'onlyDownloadableProduct': {'type': bool, 'help':
-                                            "True or False : show only downlodable product for "
+                                            "True or False : show only downlodable products for "
                                             "the current account"},
                  }
 
@@ -142,8 +143,8 @@ PEPS_VERSION_KEYS = {'latitudeBand': {'type': str, 'help': ''},
                      's2TakeId': {'type': str, 'help': ''},
                      'isNrt': {'type': str, 'help': ''},
                      'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
-                     # resolution overwritten but not working on peps
-                     'resolution': {'type': str, 'help': 'not working on peps'},
+                     # resolution overwritten but not available on peps
+                     'resolution': {'type': str, 'help': 'not available on peps'},
 
                      'relativeOrbitNumber': {'type': int, 'help': 'Should be an integer'},
 
@@ -334,11 +335,10 @@ class RestoCriteria(dict):
 
     def _retrieve_criterion(self, key: str) -> str:
         """
-        If key not found in criteria_keys, search for the same criterion without case sensitive
-        and rewrite it
+        Case unsensitive search of the criterion and return its case sensitive name.
 
         :param key: key to test
-        :raises RestoClientUserError: when key is unknow
+        :raises RestoClientUserError: when key is unknown
         :returns: key suitable for the current server
         """
         if key not in self.criteria_keys:
