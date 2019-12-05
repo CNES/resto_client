@@ -80,8 +80,8 @@ class UTestRestoCriteria(unittest.TestCase):
         Unit test of __setitem__ with standard criterion
         """
         resto_criteria = RestoCriteria('dotcloud')
-        resto_criteria['identifier'] = 2010
-        self.assertEqual(resto_criteria['identifier'], 2010)
+        resto_criteria['identifier'] = '2010'
+        self.assertEqual(resto_criteria['identifier'], '2010')
         del resto_criteria['identifier']
         resto_criteria['startDate'] = '2010-01-01'
         self.assertEqual(resto_criteria['startDate'], '2010-01-01')
@@ -177,8 +177,8 @@ class UTestRestoCriteria(unittest.TestCase):
         Unit test of _retrieve_criterion with standard criterion
         """
         resto_criteria = RestoCriteria('dotcloud')
-        resto_criteria['idenTIFier'] = 2010
-        self.assertEqual(resto_criteria['identifier'], 2010)
+        resto_criteria['idenTIFier'] = '2010'
+        self.assertEqual(resto_criteria['identifier'], '2010')
 
     def test_d_retrieve_criterion(self) -> None:
         """
