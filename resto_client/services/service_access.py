@@ -22,7 +22,7 @@ from resto_client.functions.utils import is_valid_url
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.generic.basic_types import CertifiedUrl
+from resto_client.generic.basic_types import URLType
 
 if TYPE_CHECKING:
     from resto_client.services.base_service import BaseService  # @UnusedImport
@@ -154,7 +154,7 @@ class ServiceAccess(ABC):
         :param service_name: the name of the service to report in exception messages.
         :returns: an URL with a final '/' if not present
         """
-        CertifiedUrl(base_url, service_name)
+        URLType(base_url, service_name)
         if urljoin(base_url, ' ')[:-1] != base_url:
             base_url = base_url + '/'
         return base_url

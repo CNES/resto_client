@@ -131,7 +131,7 @@ class Polarisation(TestList):  # pylint: disable=too-few-public-methods
         super(Polarisation, self).__init__(str_input=str_input, accepted=accpt_tuple)
 
 
-class CertifiedUrl():  # pylint: disable=too-few-public-methods
+class URLType():  # pylint: disable=too-few-public-methods
     """
     A class to make sure input is an url
     """
@@ -142,12 +142,12 @@ class CertifiedUrl():  # pylint: disable=too-few-public-methods
 
         :param base_url: url in str format to test
         :param url_purpose: purpose of the url
-        :raises RestoClientDesignError: geometry has not a wkt format
+        :raises RestoClientDesignError: if base_url is not a proper url
         """
-        error_msg = 'Given url for {} is not a valid URL: {}.'
         try:
             result = urlparse(base_url)
             if not all([result.scheme, result.netloc]):
-                raise RestoClientDesignError(error_msg.format(url_purpose, base_url))
+                raise ValueError()
         except ValueError:
+            error_msg = 'Given url for {} is not a valid URL: {}.'
             raise RestoClientDesignError(error_msg.format(url_purpose, base_url))

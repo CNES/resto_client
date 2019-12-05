@@ -17,7 +17,7 @@ import unittest
 from shapely.errors import WKTReadingError
 
 from resto_client.generic.basic_types import (GeometryWKT, DateYMD, SquareInterval, TestList,
-                                              AscOrDesc, Polarisation, CertifiedUrl)
+                                              AscOrDesc, Polarisation, URLType)
 from resto_client.base_exceptions import RestoClientDesignError
 
 
@@ -162,15 +162,15 @@ class UTestBasicTypes(unittest.TestCase):
 
     def test_n_certified_url(self) -> None:
         """
-        Unit test of CertifiedUrl in nominal cases
+        Unit test of URLType in nominal cases
         """
-        self.assertEqual(type(CertifiedUrl("https://www.kalideos.fr")), CertifiedUrl)
+        self.assertEqual(type(URLType("https://www.kalideos.fr")), URLType)
 
     def test_d_certified_url(self) -> None:
         """
-        Unit test of CertifiedUrl in degraded cases
+        Unit test of URLType in degraded cases
         """
         with self.assertRaises(RestoClientDesignError) as context:
-            CertifiedUrl("bad_test", "test")
+            URLType("bad_test", "test")
         expect_msg = 'Given url for test is not a valid URL: bad_test.'
         self.assertEqual(expect_msg, str(context.exception))
