@@ -101,12 +101,13 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
                                                    "should be used with lon and lat"}
                                         },
 
-                        'region': {'type': 'region', 'help': 'Shortame of .shp from zones folder'},
+                        'region': {'type': 'region', 'help':
+                                   'Shortname of .shp file from zones folder'},
                         }
 
 DOTCLOUD_KEYS: CriteriaDictType
 DOTCLOUD_KEYS = {
-                'identifiers': {'type': str, 'help': 'Accept multiple identifier i1,i2,etc.'},
+                'identifiers': {'type': str, 'help': 'Accept multiple identifiers i1,i2,etc.'},
                 'producerProductId': {'type': str, 'help': 'Producer product identifier'},
                 'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
                 'metadataVisibility': {'type': str, 'help': 'Hiden access of product'},
