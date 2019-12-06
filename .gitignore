@@ -53,6 +53,7 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
+.coverage/
 .coverage.*
 .cache
 nosetests.xml
@@ -60,6 +61,8 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+tests_*.log
+
 
 # Translations
 *.mo
