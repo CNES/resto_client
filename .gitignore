@@ -1,69 +1,104 @@
-# -*- coding: utf-8 -*-
-#
-#  Copyright 2019 CNES
-#
-#  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-#  in compliance with the License. You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software distributed under the License
-#  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-#  or implied. See the License for the specific language governing permissions and
-#  limitations under the License.
-
-###########################
-# Common rules applicable
-########################### 
-
-# Linux editing
-*.swp
-*~
-
-# Python stuff
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
-*.egg
-*.egg-info/
-eggs/
-develop-eggs/
-pip-log.txt
+*$py.class
 
-# Compiled stuff
+# C extensions
 *.so
-*.dll
-exe/
-obj/
-bin/
-var/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
 lib/
 lib64/
-
-# Build
-dist/
-build/
 parts/
 sdist/
-install/
+var/
+wheels/
+*.egg-info/
 .installed.cfg
-version_from_git.py
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-.coverage/
+htmlcov/
 .tox/
-.scannerwork/
+.coverage
+.coverage.*
+.cache
 nosetests.xml
-tests_*.log
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
 
-# Generated documentation
-doc/doc_sphinx/source/api_doc/
+# Translations
+*.mo
+*.pot
 
-# Eclipse working directories
-.refactorings/
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
 
-# mypy cache
-.mypy_cache
+# Flask stuff:
+instance/
+.webassets-cache
 
-####################################################
-# Insert hereafter, your project's specific rules
-#################################################### 
-.settings/org.eclipse.core.resources.prefs
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
