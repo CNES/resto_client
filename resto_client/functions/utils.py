@@ -32,17 +32,3 @@ def contract_url(full_url: str) -> str:
     contracted_url = urlunparse(url_lst)
 
     return contracted_url
-
-
-def is_valid_url(url: str) -> bool:
-    """
-    Validate if the passed argument looks like a valid url.
-
-    :param url: url to check
-    :returns: True if the argument looks like a valid URL
-    """
-    try:
-        result = urlparse(url)
-        return all([result.scheme, result.netloc])
-    except ValueError:
-        return False
