@@ -120,7 +120,11 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# SonarQube
+.scannerwork/
+
 # Linux editing
 *.swp
 *~
+
 
