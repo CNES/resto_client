@@ -56,7 +56,10 @@ class UTestBasicTypes(unittest.TestCase):
         """
         Unit test of DateYMDInterval in nominal cases
         """
-        self.assertEqual(type(DateYMDInterval("2019-01-01f:2019-02-02")), DateYMDInterval)
+        try:
+            _ = DateYMDInterval("2019-01-01:2019-02-02")
+        except ValueError as excp:
+            self.fail(str(excp))
 
     def test_d_date_ymd_interval(self) -> None:
         """
