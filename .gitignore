@@ -127,4 +127,8 @@ venv.bak/
 *.swp
 *~
 
+# Eclipse IDE
+.refactorings/
+.settings/org.eclipse.core.resources.prefs
+
 
