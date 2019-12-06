@@ -27,8 +27,8 @@ INTERVAL_TXT = '{} of the time slice of {}. Format should follow RFC-3339'
 LATLON_TXT = 'expressed in decimal degrees (EPSG:4326) - must be used with'
 COMMON_CRITERIA_KEYS: CriteriaDictType
 COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
-                                "Defined by 'west, south, east, north' coordinates of longitude,"
-                                " latitude, in decimal degrees (EPSG:4326)"},
+                                "Defined by 'west, south, east, north' meridians and parallels"
+                                " in that order, in decimal degrees (EPSG:4326)"},
                         'identifier': {'type': str, 'help':
                                        'Valid ID or UUID according to RFC 4122'},
                         'lang': {'type': str, 'help':
