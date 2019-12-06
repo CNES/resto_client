@@ -60,6 +60,6 @@ def guess_extension_with_charset(content_type: str) -> Optional[str]:
     guess_from = content_type
     for kind_of_mimetype in MimeTypes().types_map_inv:
         for key in kind_of_mimetype:
-            if content_type.startswith(str(key)):
-                guess_from = str(key)
+            if content_type.startswith(key):
+                guess_from = key
     return guess_extension(guess_from.strip())
