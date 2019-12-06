@@ -162,16 +162,6 @@ class UTestRestoCriteria(unittest.TestCase):
         resto_criteria1['identifier'] = 'alpes.geojson'
         self.assertFalse('geometry' in resto_criteria1)
 
-    def test_d_region(self) -> None:
-        """
-        Unit test of the region management in degraded cases
-        """
-        resto_criteria = RestoCriteria('dotcloud')
-        with self.assertRaises(RestoClientUserError) as context:
-            resto_criteria['wrong_crit'] = 1
-        expected_msg = 'Criterion wrong_crit not supported by this resto server'
-        self.assertIn(expected_msg, str(context.exception))
-
     def test_n_retrieve_criterion(self) -> None:
         """
         Unit test of _retrieve_criterion with standard criterion
@@ -182,8 +172,10 @@ class UTestRestoCriteria(unittest.TestCase):
 
     def test_d_retrieve_criterion(self) -> None:
         """
-        Unit test of _retrieve_criterion in degraded cases
+        Unit test of the _retrieve_criterion management in degraded cases
         """
         resto_criteria = RestoCriteria('dotcloud')
-        resto_criteria['idenTIFier'] = 2010
-        self.assertEqual(resto_criteria['identifier'], 2010)
+        with self.assertRaises(RestoClientUserError) as context:
+            resto_criteria['wrong_crit'] = 1
+        expected_msg = 'Criterion wrong_crit not supported by this resto server'
+        self.assertIn(expected_msg, str(context.exception))
