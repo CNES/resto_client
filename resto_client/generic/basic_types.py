@@ -12,12 +12,13 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Sequence  # @NoMove
-
+from typing import Sequence, Optional  # @NoMove
+from urllib.parse import urlparse
 from datetime import datetime
-
 from shapely import wkt
 from shapely.errors import WKTReadingError
+
+from resto_client.base_exceptions import RestoClientDesignError
 
 
 class DateYMD():  # pylint: disable=too-few-public-methods
@@ -61,6 +62,7 @@ class DateYMDInterval():  # pylint: disable=too-few-public-methods
         if date1 > date2:
             msg_error = 'First date must be anterior to Second one in interval, Here :{}>{}'
             raise ValueError(msg_error.format(date1, date2))
+
 
 class GeometryWKT():  # pylint: disable=too-few-public-methods
     """
@@ -156,3 +158,25 @@ class Polarisation(TestList):  # pylint: disable=too-few-public-methods
         """
         accpt_tuple = ('HH', 'VV', 'HH HV', 'VV VH')
         super(Polarisation, self).__init__(str_input=str_input, accepted=accpt_tuple)
+
+
+class URLType():  # pylint: disable=too-few-public-methods
+    """
+    A class to make sure input is an url
+    """
+
+    def __init__(self, base_url: str, url_purpose: Optional[str]="Unknown") -> None:
+        """
+        Test the input in order to have a proper url
+
+        :param base_url: url in str format to test
+        :param url_purpose: purpose of the url
+        :raises RestoClientDesignError: if base_url is not a proper url
+        """
+        try:
+            result = urlparse(base_url)
+            if not all([result.scheme, result.netloc]):
+                raise ValueError()
+        except ValueError:
+            error_msg = 'Given url for {} is not a valid URL: {}.'
+            raise RestoClientDesignError(error_msg.format(url_purpose, base_url))

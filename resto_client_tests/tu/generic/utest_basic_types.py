@@ -17,7 +17,8 @@ import unittest
 from shapely.errors import WKTReadingError
 
 from resto_client.generic.basic_types import (GeometryWKT, DateYMD, SquareInterval, TestList,
-                                              AscOrDesc, Polarisation, DateYMDInterval)
+                                              AscOrDesc, Polarisation, DateYMDInterval, URLType)
+from resto_client.base_exceptions import RestoClientDesignError
 
 
 class UTestBasicTypes(unittest.TestCase):
@@ -80,7 +81,8 @@ class UTestBasicTypes(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             DateYMDInterval("2019-01-03:2019-01-01")
         expected_msg = 'First date must be anterior to Second one in interval, Here :{}>{}'
-        self.assertEqual(expected_msg.format('2019-01-03 00:00:00', '2019-01-01 00:00:00'), str(context.exception))
+        self.assertEqual(expected_msg.format('2019-01-03 00:00:00', '2019-01-01 00:00:00'),
+                         str(context.exception))
 
     def test_n_geometry_wkt(self) -> None:
         """
@@ -188,3 +190,18 @@ class UTestBasicTypes(unittest.TestCase):
         accpt_tuple = ('HH', 'VV', 'HH HV', 'VV VH')
         expected_msg = 'str_wrong has a wrong value, expected in {}'.format(accpt_tuple)
         self.assertEqual(expected_msg, str(context.exception))
+
+    def test_n_certified_url(self) -> None:
+        """
+        Unit test of URLType in nominal cases
+        """
+        self.assertEqual(type(URLType("https://www.kalideos.fr")), URLType)
+
+    def test_d_certified_url(self) -> None:
+        """
+        Unit test of URLType in degraded cases
+        """
+        with self.assertRaises(RestoClientDesignError) as context:
+            URLType("bad_test", "test")
+        expect_msg = 'Given url for test is not a valid URL: bad_test.'
+        self.assertEqual(expect_msg, str(context.exception))
