@@ -17,8 +17,7 @@ import copy
 from typing import List, Dict, Union, TypeVar, Type, Optional, TYPE_CHECKING
 from urllib.parse import urljoin
 
-from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
-from resto_client.functions.utils import is_valid_url
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS

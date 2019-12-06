@@ -17,7 +17,7 @@ import unittest
 from shapely.errors import WKTReadingError
 
 from resto_client.generic.basic_types import (GeometryWKT, DateYMD, SquareInterval, TestList,
-                                              AscOrDesc, Polarisation, URLType)
+                                              AscOrDesc, Polarisation, DateYMDInterval, URLType)
 from resto_client.base_exceptions import RestoClientDesignError
 
 
@@ -52,6 +52,37 @@ class UTestBasicTypes(unittest.TestCase):
             DateYMD("dert")
         expected_msg = 'time data \'dert\' does not match format \'%Y-%m-%d\''
         self.assertEqual(expected_msg, str(context.exception))
+
+    def test_n_date_ymd_interval(self) -> None:
+        """
+        Unit test of DateYMDInterval in nominal cases
+        """
+        try:
+            _ = DateYMDInterval("2019-01-01:2019-02-02")
+        except ValueError as excp:
+            self.fail(str(excp))
+
+    def test_d_date_ymd_interval(self) -> None:
+        """
+        Unit test of DateYMDInterval in degraded cases
+        """
+        with self.assertRaises(ValueError) as context:
+            DateYMDInterval("2019-01-01")
+        expected_msg = '2019-01-01 has a wrong format, expected : Date1:Date2'
+        self.assertEqual(expected_msg, str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            DateYMDInterval("2019-01-01:toto")
+        expected_msg = 'toto in interval 2019-01-01:toto has an unexpected type, should be DateYMD'
+        self.assertEqual(expected_msg, str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            DateYMDInterval("toto:2019-01-01")
+        expected_msg = 'toto in interval toto:2019-01-01 has an unexpected type, should be DateYMD'
+        self.assertEqual(expected_msg, str(context.exception))
+        with self.assertRaises(ValueError) as context:
+            DateYMDInterval("2019-01-03:2019-01-01")
+        expected_msg = 'First date must be anterior to Second one in interval, Here :{}>{}'
+        self.assertEqual(expected_msg.format('2019-01-03 00:00:00', '2019-01-01 00:00:00'),
+                         str(context.exception))
 
     def test_n_geometry_wkt(self) -> None:
         """
@@ -117,8 +148,8 @@ class UTestBasicTypes(unittest.TestCase):
         Unit test of TestList in degraded cases
         """
         with self.assertRaises(ValueError) as context:
-            TestList("str_wrong", (1, 2))
-        expected_msg = 'str_wrong has a wrong value, expected in (1, 2)'
+            TestList("str_wrong", ('1', '2'))
+        expected_msg = "str_wrong has a wrong value, expected in ('1', '2')"
         self.assertEqual(expected_msg, str(context.exception))
 
     def test_n_asc_or_desc(self) -> None:
