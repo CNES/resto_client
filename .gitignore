@@ -20,6 +20,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Compiled stuff
+*.dll
+exe/
+obj/
+bin/
+var/
+
 # Distribution / packaging
 .Python
 build/
@@ -38,6 +45,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+install/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -131,5 +139,4 @@ venv.bak/
 # Eclipse IDE
 .refactorings/
 .settings/org.eclipse.core.resources.prefs
-
 
