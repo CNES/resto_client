@@ -278,7 +278,7 @@ class RestoService(BaseService):
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)
-            # Recursive call to download file
+            # Retry file download after license signature
             downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
         except FeatureOnTape as excp:
             # Redo_feature to update the storage status
@@ -286,7 +286,7 @@ class RestoService(BaseService):
             warn('Waiting 60 seconds for product transfert...')
             # Wait 60 second
             time.sleep(60)
-            # Recursive call to download file
+            # Retry file download after product staging
             downloaded_filename = self.download_feature_file(redo_feature, file_type, download_dir)
         return downloaded_filename
 
