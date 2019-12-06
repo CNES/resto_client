@@ -214,15 +214,18 @@ class DownloadRequestBase(ABC):
         if content_type in ('image/jpeg', 'text/html', 'image/png', 'text/html; charset=UTF-8'):
             # If it's a product on tape
             if self.file_type == 'product' and self._feature.storage == 'tape':
-                warn('Your product is on tape, launching request to switch to disk...')
-                # Request to download for passing from tape to disk by staging
+                warn("Your product is on tape, launching request to trigger"
+                     " its copy on disk on server side.")
+                # Launch a download request for copying from tape to disk on server side.
+                # However download will not happen.
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     tmp_file_path = Path(tmp_dir) / file_name
                     download_file(result, tmp_file_path)
                 raise FeatureOnTape()
             # If it's a product waiting to be on disk
             if self.file_type == 'product' and self._feature.storage == 'staging':
-                warn('Your product is currently beeing moved to disk, storage state : staging')
+                warn("Your product is currently being copied to disk on server side."
+                     "Try again later.")
                 raise FeatureOnTape()
             # If it's a Quicklook, Thumbnail or annexes
             download_file(result, full_file_path)
