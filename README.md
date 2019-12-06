@@ -26,7 +26,7 @@ Currently implemented commands allow to:
 * [ro : CEOS Recovery Observatory](https://www.recovery-observatory.org)
 * [peps : The French Sentinel Data Processing center](https://peps.cnes.fr)
 * [theia : The French Space Agency, THEIA land data center](https://theia.cnes.fr)
-* [creodias : Cpernicus DIAS CREODIAS](https://www.creodias.eu)
+* [creodias : Copernicus DIAS CREODIAS](https://www.creodias.eu)
 
 
 This list is augmented regularly, but you can of course add your own server by providing its configuration through **resto_client**.
