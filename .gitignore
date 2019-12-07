@@ -61,7 +61,6 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
-.coverage/
 .coverage.*
 .cache
 nosetests.xml
@@ -70,7 +69,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 tests_*.log
-
 
 # Translations
 *.mo
@@ -139,4 +137,3 @@ venv.bak/
 # Eclipse IDE
 .refactorings/
 .settings/org.eclipse.core.resources.prefs
-
