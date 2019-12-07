@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+#
+#  Copyright 2019 CNES
+#
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+#  in compliance with the License. You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software distributed under the License
+#  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+#  or implied. See the License for the specific language governing permissions and
+#  limitations under the License.
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -5,6 +19,13 @@ __pycache__/
 
 # C extensions
 *.so
+
+# Compiled stuff
+*.dll
+exe/
+obj/
+bin/
+var/
 
 # Distribution / packaging
 .Python
@@ -24,6 +45,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+install/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -46,6 +68,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+tests_*.log
 
 # Translations
 *.mo
@@ -65,6 +88,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+doc/doc_sphinx/source/api_doc/
 
 # PyBuilder
 target/
@@ -102,3 +126,14 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# SonarQube
+.scannerwork/
+
+# Linux editing
+*.swp
+*~
+
+# Eclipse IDE
+.refactorings/
+.settings/org.eclipse.core.resources.prefs
