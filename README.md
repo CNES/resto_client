@@ -208,4 +208,4 @@ subcommands:
 
 ### Documentation
 
-More documentation vailable soon.
+More documentation available soon.
