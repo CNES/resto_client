@@ -156,3 +156,6 @@ class AuthenticationService(BaseService):
         if self.credentials.token_value is not None:
             return RevokeTokenRequest(self).run()
         return None
+
+    def __str__(self) -> str:
+        return super(AuthenticationService, self).__str__() + '\n' + str(self.credentials)
