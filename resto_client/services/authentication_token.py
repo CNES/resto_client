@@ -21,6 +21,8 @@ from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from resto_client.services.authentication_credentials import \
+        AuthenticationCredentials  # @UnusedImport
 
 
 class AuthenticationToken():
@@ -29,13 +31,13 @@ class AuthenticationToken():
     """
     properties_storage = RESTO_CLIENT_SETTINGS
 
-    def __init__(self, authentication_service: 'Optional[AuthenticationService]'=None) -> None:
+    def __init__(self, parent_credentials: 'AuthenticationCredentials') -> None:
         """
         Constructor
 
-        :param authentication_service: parent authentication service for this token.
+        :param parent_credentials: parent credentials of this token.
         """
-        self._parent_service = authentication_service
+        self.parent_service = parent_credentials.parent_service
 
     def reset(self) -> None:
         """
@@ -43,23 +45,16 @@ class AuthenticationToken():
         """
         self.token = None  # type: ignore
 
-    def set_service(self, authentication_service: 'AuthenticationService') -> None:
-        """
-        Set the authentication service to which this token is connected.
-
-        :param authentication_service: parent authentication service for this token.
-        """
-        self._parent_service = authentication_service
-
     @classmethod
-    def persisted(cls) -> 'AuthenticationToken':
+    def persisted(cls, parent_credentials: 'AuthenticationCredentials') -> 'AuthenticationToken':
         """
         Create an instance from persisted attributes (token), without connection to an
         authentication service (to be established after creation, and before use).
 
+        :param parent_credentials: the credentials to which the persisted token must be linked.
         :returns: a token instance from the persisted token
         """
-        instance = cls()
+        instance = cls(parent_credentials)
         instance.token = cls.properties_storage.get('token')  # type: ignore
         return instance
 
@@ -89,9 +84,9 @@ class AuthenticationToken():
         _ = unused_arg  # to avoid pylint warning
         # Trigger content retrieval from persisted value, if any
         new_token = self.token
-        if self._parent_service is not None:
+        if self.parent_service is not None:
             if not self.valid_token():
-                new_token = self._parent_service.get_token()
+                new_token = self.parent_service.get_token()
         return new_token
 
     def valid_token(self) -> bool:
@@ -101,9 +96,9 @@ class AuthenticationToken():
         """
         if self.token is None:
             return False
-        if self._parent_service is None:
+        if self.parent_service is None:
             raise RestoClientDesignError('Cannot validate token when no parent service defined')
-        return self._parent_service.check_token()
+        return self.parent_service.check_token()
 
     def update_authorization_header(self,
                                     headers: dict,

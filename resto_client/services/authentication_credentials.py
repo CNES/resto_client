@@ -41,10 +41,10 @@ class AuthenticationCredentials():
 
         :param authentication_service: authentication service onto which these credentials are valid
         """
-        self._parent_service = authentication_service
+        self.parent_service = authentication_service
 
         self._password: Optional[str] = None
-        self._token = AuthenticationToken(authentication_service)
+        self._token = AuthenticationToken(self)
 
     def set(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
         """
@@ -90,10 +90,9 @@ class AuthenticationCredentials():
         # We only need to create a standard instance, as persisted username and tokenwill be
         # retrieved at first get(), if they exists.
         persisted_username = cls.properties_storage.get('username')
-        persisted_token = AuthenticationToken.persisted()
         instance = cls(authentication_service)
+        persisted_token = AuthenticationToken.persisted(instance)
         instance.username = persisted_username  # type: ignore
-        persisted_token.set_service(authentication_service)
         instance._token = persisted_token
         return instance
 
@@ -137,7 +136,7 @@ class AuthenticationCredentials():
         # Normalize username as lowercase
         username = username.lower()
         # if there is no service but a try to set account
-        if self._parent_service.service_access.base_url is None:
+        if self.parent_service.service_access.base_url is None:
             raise ValueError('You can t set an account without first setting up a server')
         return username
 
