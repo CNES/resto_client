@@ -45,18 +45,12 @@ class AuthenticationToken():
         """
         self.token = None  # type: ignore
 
-    @classmethod
-    def persisted(cls, parent_credentials: 'AuthenticationCredentials') -> 'AuthenticationToken':
+    @staticmethod
+    def get_persisted_token() -> 'str':
         """
-        Create an instance from persisted attributes (token), without connection to an
-        authentication service (to be established after creation, and before use).
-
-        :param parent_credentials: the credentials to which the persisted token must be linked.
-        :returns: a token instance from the persisted token
+        :returns: the persisted token value
         """
-        instance = cls(parent_credentials)
-        instance.token = cls.properties_storage.get('token')  # type: ignore
-        return instance
+        return AuthenticationToken.properties_storage.get('token')  # type: ignore
 
     @property  # type: ignore
     @managed_getter()
