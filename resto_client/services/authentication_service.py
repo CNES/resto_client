@@ -45,7 +45,7 @@ class AuthenticationService(BaseService):
         """
         super(AuthenticationService, self).__init__(auth_access)
         # Credentials need to exist before calling  update_after_url_change
-        self.credentials = AuthenticationCredentials(self)
+        self.credentials = AuthenticationCredentials(authentication_service=self)
         self.update_after_url_change()
 
         # Need to set username before password because username update will reset password
