@@ -46,19 +46,12 @@ The recommended way to intall `resto_client` is to simply use [`pip`](https://py
 
 ```console
 $ pip install resto_client
-Collecting resto_client
-...
-Installing collected packages: ptable, appdirs, geojson, tqdm, chardet, idna, certifi, urllib3,
-requests, shapely, colorama, resto-client
-Successfully installed appdirs-1.4.3 certifi-2019.9.11 chardet-3.0.4 colorama-0.4.1 geojson-2.5.0 
-idna-2.8 ptable-0.9.2 requests-2.22.0 resto-client-0.1.0 shapely-1.6.4.post2 tqdm-4.38.0 urllib3-1.25.7
 ```
 
 Once **resto_client** package is installed you can test it by issuing the following command in a terminal:
 
 ```console
 $ resto_client --help
-...
 ```
 
 
@@ -215,4 +208,4 @@ subcommands:
 
 ### Documentation
 
-Documentation is Available at [`//resto_client.readthedocs.io`](https://resto_client.readthedocs.io/en/latest/).
+More documentation vailable soon.
