@@ -87,13 +87,14 @@ class AuthenticationCredentials():
         :param authentication_service: authentication service onto which these credentials are valid
         :returns: a credentials instance from the persisted username
         """
-        # We only need to create a standard instance, as persisted username and tokenwill be
-        # retrieved at first get(), if they exists.
+        # Retrieve persisted attributes.
         persisted_username = cls.properties_storage.get('username')
+        persisted_token = AuthenticationToken.get_persisted_token()
+
+        # Create a new instance and set persisted attributes.
         instance = cls(authentication_service)
-        persisted_token = AuthenticationToken.persisted(instance)
         instance.username = persisted_username  # type: ignore
-        instance._token = persisted_token
+        instance.token_value = persisted_token
         return instance
 
     @property
@@ -102,6 +103,10 @@ class AuthenticationCredentials():
         :return: the token value associated to these credentials, or None if not available.
         """
         return self._token.token
+
+    @token_value.setter
+    def token_value(self, token: str) -> None:
+        self._token.token = token  # type: ignore
 
     @property  # type: ignore
     @managed_getter()
