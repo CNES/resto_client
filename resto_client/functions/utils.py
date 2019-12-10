@@ -50,16 +50,16 @@ def is_valid_url(url: str) -> bool:
         return False
 
 
-def guess_extension_with_charset(content_type: str) -> Optional[str]:
+def guess_extension_with_charset(content_type_strip: str) -> Optional[str]:
     """
     Guess proper extension to use, even if charset is present in content_type
 
-    :param content_type: content_type to check
+    :param content_type_strip: content_type.strip to check
     :returns: extension
     """
-    guess_from = content_type
+    guess_from = content_type_strip
     for kind_of_mimetype in MimeTypes().types_map_inv:
         for key in kind_of_mimetype:
-            if content_type.startswith(key):
+            if content_type_strip.startswith(key):
                 guess_from = key
-    return guess_extension(guess_from.strip())
+    return guess_extension(guess_from)
