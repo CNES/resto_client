@@ -61,9 +61,9 @@ class UTestRestoCriteria(unittest.TestCase):
         """
         Unit test of class construction
         """
-        resto_criteria = RestoCriteria('dotcloud', identifier=2010)
+        resto_criteria = RestoCriteria('dotcloud', identifier='2010')
         self.assertTrue(hasattr(resto_criteria, 'criteria_keys'))
-        self.assertDictEqual(resto_criteria, {'identifier': 2010})
+        self.assertDictEqual(resto_criteria, {'identifier': '2010'})
 
     def test_d_init_of_resto_criteria(self) -> None:
         """
@@ -80,8 +80,8 @@ class UTestRestoCriteria(unittest.TestCase):
         Unit test of __setitem__ with standard criterion
         """
         resto_criteria = RestoCriteria('dotcloud')
-        resto_criteria['identifier'] = 2010
-        self.assertEqual(resto_criteria['identifier'], 2010)
+        resto_criteria['identifier'] = '2010'
+        self.assertEqual(resto_criteria['identifier'], '2010')
         del resto_criteria['identifier']
         resto_criteria['startDate'] = '2010-01-01'
         self.assertEqual(resto_criteria['startDate'], '2010-01-01')
@@ -162,9 +162,17 @@ class UTestRestoCriteria(unittest.TestCase):
         resto_criteria1['identifier'] = 'alpes.geojson'
         self.assertFalse('geometry' in resto_criteria1)
 
-    def test_d_region(self) -> None:
+    def test_n_retrieve_criterion(self) -> None:
         """
-        Unit test of the region management in degraded cases
+        Unit test of _retrieve_criterion with standard criterion
+        """
+        resto_criteria = RestoCriteria('dotcloud')
+        resto_criteria['idenTIFier'] = '2010'
+        self.assertEqual(resto_criteria['identifier'], '2010')
+
+    def test_d_retrieve_criterion(self) -> None:
+        """
+        Unit test of the _retrieve_criterion management in degraded cases
         """
         resto_criteria = RestoCriteria('dotcloud')
         with self.assertRaises(RestoClientUserError) as context:
