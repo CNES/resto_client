@@ -29,7 +29,9 @@ class UTestUtils(unittest.TestCase):
         dict_mime_extension = {'text/html': ('.htm', 'text/html', None),
                                'image/jpeg': ('.jpe', 'image/jpeg', None),
                                'image/png': ('.png', 'image/png', None),
-                               'text/html; charset=UTF-8': ('.htm', 'text/html', 'UTF-8')}
+                               'text/html; charset=UTF-8': ('.htm', 'text/html', 'UTF-8'),
+                               'text/html; chaRset=UTF-8': ('.htm', 'text/html', 'UTF-8'),
+                               'text/html;charset=UTF-8': ('.htm', 'text/html', 'UTF-8')}
         for content_type, tuple_in in dict_mime_extension.items():
             guessed_tuple = get_file_properties(content_type)
             self.assertEqual(tuple_in, guessed_tuple)

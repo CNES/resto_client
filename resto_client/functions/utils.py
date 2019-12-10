@@ -50,25 +50,27 @@ def is_valid_url(url: str) -> bool:
         return False
 
 
-def get_file_properties(content_type_strip: str) -> Tuple[Optional[str], str, Union[str, None]]:
+def get_file_properties(content_type: str) -> Tuple[Optional[str], str, Union[str, None]]:
     """
     Guess proper extension to use, even if charset is present in content_type
     and return correct content_type and encoding
 
-    :param content_type_strip: content_type.strip to check
+    :param content_type: content_type stripped to check
     :returns: extension
     :returns: mimetype
     :returns: encoding
     """
-    mimetype = content_type_strip
-    split_content = content_type_strip.split(';')
+    mimetype = content_type
+    split_content = content_type.split(';')
     for kind_of_mimetype in MimeTypes().types_map_inv:
         for key in kind_of_mimetype:
-            if content_type_strip.startswith(key):
+            if content_type.startswith(key):
                 mimetype = key
     encoding = None
     if len(split_content) > 1:
         encoding = split_content[1]
-        if 'charset=' in encoding:
-            encoding = split_content[1].split('charset=')[1]
+        if '=' in encoding:
+            split_encoding = split_content[1].split('=')
+            if split_encoding[0].strip().lower() == 'charset':
+                encoding = split_encoding[1]
     return (guess_extension(mimetype), mimetype, encoding)
