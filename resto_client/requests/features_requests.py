@@ -23,7 +23,7 @@ from resto_client.entities.resto_feature import RestoFeature
 from resto_client.responses.download_error_response import DownloadErrorResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
-from resto_client.functions.utils import guess_extension_mimetype_encoding
+from resto_client.functions.utils import get_file_properties
 
 from .anonymous_request import AnonymousRequest
 from .authentication_required_request import AuthenticationRequiredRequest
@@ -148,7 +148,7 @@ class DownloadRequestBase(ABC):
         :returns: encoding of the file to record if given else None
         :raises RestoClientDesignError: when extension cannot be guessed from mimetype.
         """
-        extension, mimetype, encoding = guess_extension_mimetype_encoding(content_type.strip())
+        extension, mimetype, encoding = get_file_properties(content_type.strip())
 
         if extension is None:
             msg_excp = 'cannot guess the file extension from mimetype: {}'

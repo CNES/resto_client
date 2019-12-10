@@ -50,8 +50,7 @@ def is_valid_url(url: str) -> bool:
         return False
 
 
-def guess_extension_mimetype_encoding(content_type_strip: str) -> Tuple[Optional[str], str,
-                                                                        Union[str, None]]:
+def get_file_properties(content_type_strip: str) -> Tuple[Optional[str], str, Union[str, None]]:
     """
     Guess proper extension to use, even if charset is present in content_type
     and return correct content_type and encoding
