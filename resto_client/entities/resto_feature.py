@@ -135,6 +135,15 @@ class RestoFeature(geojson.Feature):
         """
         return self.properties['productIdentifier']
 
+    @property
+    def storage(self) -> Optional[str]:
+        """
+        :returns: the product storage.
+        """
+        if self.properties.get('storage') is not None:
+            return self.properties.get('storage').get('mode')
+        return None
+
     def __str__(self) -> str:
 
         if self.properties is not None:

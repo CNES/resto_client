@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+import time
+from warnings import warn
 from pathlib import Path
 from typing import Optional, Dict, Type
 
@@ -30,7 +32,8 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      DownloadQuicklookRequest,
                                                      DownloadThumbnailRequest,
                                                      SignLicenseRequest,
-                                                     LicenseSignatureRequested)
+                                                     LicenseSignatureRequested,
+                                                     FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
 from resto_client.settings.servers_database import DB_SERVERS
@@ -275,8 +278,16 @@ class RestoService(BaseService):
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)
-            # Recursive call to download file
+            # Retry file download after license signature
             downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
+        except FeatureOnTape as excp:
+            # Redo_feature to update the storage status
+            redo_feature = self.get_feature_by_id(feature.product_identifier)
+            warn('Waiting 60 seconds for product transfert...')
+            # Wait 60 second
+            time.sleep(60)
+            # Retry file download after product staging
+            downloaded_filename = self.download_feature_file(redo_feature, file_type, download_dir)
         return downloaded_filename
 
     def _ensure_collection(self, collection: Optional[str]=None) -> str:
