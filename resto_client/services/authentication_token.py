@@ -20,7 +20,6 @@ from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
     from resto_client.services.authentication_credentials import \
         AuthenticationCredentials  # @UnusedImport
 
