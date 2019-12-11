@@ -56,11 +56,8 @@ class RestoService(BaseService):
         :param auth_service: access to the Authentication service associated to this resto service.
         """
         super(RestoService, self).__init__(service_access=resto_access)
-        # Collections manager and associated authentication service need to exist before
-        # calling update_after_url_change
         self._collections_mgr = RestoCollectionsManager(self)
         self._auth_service = auth_service
-        self.update_after_url_change()
 
     def reset(self) -> None:
         self.service_access.detected_protocol = None
@@ -100,6 +97,7 @@ class RestoService(BaseService):
         auth_service = AuthenticationService.from_name(server_name,
                                                        username=username, password=password)
         resto_service = cls(resto_access=server_description.resto_access, auth_service=auth_service)
+        resto_service.update_after_url_change()
         return resto_service
 
     @classmethod
@@ -112,6 +110,7 @@ class RestoService(BaseService):
         # Retrieve persisted access to the resto service
         resto_service_access = RestoServiceAccess.persisted()
         resto_service = cls(resto_access=resto_service_access, auth_service=auth_service)
+        resto_service.update_after_url_change()
         persisted_coll_manager = RestoCollectionsManager.persisted(resto_service)
         resto_service.set_collection_mgr(persisted_coll_manager)
         return resto_service
@@ -157,7 +156,7 @@ class RestoService(BaseService):
             out_str += self._collections_mgr.str_statistics()
         return out_str
 
-# ++++++++ From here we have the supported request to the service ++++++++++++
+# ++++++++ From here we have the requests supported by the service ++++++++++++
 
     def describe(self) -> RestoCollections:
         """
