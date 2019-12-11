@@ -44,7 +44,9 @@ class AuthenticationService(BaseService):
         :param password: user password
         """
         super(AuthenticationService, self).__init__(auth_access)
+        # Credentials need to exist before calling  update_after_url_change
         self.credentials = AuthenticationCredentials(authentication_service=self)
+        self.update_after_url_change()
 
         # Need to set username before password because username update will reset password
         if username is not None:
@@ -75,10 +77,7 @@ class AuthenticationService(BaseService):
         :returns: an authentication service corresponding to the server_name
         """
         server_description = DB_SERVERS.get_server(server_name)
-        auth_service = cls(auth_access=server_description.auth_access,
-                           username=username, password=password)
-        auth_service.update_after_url_change()
-        return auth_service
+        return cls(auth_access=server_description.auth_access, username=username, password=password)
 
     @classmethod
     def persisted(cls) -> 'AuthenticationService':
@@ -88,7 +87,6 @@ class AuthenticationService(BaseService):
         # Retrieve persisted access to the authentication service
         auth_service_access = AuthenticationServiceAccess.persisted()
         instance = cls(auth_access=auth_service_access)
-        instance.update_after_url_change()
         instance.credentials = AuthenticationCredentials.persisted(instance)
         return instance
 
