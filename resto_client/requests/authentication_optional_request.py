@@ -13,13 +13,19 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from typing import Optional, Union  # @NoMove
-
+from typing import Optional, Union, TYPE_CHECKING  # @NoMove
 from requests import Response
 
+from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.responses.resto_response import RestoResponse
+from resto_client.services.base_service import BaseService
 
 from .base_request import BaseRequest
+
+
+if TYPE_CHECKING:
+    from resto_client.services.application_service import ApplicationService  # @UnusedImport
+    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class AuthenticationOptionalRequest(BaseRequest):
@@ -27,6 +33,24 @@ class AuthenticationOptionalRequest(BaseRequest):
      Base class for several Resto Requests which can request Authentication
     """
     authentication_required = False
+
+    def __init__(self, service: BaseService, **url_kwargs: str) -> None:
+        """
+        Constructor
+
+        :param service: service
+        :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
+        :raises RestoClientDesignError: when the service is not of the right type
+        """
+        super(AuthenticationOptionalRequest, self).__init__(service, **url_kwargs)
+        from resto_client.services.application_service import ApplicationService
+        from resto_client.services.authentication_service import AuthenticationService
+        if isinstance(service, ApplicationService):
+            self.auth_service = service.auth_service
+        elif isinstance(service, AuthenticationService):
+            self.auth_service = service
+        else:
+            raise RestoClientDesignError('Unsupported service type')
 
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """

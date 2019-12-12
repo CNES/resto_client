@@ -14,12 +14,7 @@
 """
 from abc import ABC, abstractmethod
 
-from typing import Optional, TYPE_CHECKING  # @UnusedImport
-
 from .service_access import ServiceAccess
-
-if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class BaseService(ABC):
@@ -38,13 +33,6 @@ class BaseService(ABC):
         self.service_access = service_access
         self.service_access.set_service(self)
 
-    @property
-    @abstractmethod
-    def auth_service(self) -> 'AuthenticationService':
-        """
-        :returns: the authentication service associated to this service.
-        """
-
     @abstractmethod
     def update_after_url_change(self) -> None:
         """
@@ -59,11 +47,4 @@ class BaseService(ABC):
         self.service_access.reset()
 
     def __str__(self) -> str:
-        result = str(self.service_access)
-        if self.auth_service is None:
-            result += '    associated authentication service : None'
-        elif self.auth_service == self:
-            result += '    associated authentication service : self'
-        else:
-            result += '    associated authentication service : {}'.format(self.auth_service)
-        return result
+        return str(self.service_access)

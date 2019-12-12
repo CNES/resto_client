@@ -56,13 +56,6 @@ class AuthenticationService(BaseService):
         self.credentials.reset()
         super(AuthenticationService, self).reset()
 
-    @property
-    def auth_service(self) -> 'AuthenticationService':
-        """
-        :returns: the authentication service of an AuthenticationService. By definition: self.
-        """
-        return self
-
     @classmethod
     def from_name(cls,
                   server_name: str,

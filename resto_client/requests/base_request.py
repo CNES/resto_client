@@ -59,7 +59,6 @@ class BaseRequest(ABC):
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
-        self.auth_service = service.auth_service
         self.service_access = service.service_access
         self._url_kwargs = url_kwargs
         if RestoClientParameters.is_debug():
