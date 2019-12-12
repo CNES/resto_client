@@ -16,6 +16,7 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 from copy import deepcopy
+from pathlib import Path
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -25,8 +26,9 @@ from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_collection
-from resto_client.services.resto_service import RestoService
+from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
+from resto_client.services.resto_service import RestoService
 from resto_client.services.service_access import RestoClientNoPersistedAccess
 
 from .cli_utils import build_resto_client_params, build_resto_service
@@ -144,7 +146,9 @@ def cli_search_collection(args: Namespace) -> None:
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
+        search_feature_id = None
         if isinstance(features_collection, RestoFeatureCollection):
+            search_feature_id = features_collection.all_id
             print(features_collection.all_id)
             msg_search = '{} results shown on a total of '
             msg_search += Style.BRIGHT + ' {} results ' + Style.NORMAL + 'beginning at index {}'
@@ -153,6 +157,7 @@ def cli_search_collection(args: Namespace) -> None:
                                     features_collection.start_index))
         elif isinstance(features_collection, RestoFeature):
             msg_head = Fore.BLUE + 'One result found with id : ' + Style.BRIGHT
+            search_feature_id = features_collection.product_identifier
             print(msg_head + features_collection.product_identifier)
         else:
             page_search = criteria_dict.get('page', 1)
@@ -162,6 +167,10 @@ def cli_search_collection(args: Namespace) -> None:
             else:
                 print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         print(Style.RESET_ALL)
+
+    if args.download and search_feature_id is not None:
+        download_features_files_from_id(resto_service, args.collection, search_feature_id,
+                                        'product', Path(client_params.download_dir))
 
 
 def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
@@ -184,4 +193,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                'region for more info', choices=region_choices, type=str.lower)
     parser_search.add_argument("--maxrecords", help="maximum records to show", type=int)
     parser_search.add_argument("--page", help="the number of the page to display", type=int)
+    parser_search.add_argument("--download", action="store_true",
+                               help="download all product found in search command")
+
     parser_search.set_defaults(func=cli_search_collection)

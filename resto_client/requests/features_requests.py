@@ -13,17 +13,17 @@
    limitations under the License.
 """
 from abc import ABC, abstractmethod
-from mimetypes import guess_extension
 from pathlib import Path
-from typing import Optional, Tuple, TYPE_CHECKING  # @NoMove
+from typing import Optional, Tuple, Union, TYPE_CHECKING  # @NoMove
 from warnings import warn
+import tempfile
 
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.responses.download_error_response import DownloadErrorResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
-
+from resto_client.functions.utils import get_file_properties
 
 from .anonymous_request import AnonymousRequest
 from .authentication_required_request import AuthenticationRequiredRequest
@@ -47,6 +47,18 @@ class LicenseSignatureRequested(RestoResponseError):
         """
         super(LicenseSignatureRequested, self).__init__('user needs to sign a license')
         self.error_response = error_response
+
+
+class FeatureOnTape(RestoResponseError):
+    """
+    Exception raised when a product requested is on tape
+    """
+
+    def __init__(self) -> None:
+        """
+        Constructor.
+        """
+        super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
 class SignLicenseRequest(AuthenticationRequiredRequest):
@@ -126,18 +138,21 @@ class DownloadRequestBase(ABC):
         self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
         self._download_directory = download_directory
 
-    def get_filename(self, content_type: str) -> Tuple[str, Path]:
+    def get_filename(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
         Returns filename and full filename according to the content type.
 
         :param content_type: mimetype of the file to download
         :returns: filename and full file path of the file to record
+        :returns: mimetype of the file to record
+        :returns: encoding of the file to record if given else None
         :raises RestoClientDesignError: when extension cannot be guessed from mimetype.
         """
-        extension = guess_extension(content_type.strip())
+        extension, mimetype, encoding = get_file_properties(content_type.strip())
+
         if extension is None:
             msg_excp = 'cannot guess the file extension from mimetype: {}'
-            raise RestoClientDesignError(msg_excp.format(content_type.strip()))
+            raise RestoClientDesignError(msg_excp.format(mimetype))
         if extension.lower() == '.jpe':
             extension = '.jpg'
         filename = '{}{}{}'.format(self._feature.product_identifier,
@@ -152,7 +167,7 @@ class DownloadRequestBase(ABC):
                 full_file_path = self._download_directory / filename
                 count += 1
 
-        return filename, full_file_path
+        return filename, full_file_path, mimetype, encoding
 
     def run(self) -> Optional[str]:
         """
@@ -176,6 +191,7 @@ class DownloadRequestBase(ABC):
         result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
                               headers=self._headers, stream=True)
         content_type = result.headers.get('content-type')
+        print(result.headers)
 
         if content_type == 'application/json':
             dict_json = result.json()
@@ -196,10 +212,25 @@ class DownloadRequestBase(ABC):
         if content_type is None:
             raise RestoResponseError('Cannot infer file extension with None content-type')
 
-        file_name, full_file_path = self.get_filename(content_type)
+        file_name, full_file_path, file_mimetype, _ = self.get_filename(content_type)
 
-        # If it's a Quicklook, Thumbnail or annexes
-        if content_type in ('image/jpeg', 'text/html', 'image/png'):
+        if file_mimetype in ('image/jpeg', 'text/html', 'image/png'):
+            # If it's a product on tape
+            if self.file_type == 'product' and self._feature.storage == 'tape':
+                warn("Your product is on tape, launching request to trigger"
+                     " its copy on disk on server side.")
+                # Launch a download request for copying from tape to disk on server side.
+                # However download will not happen.
+                with tempfile.TemporaryDirectory() as tmp_dir:
+                    tmp_file_path = Path(tmp_dir) / file_name
+                    download_file(result, tmp_file_path)
+                raise FeatureOnTape()
+            # If it's a product waiting to be on disk
+            if self.file_type == 'product' and self._feature.storage == 'staging':
+                warn("Your product is currently being copied to disk on server side."
+                     "Try again later.")
+                raise FeatureOnTape()
+            # If it's a Quicklook, Thumbnail or annexes
             download_file(result, full_file_path)
         # If it's a product
         elif content_type == self._feature.product_mimetype:

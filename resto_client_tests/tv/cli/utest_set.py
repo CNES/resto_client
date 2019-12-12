@@ -25,7 +25,6 @@ from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY,
                                                  TOKEN_KEY, VERBOSITY_KEY, REGION_KEY,
                                                  COLLECTION_KEY)
-from resto_client_tests.tv.cli.cli_accounts import USER_KALIDEOS
 
 
 class UTestCliSet(unittest.TestCase):
@@ -121,7 +120,7 @@ class UTestCliSet(unittest.TestCase):
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # First set server with parameters
         resto_client_run(arguments=['set', 'server', 'kalideos'])
-        resto_client_run(arguments=['set', 'account', USER_KALIDEOS])
+        resto_client_run(arguments=['set', 'account', 'fake_user@example.com'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
         # Then set another server
         resto_client_run(arguments=['set', 'server', 'peps'])
