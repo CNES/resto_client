@@ -38,13 +38,13 @@ from resto_client.requests.features_requests import DownloadRequestBase  # @Unus
 from resto_client.requests.service_requests import DescribeRequest
 from resto_client.settings.servers_database import DB_SERVERS
 
+from .application_service import ApplicationService
 from .authentication_service import AuthenticationService
-from .base_service import BaseService
 from .resto_collections_manager import RestoCollectionsManager
 from .service_access import RestoServiceAccess
 
 
-class RestoService(BaseService):
+class RestoService(ApplicationService):
     """
         A Resto Service, i.e. a valid resto accessible server
     """
@@ -58,9 +58,8 @@ class RestoService(BaseService):
         :param resto_access: access to resto service.
         :param auth_service: access to the Authentication service associated to this resto service.
         """
-        super(RestoService, self).__init__(service_access=resto_access)
+        super(RestoService, self).__init__(service_access=resto_access, auth_service=auth_service)
         self._collections_mgr = RestoCollectionsManager(self)
-        self._auth_service = auth_service
 
     def reset(self) -> None:
         self.service_access.detected_protocol = None
@@ -75,13 +74,6 @@ class RestoService(BaseService):
         :param collection_mgr: the collection manager
         """
         self._collections_mgr = collection_mgr
-
-    @property
-    def auth_service(self) -> AuthenticationService:
-        """
-        :returns: the authentication service associated to this RestoService.
-        """
-        return self._auth_service
 
     @classmethod
     def from_name(cls,
