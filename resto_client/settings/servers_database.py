@@ -32,12 +32,12 @@ WELL_KNOWN_SERVERS = {'kalideos': {RESTO_URL_KEY: 'https://www.kalideos.fr/resto
                              RESTO_PROTOCOL_KEY: 'dotcloud',
                              AUTH_URL_KEY: 'https://www.recovery-observatory.org/drupal/api/resto'
                              '/authenticate/',
-                             AUTH_PROTOCOL_KEY: 'sso_drupal'},
+                             AUTH_PROTOCOL_KEY: 'sso_dotcloud'},
                       'pleiades': {RESTO_URL_KEY: 'https://www.pleiades-cnes.fr/resto2/',
                                    RESTO_PROTOCOL_KEY: 'dotcloud',
                                    AUTH_URL_KEY: 'https://www.pleiades-cnes.fr/drupal/api/resto'
                                    '/authenticate/',
-                                   AUTH_PROTOCOL_KEY: 'sso_drupal'},
+                                   AUTH_PROTOCOL_KEY: 'sso_dotcloud'},
                       'peps': {RESTO_URL_KEY: 'https://peps.cnes.fr/resto/',
                                RESTO_PROTOCOL_KEY: 'peps_version',
                                AUTH_URL_KEY: 'https://peps.cnes.fr/resto/',

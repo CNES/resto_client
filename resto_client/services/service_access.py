@@ -250,10 +250,10 @@ class AuthenticationServiceAccess(ServiceAccess):
                                          'RevokeTokenRequest': None,
                                          'CheckTokenRequest': None
                                          },
-                           'sso_drupal': {'GetTokenRequest': '',
-                                          'RevokeTokenRequest': None,
-                                          'CheckTokenRequest': None
-                                          }
+                           'sso_dotcloud': {'GetTokenRequest': '',
+                                            'RevokeTokenRequest': None,
+                                            'CheckTokenRequest': None
+                                            }
                            }
         return routes_patterns
 
