@@ -54,9 +54,9 @@ WELL_KNOWN_SERVERS = {'kalideos': {RESTO_URL_KEY: 'https://www.kalideos.fr/resto
                                    AUTH_URL_KEY: 'http://opensearch.sentinel-hub.com/resto/',
                                    AUTH_PROTOCOL_KEY: 'default'},
                       'rocket': {RESTO_URL_KEY: 'https://resto.mapshup.com/2.2/',
-                                   RESTO_PROTOCOL_KEY: 'theia_version',
-                                   AUTH_URL_KEY: 'https://resto.mapshup.com/2.2/',
-                                   AUTH_PROTOCOL_KEY: 'default'}
+                                 RESTO_PROTOCOL_KEY: 'theia_version',
+                                 AUTH_URL_KEY: 'https://resto.mapshup.com/2.2/',
+                                 AUTH_PROTOCOL_KEY: 'default'}
                       }
 
 
