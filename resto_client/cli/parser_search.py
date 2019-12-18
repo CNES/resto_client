@@ -168,9 +168,9 @@ def cli_search_collection(args: Namespace) -> None:
                 print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         print(Style.RESET_ALL)
 
-    if (args.download or args.down_type) and search_feature_id is not None:
+    if args.download and search_feature_id is not None:
         download_features_files_from_id(resto_service, args.collection, search_feature_id,
-                                        args.down_type, Path(client_params.download_dir))
+                                        args.download, Path(client_params.download_dir))
 
 
 def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
@@ -193,10 +193,9 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                'region for more info', choices=region_choices, type=str.lower)
     parser_search.add_argument("--maxrecords", help="maximum records to show", type=int)
     parser_search.add_argument("--page", help="the number of the page to display", type=int)
-    parser_search.add_argument("--download", action="store_true",
-                               help="download all product found in search command")
-    parser_search.add_argument("--down_type", help='type of file you want to download after search '
-                               'request', choices=['product', 'quicklook', 'annexes', 'thumbnail'],
-                               default='product')
+    parser_search.add_argument("--download", nargs='?', default=False, const='product',
+                               help='download all file found in search command, by default product '
+                               'will be download otherwise choose from : choices',
+                               choices=['product', 'quicklook', 'annexes', 'thumbnail'])
 
     parser_search.set_defaults(func=cli_search_collection)
