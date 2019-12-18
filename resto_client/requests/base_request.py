@@ -140,9 +140,13 @@ class BaseRequest(ABC):
         """
 
         try:
-            result = post(self.get_url(), headers=self.headers, auth=self.authorization,
-                          stream=stream, data=self.authorization_data)
-            result.raise_for_status()
+            if 'Authorization' in self.headers:
+                result = post(self.get_url(), headers=self.headers,
+                              stream=stream)
+            else:
+                result = post(self.get_url(), headers=self.headers, auth=self.authorization,
+                              stream=stream, data=self.authorization_data)
+                result.raise_for_status()
         except (HTTPError, SSLError) as excp:
             msg = 'Error {} when {} {}.'
             raise Exception(msg.format(result.status_code, self.request_action,
