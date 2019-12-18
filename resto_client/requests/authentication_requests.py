@@ -89,7 +89,7 @@ class CheckTokenRequest(AnonymousRequest):
         """
         if self.service_access.protocol == 'sso_theia':
             response_json = {'status': 'error', 'message': 'user not connected'}
-        if self.service_access.protocol == 'sso_drupal':
+        elif self.service_access.protocol == 'sso_drupal':
             response_json = {'status': 'error', 'message': 'user not connected'}
         else:
             self.set_headers()
