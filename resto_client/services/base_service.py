@@ -13,8 +13,12 @@
    limitations under the License.
 """
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, cast
 
 from .service_access import ServiceAccess
+
+if TYPE_CHECKING:
+    from .authentication_service import AuthenticationService  # @UnusedImport
 
 
 class BaseService(ABC):
@@ -45,6 +49,13 @@ class BaseService(ABC):
         Reset the service to its creation state, and without any service access defined.
         """
         self.service_access.reset()
+
+    @property
+    def auth_service(self) -> 'AuthenticationService':
+        """
+        :returns: the authentication service associated to this application service.
+        """
+        return cast('AuthenticationService', self)
 
     def __str__(self) -> str:
         return str(self.service_access)

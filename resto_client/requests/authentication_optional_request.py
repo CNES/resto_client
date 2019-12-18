@@ -13,7 +13,7 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from typing import Optional, Union, TYPE_CHECKING  # @NoMove
+from typing import Optional, Union  # @NoMove
 from requests import Response
 
 from resto_client.base_exceptions import RestoClientDesignError
@@ -21,11 +21,6 @@ from resto_client.responses.resto_response import RestoResponse
 from resto_client.services.base_service import BaseService
 
 from .base_request import BaseRequest
-
-
-if TYPE_CHECKING:
-    from resto_client.services.application_service import ApplicationService  # @UnusedImport
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class AuthenticationOptionalRequest(BaseRequest):
@@ -43,14 +38,7 @@ class AuthenticationOptionalRequest(BaseRequest):
         :raises RestoClientDesignError: when the service is not of the right type
         """
         super(AuthenticationOptionalRequest, self).__init__(service, **url_kwargs)
-        from resto_client.services.application_service import ApplicationService
-        from resto_client.services.authentication_service import AuthenticationService
-        if isinstance(service, ApplicationService):
-            self.auth_service = service.auth_service
-        elif isinstance(service, AuthenticationService):
-            self.auth_service = service
-        else:
-            raise RestoClientDesignError('Unsupported service type')
+        self.auth_service = service.auth_service
 
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """
@@ -59,9 +47,8 @@ class AuthenticationOptionalRequest(BaseRequest):
         :param dict_input: entries to add in headers
         """
         super(AuthenticationOptionalRequest, self).set_headers(dict_input)
-        if dict_input is None:
-            self.auth_service.update_authorization_header(self.headers,
-                                                          self.authentication_required)
+        self.auth_service.update_authorization_header(self.headers,
+                                                      self.authentication_required)
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, str, None, Response]:
