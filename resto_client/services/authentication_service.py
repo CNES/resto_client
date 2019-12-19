@@ -91,7 +91,7 @@ class AuthenticationService(BaseService):
         return self.credentials.http_basic_auth
 
     @property
-    def username_b64(self):
+    def username_b64(self) -> str:
         return self.credentials.username_b64
 
     @property

@@ -16,7 +16,6 @@ from abc import abstractmethod
 from typing import Optional, Union  # @NoMove
 from requests import Response
 
-from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.responses.resto_response import RestoResponse
 from resto_client.services.base_service import BaseService
 
