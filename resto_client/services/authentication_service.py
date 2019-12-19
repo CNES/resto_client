@@ -39,20 +39,26 @@ class AuthenticationService(BaseService):
         :param auth_access: access to the authentication server.
         """
         super(AuthenticationService, self).__init__(auth_access)
-        self.credentials = AuthenticationCredentials(authentication_service=self)
+        self._credentials = AuthenticationCredentials(authentication_service=self)
 
     def reset(self) -> None:
-        self.credentials.reset()
+        self._credentials.reset()
         super(AuthenticationService, self).reset()
 
-    def set_credentials(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
+    def set_credentials(self, credentials: Optional[AuthenticationCredentials]=None,
+                        username: Optional[str]=None, password: Optional[str]=None) -> None:
         """
-        Set the credentials associated to this authentication service
+        Set the credentials associated to this authentication service, either by providing
+        a AuthenticationCredentials object or by specifying username or password or both.
 
+        :param credentials: Credentials to associate to this authentication service
         :param username: name of the account on the server
         :param  password: user password
         """
-        self.credentials.set(username=username, password=password)
+        if credentials is not None:
+            self._credentials = credentials
+        else:
+            self._credentials.set(username=username, password=password)
 
     @classmethod
     def from_name(cls,
@@ -80,35 +86,35 @@ class AuthenticationService(BaseService):
         # Retrieve persisted access to the authentication service
         auth_service_access = AuthenticationServiceAccess.persisted()
         instance = cls(auth_access=auth_service_access)
-        instance.credentials = AuthenticationCredentials.persisted(instance)
+        instance.set_credentials(AuthenticationCredentials.persisted(instance))
         return instance
 
     def update_after_url_change(self) -> None:
         """
         Callback method to update service after base URL was possibly changed.
         """
-        self.credentials.set()
+        self._credentials.set()
 
     @property
     def http_basic_auth(self) -> HTTPBasicAuth:
         """
         :returns: the basic HTTP authorization for the service
         """
-        return self.credentials.http_basic_auth
+        return self._credentials.http_basic_auth
 
     @property
     def username_b64(self) -> str:
         """
         :returns: the base64 username associated to this service
         """
-        return self.credentials.username_b64
+        return self._credentials.username_b64
 
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:
         """
         :returns: the authorization data for the service
         """
-        return self.credentials.authorization_data
+        return self._credentials.authorization_data
 
     def update_authorization_header(self, headers: dict, token_required: bool) -> None:
         """
@@ -118,7 +124,7 @@ class AuthenticationService(BaseService):
         :param token_required: If True ensure to retrieve an Authorization header, otherwise
                                provide it only if a valid token can be retrieved silently.
         """
-        self.credentials.update_authorization_header(headers, token_required)
+        self._credentials.update_authorization_header(headers, token_required)
 
 
 # ++++++++ From here we have the requests supported by the service ++++++++++++
@@ -132,7 +138,7 @@ class AuthenticationService(BaseService):
             new_token = GetTokenRequest(self).run()
         except AccesDeniedError as excp:
             # prevent from saving username by reset
-            self.credentials.set()  # reset username and password
+            self._credentials.set()  # reset username and password
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, the username was reset.'
             raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp
@@ -142,8 +148,8 @@ class AuthenticationService(BaseService):
         """
         :returns: True if the token is still valid
         """
-        if self.credentials.token_value is not None:
-            return CheckTokenRequest(self, self.credentials.token_value).run()
+        if self._credentials.token_value is not None:
+            return CheckTokenRequest(self, self._credentials.token_value).run()
         return False
 
     def revoke_token(self) -> Optional[requests.Response]:
@@ -152,9 +158,9 @@ class AuthenticationService(BaseService):
 
         :returns: unknown result at the moment (not working)
         """
-        if self.credentials.token_value is not None:
+        if self._credentials.token_value is not None:
             return RevokeTokenRequest(self).run()
         return None
 
     def __str__(self) -> str:
-        return super(AuthenticationService, self).__str__() + '\n' + str(self.credentials)
+        return super(AuthenticationService, self).__str__() + '\n' + str(self._credentials)
