@@ -46,6 +46,12 @@ class AuthenticationService(BaseService):
         super(AuthenticationService, self).reset()
 
     def set_credentials(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
+        """
+        Set the credentials associated to this authentication service
+
+        :param username: name of the account on the server
+        :param  password: user password
+        """
         self.credentials.set(username=username, password=password)
 
     @classmethod
@@ -92,6 +98,9 @@ class AuthenticationService(BaseService):
 
     @property
     def username_b64(self) -> str:
+        """
+        :returns: the base64 username associated to this service
+        """
         return self.credentials.username_b64
 
     @property
