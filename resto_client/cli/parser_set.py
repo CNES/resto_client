@@ -50,7 +50,7 @@ def cli_set_account(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     service = AuthenticationService.persisted()
-    service.credentials.set(username=args.username)
+    service.set_credentials(username=args.username)
 
 
 def cli_set_download_dir(args: argparse.Namespace) -> None:

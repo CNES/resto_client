@@ -51,8 +51,8 @@ def cli_unset_account(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     _ = args  # to avoid pylint warning
-    service = AuthenticationService.persisted()
-    service.credentials.set()  # reset username (and password)
+    auth_service = AuthenticationService.persisted()
+    auth_service.reset()  # resetting authentication service resets username (and password)
 
 
 def cli_unset_download_dir(args: argparse.Namespace) -> None:

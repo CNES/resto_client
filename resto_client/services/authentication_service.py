@@ -32,29 +32,21 @@ class AuthenticationService(BaseService):
         An authentication Service able to provide tokens, given credentials.
     """
 
-    def __init__(self,
-                 auth_access: AuthenticationServiceAccess,
-                 username: Optional[str]=None,
-                 password: Optional[str]=None) -> None:
+    def __init__(self, auth_access: AuthenticationServiceAccess) -> None:
         """
         Constructor
 
         :param auth_access: access to the authentication server.
-        :param username: name of the account on the server
-        :param password: user password
         """
         super(AuthenticationService, self).__init__(auth_access)
-        # Credentials need to exist before calling  update_after_url_change
         self.credentials = AuthenticationCredentials(authentication_service=self)
-        self.update_after_url_change()
-
-        # Need to set username before password because username update will reset password
-        if username is not None:
-            self.credentials.set(username=username, password=password)
 
     def reset(self) -> None:
         self.credentials.reset()
         super(AuthenticationService, self).reset()
+
+    def set_credentials(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
+        self.credentials.set(username=username, password=password)
 
     @classmethod
     def from_name(cls,
@@ -70,7 +62,9 @@ class AuthenticationService(BaseService):
         :returns: an authentication service corresponding to the server_name
         """
         server_description = DB_SERVERS.get_server(server_name)
-        return cls(auth_access=server_description.auth_access, username=username, password=password)
+        instance = cls(auth_access=server_description.auth_access)
+        instance.set_credentials(username=username, password=password)
+        return instance
 
     @classmethod
     def persisted(cls) -> 'AuthenticationService':
@@ -87,8 +81,7 @@ class AuthenticationService(BaseService):
         """
         Callback method to update service after base URL was possibly changed.
         """
-        self.credentials = AuthenticationCredentials(authentication_service=self)
-        self.credentials.set(username=None)
+        self.credentials.set()
 
     @property
     def http_basic_auth(self) -> HTTPBasicAuth:
@@ -96,6 +89,10 @@ class AuthenticationService(BaseService):
         :returns: the basic HTTP authorization for the service
         """
         return self.credentials.http_basic_auth
+
+    @property
+    def username_b64(self):
+        return self.credentials.username_b64
 
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:

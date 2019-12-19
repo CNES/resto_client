@@ -46,7 +46,7 @@ def build_resto_service(args: argparse.Namespace) -> RestoService:
 
     persisted_resto_service = RestoService.persisted()
     if username is not None or password is not None:
-        persisted_resto_service.auth_service.credentials.set(username=username,
+        persisted_resto_service.auth_service.set_credentials(username=username,
                                                              password=password)
     return persisted_resto_service
 
