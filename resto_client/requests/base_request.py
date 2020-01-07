@@ -146,7 +146,7 @@ class BaseRequest(ABC):
             else:
                 result = post(self.get_url(), headers=self.headers, auth=self.authorization,
                               stream=stream, data=self.authorization_data)
-                result.raise_for_status()
+            result.raise_for_status()
         except (HTTPError, SSLError) as excp:
             msg = 'Error {} when {} {}.'
             raise Exception(msg.format(result.status_code, self.request_action,
