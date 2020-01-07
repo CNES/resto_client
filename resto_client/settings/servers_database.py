@@ -28,7 +28,7 @@ WELL_KNOWN_SERVERS = {'kalideos': {RESTO_URL_KEY: 'https://www.kalideos.fr/resto
                                    RESTO_PROTOCOL_KEY: 'dotcloud',
                                    AUTH_URL_KEY: 'https://www.kalideos.fr/drupal/api/resto'
                                    '/authenticate/',
-                                   AUTH_PROTOCOL_KEY: 'default'},
+                                   AUTH_PROTOCOL_KEY: 'sso_dotcloud'},
                       'ro': {RESTO_URL_KEY: 'https://www.recovery-observatory.org/resto2/',
                              RESTO_PROTOCOL_KEY: 'dotcloud',
                              AUTH_URL_KEY: 'https://www.recovery-observatory.org/drupal/api/resto'
