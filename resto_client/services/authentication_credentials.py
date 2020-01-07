@@ -180,7 +180,7 @@ class AuthenticationCredentials():
         :returns: the basic HTTP authorization for the service
         """
         self._ensure_credentials()
-        return HTTPBasicAuth(self.username, self._password)
+        return HTTPBasicAuth(self.username.encode('utf-8'), self._password.encode('utf-8'))
 
     def update_authorization_header(self, headers: dict, token_required: bool) -> None:
         """
