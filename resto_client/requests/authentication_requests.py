@@ -55,7 +55,10 @@ class GetTokenRequest(AuthenticationRequiredRequest):
         """
         :returns: the resto token associated to the user account
         """
-        if self.service_access.protocol == 'sso_theia':
+        if self.service_access.protocol == 'sso_dotcloud':
+            response_post = self.post().json()
+            response_json = cast(dict, response_post)
+        elif self.service_access.protocol == 'sso_theia':
             response_text = self.post_as_text()
             response_json = {'token': response_text}
         else:
@@ -84,7 +87,7 @@ class CheckTokenRequest(AnonymousRequest):
         """
         :returns: True if the token is still valid
         """
-        if self.service_access.protocol == 'sso_theia':
+        if self.service_access.protocol in ['sso_theia', 'sso_dotcloud']:
             response_json = {'status': 'error', 'message': 'user not connected'}
         else:
             self.set_headers()

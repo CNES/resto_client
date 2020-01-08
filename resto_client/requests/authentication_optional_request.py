@@ -35,8 +35,7 @@ class AuthenticationOptionalRequest(BaseRequest):
         :param dict_input: entries to add in headers
         """
         super(AuthenticationOptionalRequest, self).set_headers(dict_input)
-        if dict_input is None:
-            self.auth_service.update_authorization_header(self.headers, self.token_required)
+        self.auth_service.update_authorization_header(self.headers, self.token_required)
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, str, None, Response]:
