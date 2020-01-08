@@ -195,7 +195,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     parser_search.add_argument("--page", help="the number of the page to display", type=int)
     parser_search.add_argument("--download", nargs='?', default=False, const='product',
                                help='download all file found in search command, by default product '
-                               'will be download otherwise choose from : choices',
+                               'will be download',
                                choices=['product', 'quicklook', 'annexes', 'thumbnail'])
 
     parser_search.set_defaults(func=cli_search_collection)
