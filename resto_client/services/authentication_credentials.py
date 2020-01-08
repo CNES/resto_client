@@ -162,7 +162,7 @@ class AuthenticationCredentials():
         :returns: the authorization for the service
         """
         self._ensure_credentials()
-        return HTTPBasicAuth(self.username, self._password)
+        return HTTPBasicAuth(self.username.encode('utf-8'), self._password.encode('utf-8'))
 
     def __str__(self) -> str:
         return 'username: {} / password: {}'.format(self.username, self._password)

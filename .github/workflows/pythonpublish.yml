@@ -1,12 +1,13 @@
 name: Upload package on Pypi
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*'
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python
@@ -24,4 +25,4 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
         twine check dist/*
-        twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
+        twine upload dist/*
