@@ -17,7 +17,7 @@ from pathlib import Path
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.services.service_access import AuthenticationServiceAccess, RestoServiceAccess
 from resto_client.settings.dict_settings import DictSettingsJson
-from .resto_client_settings import RESTO_CLIENT_CONFIG_DIR
+from .resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
 RESTO_URL_KEY = 'resto_base_url'
 RESTO_PROTOCOL_KEY = 'resto_protocol'
