@@ -17,3 +17,21 @@ from .resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
 RESTO_CLIENT_SETTINGS_FILENAME = RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json'
 RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_SETTINGS_FILENAME)
+
+# Process resto_client_settings versions
+
+# Settings written previously to setting version introduction
+if 'settings_version' not in RESTO_CLIENT_SETTINGS:
+    RESTO_CLIENT_SETTINGS['settings_version'] = 'V0'
+
+if RESTO_CLIENT_SETTINGS['settings_version'] == 'V0':
+    if 'auth_base_url' in RESTO_CLIENT_SETTINGS:
+        del RESTO_CLIENT_SETTINGS['auth_base_url']
+    if 'auth_protocol' in RESTO_CLIENT_SETTINGS:
+        del RESTO_CLIENT_SETTINGS['auth_protocol']
+    if 'resto_base_url' in RESTO_CLIENT_SETTINGS:
+        del RESTO_CLIENT_SETTINGS['resto_base_url']
+    if 'resto_protocol' in RESTO_CLIENT_SETTINGS:
+        del RESTO_CLIENT_SETTINGS['resto_protocol']
+    RESTO_CLIENT_SETTINGS['settings_version'] = 'V1'
+# TODO: FInish V0->V1 upgrade
