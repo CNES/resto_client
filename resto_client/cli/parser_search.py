@@ -168,7 +168,7 @@ def cli_search_collection(args: Namespace) -> None:
                 print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         print(Style.RESET_ALL)
 
-    if args.download and search_feature_id is not None:
+    if args.download is not None and search_feature_id is not None:
         download_features_files_from_id(resto_service, args.collection, search_feature_id,
                                         args.download, Path(client_params.download_dir))
 
