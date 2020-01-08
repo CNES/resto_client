@@ -95,17 +95,18 @@ class AuthenticationToken():
 
     def update_authorization_header(self,
                                     headers: dict,
-                                    token_required: bool,
+                                    authentication_required: bool,
                                     username_defined: bool) -> None:
         """
         Update the Authorization header if the token is not None or if it is required.
 
         :param headers: the headers into which the Authorization header must be recorded.
-        :param token_required: If True ensure to retrieve an Authorization header, otherwise
-                               provide it only if a valid token can be retrieved silently.
+        :param authentication_required: If True ensure to retrieve an Authorization header,
+                                        otherwise provide it only if a valid token can be
+                                        retrieved silently.
         :param username_defined: True if a username is defined in the service credentials.
         """
-        if token_required:
+        if authentication_required:
             self.token = 'A fake token value to trigger get_token()'  # type: ignore
         else:
             # If the token is valid use it, otherwise renew it if the username is not None
