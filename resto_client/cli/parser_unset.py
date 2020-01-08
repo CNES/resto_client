@@ -15,13 +15,11 @@
 import argparse
 
 from resto_client.cli.cli_utils import build_resto_client_params
-from resto_client.services.authentication_service import AuthenticationService
-from resto_client.services.resto_service import RestoService
+from resto_client.services.resto_server import RestoServer
+
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
 # pylint: disable=protected-access
-
-
 def cli_unset_server(args: argparse.Namespace) -> None:
     """
     CLI adapter to unset the persistent server parameters
@@ -29,7 +27,7 @@ def cli_unset_server(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     _ = args  # to avoid pylint warning
-    service = RestoService.persisted()
+    service = RestoServer.persisted().resto_service
     service.reset()
 
 
@@ -40,7 +38,7 @@ def cli_unset_collection(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     _ = args  # to avoid pylint warning
-    service = RestoService.persisted()
+    service = RestoServer.persisted().resto_service
     service.current_collection = None
 
 
@@ -51,7 +49,7 @@ def cli_unset_account(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     _ = args  # to avoid pylint warning
-    auth_service = AuthenticationService.persisted()
+    auth_service = RestoServer.persisted().auth_service
     auth_service.reset()  # resetting authentication service resets username (and password)
 
 

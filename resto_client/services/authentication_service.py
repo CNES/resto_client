@@ -20,7 +20,6 @@ from requests.auth import HTTPBasicAuth
 from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
                                                            RevokeTokenRequest)
 from resto_client.requests.utils import AccesDeniedError
-from resto_client.settings.servers_database import DB_SERVERS
 
 from .authentication_credentials import AuthenticationCredentials
 from .base_service import BaseService
@@ -59,35 +58,6 @@ class AuthenticationService(BaseService):
             self._credentials = credentials
         else:
             self._credentials.set(username=username, password=password)
-
-    @classmethod
-    def from_name(cls,
-                  server_name: str,
-                  username: Optional[str]=None,
-                  password: Optional[str]=None) -> 'AuthenticationService':
-        """
-        Build an authentication service from the database of servers
-
-        :param server_name: the name of the server to use in the database
-        :param username: name of the account on the server
-        :param  password: user password
-        :returns: an authentication service corresponding to the server_name
-        """
-        server_description = DB_SERVERS.get_server(server_name)
-        instance = cls(auth_access=server_description.auth_access)
-        instance.set_credentials(username=username, password=password)
-        return instance
-
-    @classmethod
-    def persisted(cls) -> 'AuthenticationService':
-        """
-        :returns: an authentication service from the persisted authentication access description.
-        """
-        # Retrieve persisted access to the authentication service
-        auth_service_access = AuthenticationServiceAccess.persisted()
-        instance = cls(auth_access=auth_service_access)
-        instance.set_credentials(AuthenticationCredentials.persisted(instance))
-        return instance
 
     def update_after_url_change(self) -> None:
         """
@@ -138,6 +108,8 @@ class AuthenticationService(BaseService):
             new_token = GetTokenRequest(self).run()
         except AccesDeniedError as excp:
             # prevent from saving username by reset
+            print(self._credentials.username)
+            print(self._credentials._password)
             self._credentials.set()  # reset username and password
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, the username was reset.'

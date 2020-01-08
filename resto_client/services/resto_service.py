@@ -12,10 +12,10 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-import time
-from warnings import warn
 from pathlib import Path
+import time
 from typing import Optional, Dict, Type
+from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
@@ -36,7 +36,6 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
-from resto_client.settings.servers_database import DB_SERVERS
 
 from .application_service import ApplicationService
 from .authentication_service import AuthenticationService
@@ -74,41 +73,6 @@ class RestoService(ApplicationService):
         :param collection_mgr: the collection manager
         """
         self._collections_mgr = collection_mgr
-
-    @classmethod
-    def from_name(cls,
-                  server_name: str,
-                  username: Optional[str]= None,
-                  password: Optional[str]=None) -> 'RestoService':
-        """
-        Build a resto service from the database of servers
-
-        :param server_name: the name of the server to use in the database
-        :param username: name of the account on the server
-        :param password: user password
-        :returns: a resto service corresponding to the server_name
-        """
-        server_description = DB_SERVERS.get_server(server_name)
-        auth_service = AuthenticationService.from_name(server_name,
-                                                       username=username, password=password)
-        resto_service = cls(resto_access=server_description.resto_access, auth_service=auth_service)
-        resto_service.update_after_url_change()
-        return resto_service
-
-    @classmethod
-    def persisted(cls) -> 'RestoService':
-        """
-        :returns: a resto service from the persisted authentication access description.
-        """
-        # Retrieve persisted authentication service
-        auth_service = AuthenticationService.persisted()
-        # Retrieve persisted access to the resto service
-        resto_service_access = RestoServiceAccess.persisted()
-        resto_service = cls(resto_access=resto_service_access, auth_service=auth_service)
-        resto_service.update_after_url_change()
-        persisted_coll_manager = RestoCollectionsManager.persisted(resto_service)
-        resto_service.set_collection_mgr(persisted_coll_manager)
-        return resto_service
 
     def update_after_url_change(self) -> None:
         """

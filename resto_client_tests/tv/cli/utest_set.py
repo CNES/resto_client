@@ -19,7 +19,7 @@ import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.services.service_access import RestoClientNoPersistedAccess
+from resto_client.services.resto_server import RestoClientNoPersistedServer
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY,
@@ -43,8 +43,8 @@ class UTestCliSet(unittest.TestCase):
         for server_name in WELL_KNOWN_SERVERS:
             resto_client_run(arguments=['set', 'server', server_name])
             # Verify that RESTO_CLIENT_SETTINGS contain all server info from server database
-            self.assertTrue(WELL_KNOWN_SERVERS[server_name].items()
-                            <= RESTO_CLIENT_SETTINGS.items())
+            self.assertTrue('server_name' in RESTO_CLIENT_SETTINGS)
+            self.assertEqual(RESTO_CLIENT_SETTINGS['server_name'], server_name)
 
     def test_n_set_account(self) -> None:
         """
@@ -154,7 +154,7 @@ class UTestCliSet(unittest.TestCase):
         """
         RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
-        with self.assertRaises(RestoClientNoPersistedAccess):
+        with self.assertRaises(RestoClientNoPersistedServer):
             resto_client_run(arguments=['set', 'account', 'test_name'])
         # Verify non-setting of parameters
         self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)

@@ -15,8 +15,7 @@
 import argparse
 
 from resto_client.functions.aoi_utils import find_region_choice
-from resto_client.services.authentication_service import AuthenticationService
-from resto_client.services.resto_service import RestoService
+from resto_client.services.resto_server import RestoServer
 from resto_client.settings.resto_client_parameters import ALLOWED_VERBOSITY
 
 from .cli_utils import build_resto_client_params, build_resto_service
@@ -39,7 +38,7 @@ def cli_set_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    service = RestoService.persisted()
+    service = RestoServer.persisted().resto_service
     service.current_collection = args.collection
 
 
@@ -49,7 +48,7 @@ def cli_set_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    service = AuthenticationService.persisted()
+    service = RestoServer.persisted().auth_service
     service.set_credentials(username=args.username)
 
 

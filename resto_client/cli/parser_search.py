@@ -14,9 +14,9 @@
 """
 from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
-from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 from copy import deepcopy
 from pathlib import Path
+from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -28,12 +28,12 @@ from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_collection
 from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
-from resto_client.services.resto_service import RestoService
-from resto_client.services.service_access import RestoClientNoPersistedAccess
+from resto_client.services.resto_server import RestoServer, RestoClientNoPersistedServer
 
 from .cli_utils import build_resto_client_params, build_resto_service
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
+
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
 # pylint: disable=protected-access
@@ -44,12 +44,12 @@ def get_table_help_criteria() -> str:
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
     """
     try:
-        resto_protocol = RestoService.persisted().service_access.protocol
+        resto_protocol = RestoServer.persisted().resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
         title_help = "Current {} server supports the following criteria (defined in the Resto API):"
         title_help = title_help.format(resto_protocol)
         dict_to_print = resto_criteria.criteria_keys
-    except RestoClientNoPersistedAccess:
+    except RestoClientNoPersistedServer:
         title_help = "Criteria supported by all servers (more available when a server is selected):"
         dict_to_print = COMMON_CRITERIA_KEYS
 

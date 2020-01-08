@@ -15,6 +15,7 @@
 import argparse
 
 from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.services.resto_server import RestoServer
 from resto_client.services.resto_service import RestoService
 from resto_client.settings.resto_client_parameters import RestoClientParameters
 
@@ -42,9 +43,10 @@ def build_resto_service(args: argparse.Namespace) -> RestoService:
     password = args.password if hasattr(args, 'password') else None
 
     if server_name is not None:
-        return RestoService.from_name(server_name, username=username, password=password)
+        resto_server = RestoServer(server_name, username=username, password=password)
+        return resto_server.resto_service
 
-    persisted_resto_service = RestoService.persisted()
+    persisted_resto_service = RestoServer.persisted().resto_service
     if username is not None or password is not None:
         persisted_resto_service.auth_service.set_credentials(username=username,
                                                              password=password)

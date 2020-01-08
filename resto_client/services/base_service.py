@@ -35,7 +35,6 @@ class BaseService(ABC):
         """
         # Initialize from service_access.
         self.service_access = service_access
-        self.service_access.set_service(self)
 
     @abstractmethod
     def update_after_url_change(self) -> None:
@@ -48,7 +47,6 @@ class BaseService(ABC):
         """
         Reset the service to its creation state, and without any service access defined.
         """
-        self.service_access.reset()
 
     @property
     def auth_service(self) -> 'AuthenticationService':
