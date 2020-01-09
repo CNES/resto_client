@@ -249,7 +249,11 @@ class AuthenticationServiceAccess(ServiceAccess):
                            'sso_theia': {'GetTokenRequest': '',
                                          'RevokeTokenRequest': None,
                                          'CheckTokenRequest': None
-                                         }
+                                         },
+                           'sso_dotcloud': {'GetTokenRequest': '',
+                                            'RevokeTokenRequest': None,
+                                            'CheckTokenRequest': None
+                                            }
                            }
         return routes_patterns
 

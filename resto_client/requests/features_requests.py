@@ -191,7 +191,6 @@ class DownloadRequestBase(ABC):
         result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
                               headers=self._headers, stream=True)
         content_type = result.headers.get('content-type')
-        print(result.headers)
 
         if content_type == 'application/json':
             dict_json = result.json()
