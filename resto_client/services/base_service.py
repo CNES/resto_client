@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, cast
 
 from .service_access import ServiceAccess
 
+
 if TYPE_CHECKING:
     from .authentication_service import AuthenticationService  # @UnusedImport
 
@@ -35,6 +36,7 @@ class BaseService(ABC):
         """
         # Initialize from service_access.
         self.service_access = service_access
+        self._auth_service = self
 
     @abstractmethod
     def update_after_url_change(self) -> None:
@@ -53,7 +55,11 @@ class BaseService(ABC):
         """
         :returns: the authentication service associated to this application service.
         """
-        return cast('AuthenticationService', self)
+        return cast('AuthenticationService', self._auth_service)
+
+    @auth_service.setter
+    def auth_service(self, auth_service: 'AuthenticationService') -> None:
+        self._auth_service = auth_service
 
     def __str__(self) -> str:
         return str(self.service_access)

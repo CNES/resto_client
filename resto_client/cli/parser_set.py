@@ -48,8 +48,8 @@ def cli_set_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    service = RestoServer.persisted().auth_service
-    service.set_credentials(username=args.username)
+    authentication_service = RestoServer.persisted().authentication_service
+    authentication_service.set_credentials(username=args.username)
 
 
 def cli_set_download_dir(args: argparse.Namespace) -> None:

@@ -49,8 +49,8 @@ def cli_unset_account(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     _ = args  # to avoid pylint warning
-    auth_service = RestoServer.persisted().auth_service
-    auth_service.reset()  # resetting authentication service resets username (and password)
+    authentication_service = RestoServer.persisted().authentication_service
+    authentication_service.reset()  # reset authentication service => reset username and password
 
 
 def cli_unset_download_dir(args: argparse.Namespace) -> None:

@@ -46,10 +46,10 @@ class RestoServer():
         :param password: user password
         """
         server_description = DB_SERVERS.get_server(server_name)
-        self.auth_service = AuthenticationService(server_description.auth_access)
-        self.auth_service.set_credentials(username=username, password=password)
+        self.authentication_service = AuthenticationService(server_description.auth_access)
+        self.authentication_service.set_credentials(username=username, password=password)
         self.resto_service = RestoService(resto_access=server_description.resto_access,
-                                          auth_service=self.auth_service)
+                                          auth_service=self.authentication_service)
         self.resto_service.update_after_url_change()
         self.server_name = server_name  # type: ignore
 
@@ -67,9 +67,9 @@ class RestoServer():
         instance = cls(persisted_server_name)
 
         # Update authentication service persisted parameters
-        auth_service = instance.auth_service
-        persisted_credentials = AuthenticationCredentials.persisted(auth_service)
-        auth_service.set_credentials(persisted_credentials)
+        authentication_service = instance.authentication_service
+        persisted_credentials = AuthenticationCredentials.persisted(authentication_service)
+        authentication_service.set_credentials(persisted_credentials)
 
         # Retrieve persisted access to the resto service
         resto_service = instance.resto_service

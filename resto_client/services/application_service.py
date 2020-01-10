@@ -35,14 +35,7 @@ class ApplicationService(BaseService):
                              service.
         """
         super(ApplicationService, self).__init__(service_access=service_access)
-        self._auth_service = auth_service
-
-    @property
-    def auth_service(self) -> AuthenticationService:
-        """
-        :returns: the authentication service associated to this application service.
-        """
-        return self._auth_service
+        self.auth_service = auth_service
 
     @abstractmethod
     def update_after_url_change(self) -> None:
