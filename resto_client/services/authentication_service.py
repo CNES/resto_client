@@ -86,16 +86,16 @@ class AuthenticationService(BaseService):
         """
         return self._credentials.authorization_data
 
-    def update_authorization_header(self, headers: dict, authentication_required: bool) -> None:
+    def get_authorization_header(self, authentication_required: bool) -> dict:
         """
-        Update the Authorization header if possible
+        Get the Authorization header if possible
 
-        :param headers: the headers into which the Authorization header must be recorded.
         :param authentication_required: If True ensure to retrieve an Authorization header,
                                         otherwise provide it only if a valid token can be
                                         retrieved silently.
+        :returns: the authorization header
         """
-        self._credentials.update_authorization_header(headers, authentication_required)
+        return self._credentials.get_authorization_header(authentication_required)
 
 
 # ++++++++ From here we have the requests supported by the service ++++++++++++

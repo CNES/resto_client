@@ -93,19 +93,19 @@ class AuthenticationToken():
             raise RestoClientDesignError('Cannot validate token when no parent service defined')
         return self.parent_service.check_token()
 
-    def update_authorization_header(self,
-                                    headers: dict,
-                                    authentication_required: bool,
-                                    username_defined: bool) -> None:
+    def get_authorization_header(self,
+                                 authentication_required: bool,
+                                 username_defined: bool) -> dict:
         """
-        Update the Authorization header if the token is not None or if it is required.
+        Build the Authorization header if the token is not None or if it is required.
 
-        :param headers: the headers into which the Authorization header must be recorded.
         :param authentication_required: If True ensure to retrieve an Authorization header,
                                         otherwise provide it only if a valid token can be
                                         retrieved silently.
         :param username_defined: True if a username is defined in the service credentials.
+        :returns: the authorization header
         """
+        authorization_header = {}
         if authentication_required:
             self.token = 'A fake token value to trigger get_token()'  # type: ignore
         else:
@@ -116,4 +116,5 @@ class AuthenticationToken():
                 if username_defined:
                     self.token = 'A fake token value to trigger get_token()'  # type: ignore
         if self.token is not None:
-            headers['Authorization'] = 'Bearer ' + self.token
+            authorization_header['Authorization'] = 'Bearer ' + self.token
+        return authorization_header

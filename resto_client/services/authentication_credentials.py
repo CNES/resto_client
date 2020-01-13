@@ -186,17 +186,17 @@ class AuthenticationCredentials():
             encoded_password = self._password.encode('utf-8')
         return HTTPBasicAuth(self.username.encode('utf-8'), encoded_password)
 
-    def update_authorization_header(self, headers: dict, authentication_required: bool) -> None:
+    def get_authorization_header(self, authentication_required: bool) -> dict:
         """
-        Update the Authorization headers if possible
+        Returns the Authorization headers if possible
 
-        :param headers: the headers into which the Authorization header must be recorded.
         :param authentication_required: If True ensure to retrieve an Authorization header,
                                         otherwise provide it only if a valid token can be
                                         retrieved silently.
+        :returns: the authorization header
         """
         username_defined = self.username is not None
-        self._token.update_authorization_header(headers, authentication_required, username_defined)
+        return self._token.get_authorization_header(authentication_required, username_defined)
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,

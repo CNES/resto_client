@@ -77,7 +77,6 @@ class BaseRequest(ABC):
         return urljoin(self.service_access.base_url,
                        url_extension.format(**self._url_kwargs))
 
-    @abstractmethod
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """
         Set headers with dic_input
