@@ -28,15 +28,11 @@ from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_collection
 from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
-from resto_client.services.resto_server import RestoServer, RestoClientNoPersistedServer
+from resto_client.services.resto_server import RestoClientNoPersistedServer
 
 from .cli_utils import build_resto_client_params, build_resto_server
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
-
-
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
 
 
 def get_table_help_criteria() -> str:
@@ -44,7 +40,7 @@ def get_table_help_criteria() -> str:
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
     """
     try:
-        resto_protocol = RestoServer.persisted().resto_service.service_access.protocol
+        resto_protocol = build_resto_server().resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
         title_help = "Current {} server supports the following criteria (defined in the Resto API):"
         title_help = title_help.format(resto_protocol)
@@ -172,6 +168,10 @@ def cli_search_collection(args: Namespace) -> None:
     if args.download and search_feature_id is not None:
         download_features_files_from_id(resto_service, args.collection, search_feature_id,
                                         'product', Path(client_params.download_dir))
+
+
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 
 
 def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:

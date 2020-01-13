@@ -13,23 +13,28 @@
    limitations under the License.
 """
 import argparse
+from typing import Optional
 
-from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.services.resto_server import RestoServer
 from resto_client.settings.resto_client_parameters import RestoClientParameters
 
 
-def build_resto_server(args: argparse.Namespace) -> RestoServer:
+def build_resto_server(args: Optional[argparse.Namespace] = None) -> RestoServer:
     """
     Build a RestoServer instance from parsed arguments, suitable for further processing
     in CLI context.
 
-    :param args: arguments as parsed by ArgParse
+    :param args: arguments as parsed by argparse
     :returns: RestoServer instance suitable for further processing in CLI context
     """
-    server_name = args.server_name if hasattr(args, 'server_name') else None
-    username = args.username if hasattr(args, 'username') else None
-    password = args.password if hasattr(args, 'password') else None
+    if args is None:
+        server_name = None
+        username = None
+        password = None
+    else:
+        server_name = args.server_name if hasattr(args, 'server_name') else None
+        username = args.username if hasattr(args, 'username') else None
+        password = args.password if hasattr(args, 'password') else None
 
     if server_name is not None:
         return RestoServer(server_name, username=username, password=password)
