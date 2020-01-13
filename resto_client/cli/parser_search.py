@@ -168,7 +168,7 @@ def cli_search_collection(args: Namespace) -> None:
                 print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         print(Style.RESET_ALL)
 
-    if args.download is not False and search_feature_id is not None:
+    if args.download and search_feature_id is not None:
         download_features_files_from_id(resto_service, args.collection, search_feature_id,
                                         args.download, Path(client_params.download_dir))
 
@@ -195,7 +195,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     parser_search.add_argument("--page", help="the number of the page to display", type=int)
     parser_search.add_argument("--download", nargs='?', default=False, const='product',
                                help='download files corresponding to found features, by default'
-                               ' product will be download',
+                               ' product will be downloaded',
                                choices=['product', 'quicklook', 'annexes', 'thumbnail'])
 
     parser_search.set_defaults(func=cli_search_collection)
