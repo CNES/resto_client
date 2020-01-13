@@ -17,14 +17,13 @@ from typing import Iterable
 from typing import List  # @UnusedImport
 from resto_client.settings.dict_settings import DictSettingsJson
 
-from .resto_client_parameters import RestoClientParameters
 
-
-def persist_settings(settings: Iterable[DictSettingsJson]) -> None:
+def persist_settings(settings: Iterable[DictSettingsJson], print_settings: bool = False) -> None:
     """
     Initialize the settings from file(s) and register their recording at exit time.
 
     :param settings: an iterable containing settings for the application
+    :param print_settings: flag to print the settings either at load or at save time
     """
     persisted_settings: List[DictSettingsJson] = []
 
@@ -33,12 +32,12 @@ def persist_settings(settings: Iterable[DictSettingsJson]) -> None:
         Function to save the application settings in a file. To be called once at exit time.
         """
         for setting in persisted_settings:
-            if RestoClientParameters.is_debug():
+            if print_settings:
                 print(setting)
             setting.save()
 
     for setting in settings:
-        if RestoClientParameters.is_debug():
+        if print_settings:
             print(setting)
         persisted_settings.append(setting)
 

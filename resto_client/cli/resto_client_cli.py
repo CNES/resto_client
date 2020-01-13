@@ -112,7 +112,7 @@ def main(arguments: Optional[Sequence[str]]=None) -> None:
 
     :param arguments: list of arguments
     """
-    persist_settings([RESTO_CLIENT_SETTINGS])
+    persist_settings([RESTO_CLIENT_SETTINGS], RestoClientParameters.is_debug())
     resto_client_run(arguments=arguments)
 
 
