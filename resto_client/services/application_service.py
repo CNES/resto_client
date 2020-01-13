@@ -50,6 +50,7 @@ class ApplicationService(BaseService):
         Reset the service to its creation state, and without any service access defined.
         """
         super(ApplicationService, self).reset()
+        self.auth_service.reset()
 
     def __str__(self) -> str:
         result = super(ApplicationService, self).__str__()

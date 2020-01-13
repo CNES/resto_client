@@ -55,7 +55,7 @@ class RestoService(ApplicationService):
         Constructor
 
         :param resto_access: access to resto service.
-        :param auth_service: access to the Authentication service associated to this resto service.
+        :param auth_service: Authentication service associated to this resto service.
         """
         super(RestoService, self).__init__(service_access=resto_access, auth_service=auth_service)
         self._collections_mgr = RestoCollectionsManager(self)
@@ -63,7 +63,6 @@ class RestoService(ApplicationService):
     def reset(self) -> None:
         self.service_access.detected_protocol = None
         self._collections_mgr.reset()
-        self.auth_service.reset()
         super(RestoService, self).reset()
 
     def set_collection_mgr(self, collection_mgr: RestoCollectionsManager) -> None:
