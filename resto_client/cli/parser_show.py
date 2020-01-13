@@ -68,8 +68,8 @@ def cli_show_features(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     unused_client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
-    service = build_resto_server(args).resto_service
-    features = create_features_from_ids(service, args.collection, args.feature_id)
+    resto_server = build_resto_server(args)
+    features = create_features_from_ids(resto_server, args.collection, args.feature_id)
 
     for feature in features:
         print(feature)

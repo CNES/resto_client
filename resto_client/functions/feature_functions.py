@@ -16,16 +16,17 @@ from pathlib import Path
 from typing import List, Union
 
 from resto_client.entities.resto_feature import RestoFeature
-from resto_client.services.resto_service import RestoService
+from resto_client.services.resto_server import RestoServer
 
 
-def create_features_from_ids(service: RestoService,
+# TODO: declare optional arguments
+def create_features_from_ids(server: RestoServer,
                              collection_name: str,
                              features_ids: Union[str, List[str]]) -> List[RestoFeature]:
     """
     Creates a list of resto features by querying Resto
 
-    :param service: Resto service
+    :param server: Resto server
     :param collection_name: Name of the collection containing features
     :param features_ids: Feature(s) identifier(s)
     :returns: a list of Resto features
@@ -36,13 +37,16 @@ def create_features_from_ids(service: RestoService,
         features_ids = [features_ids]
 
     for feature_id in features_ids:
-        feature = service.get_feature_by_id(feature_id, collection_name)
+        # TODO: Declare method in RestoServer as proxies
+        feature = server.resto_service.get_feature_by_id(feature_id, collection_name)
         features_list.append(feature)
 
     return features_list
 
+# TODO: declare optional arguments
 
-def download_features_files_from_id(resto_service: RestoService,
+
+def download_features_files_from_id(resto_server: RestoServer,
                                     collection: str,
                                     features_ids: Union[str, List[str]],
                                     file: str,
@@ -52,7 +56,7 @@ def download_features_files_from_id(resto_service: RestoService,
 
     :param collection: the resto collection name
     :param features_ids: id(s) of the feature(s) which as a file to download
-    :param resto_service: the resto service to query
+    :param resto_server: the resto server to query
     :param download_dir: the path to the directory where download must be done.
     :param file: file to download product, quicklook, thumbnail or annexes
     :raises ValueError: if the file type is not supported
@@ -62,10 +66,12 @@ def download_features_files_from_id(resto_service: RestoService,
         features_ids = [features_ids]
 
     # Issue a search request into the collection to retrieve features.
-    features = create_features_from_ids(resto_service, collection, features_ids)
+    resto_service = resto_server.resto_service
+    features = create_features_from_ids(resto_server, collection, features_ids)
 
     for feature in features:
         # Do download
+        # TODO: Declare method in RestoServer as proxies
         unused_downloaded_filename = resto_service.download_feature_file(feature,
                                                                          file,
                                                                          download_dir)

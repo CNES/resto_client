@@ -136,9 +136,8 @@ def cli_search_collection(args: Namespace) -> None:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     client_params = build_resto_client_params(args)
-    # TODO: pass a RestoServer to functions
-    resto_service = build_resto_server(args).resto_service
-    features_collection = search_collection(resto_service, args.collection,
+    resto_server = build_resto_server(args)
+    features_collection = search_collection(resto_server, args.collection,
                                             client_params.region, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
@@ -166,7 +165,7 @@ def cli_search_collection(args: Namespace) -> None:
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:
-        download_features_files_from_id(resto_service, args.collection, search_feature_id,
+        download_features_files_from_id(resto_server, args.collection, search_feature_id,
                                         'product', Path(client_params.download_dir))
 
 

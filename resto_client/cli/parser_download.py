@@ -38,8 +38,8 @@ def cli_download_files(args: argparse.Namespace) -> None:
     :type args: :class:`argparse.Namespace`
     """
     client_params = build_resto_client_params(args)
-    resto_service = build_resto_server(args).resto_service
-    download_features_files_from_id(resto_service, args.collection, args.feature_id,
+    resto_server = build_resto_server(args)
+    download_features_files_from_id(resto_server, args.collection, args.feature_id,
                                     args.download_type, Path(client_params.download_dir))
 
 

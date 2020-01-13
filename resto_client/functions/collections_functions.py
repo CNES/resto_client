@@ -15,12 +15,13 @@
 from typing import Optional, Dict, Any
 
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.services.resto_service import RestoService
+from resto_client.services.resto_server import RestoServer
 
 from .resto_criteria import RestoCriteria
 
 
-def search_collection(resto_service: RestoService,
+# TODO: declare optional arguments
+def search_collection(resto_server: RestoServer,
                       collection_name: str,
                       region: str,
                       criteria: Optional[Dict[str, Any]]=None) -> Optional[RestoFeatureCollection]:
@@ -28,16 +29,18 @@ def search_collection(resto_service: RestoService,
     Search in a collection using selection criteria
 
     :param collection_name: name of the resto collection; iF None search all collections
-    :param resto_service: the resto service to query
+    :param resto_server: the resto server to query
     :param region: the name of the region to use
     :param criteria: list of criterion for search
     :returns: the collection of retrieved features
     """
+    resto_service = resto_server.resto_service
     new_criteria = RestoCriteria(resto_service.service_access.protocol)
     if criteria is not None:
         new_criteria.update(criteria)
     new_criteria.update({'region': region})
 
+    # TODO: declare functions in RestoServer, as proxies
     search_feature_collection = resto_service.search_collection(new_criteria, collection_name)
     if len(search_feature_collection.all_id) == 1:
         search_result = search_feature_collection.features[0]
