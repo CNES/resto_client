@@ -60,6 +60,7 @@ class BaseRequest(ABC):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
         self.service_access = service.service_access
+        self.auth_service = service.auth_service
         self._url_kwargs = url_kwargs
         if RestoClientParameters.is_debug():
             with colorama_text():

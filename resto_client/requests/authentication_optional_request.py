@@ -17,7 +17,6 @@ from typing import Optional, Union  # @NoMove
 from requests import Response
 
 from resto_client.responses.resto_response import RestoResponse
-from resto_client.services.base_service import BaseService
 
 from .base_request import BaseRequest
 
@@ -27,17 +26,6 @@ class AuthenticationOptionalRequest(BaseRequest):
      Base class for several Resto Requests which can request Authentication
     """
     authentication_required = False
-
-    def __init__(self, service: BaseService, **url_kwargs: str) -> None:
-        """
-        Constructor
-
-        :param service: service
-        :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
-        :raises RestoClientDesignError: when the service is not of the right type
-        """
-        super(AuthenticationOptionalRequest, self).__init__(service, **url_kwargs)
-        self.auth_service = service.auth_service
 
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """
