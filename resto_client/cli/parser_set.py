@@ -18,7 +18,7 @@ from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.services.resto_server import RestoServer
 from resto_client.settings.resto_client_parameters import ALLOWED_VERBOSITY
 
-from .cli_utils import build_resto_client_params, build_resto_service
+from .cli_utils import build_resto_client_params, build_resto_server
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
@@ -29,7 +29,7 @@ def cli_set_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    unused_service = build_resto_service(args)
+    unused_server = build_resto_server(args)
 
 
 def cli_set_collection(args: argparse.Namespace) -> None:

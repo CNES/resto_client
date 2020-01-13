@@ -30,7 +30,7 @@ from resto_client.functions.feature_functions import download_features_files_fro
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 from resto_client.services.resto_server import RestoServer, RestoClientNoPersistedServer
 
-from .cli_utils import build_resto_client_params, build_resto_service
+from .cli_utils import build_resto_client_params, build_resto_server
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
 
@@ -140,7 +140,8 @@ def cli_search_collection(args: Namespace) -> None:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     client_params = build_resto_client_params(args)
-    resto_service = build_resto_service(args)
+    # TODO: pass a RestoServer to functions
+    resto_service = build_resto_server(args).resto_service
     features_collection = search_collection(resto_service, args.collection,
                                             client_params.region, criteria_dict)
 
