@@ -15,9 +15,9 @@
 import argparse
 
 from resto_client.functions.aoi_utils import find_region_choice
-from resto_client.settings.resto_client_parameters import ALLOWED_VERBOSITY
 
 from .cli_utils import build_resto_client_params, build_resto_server
+from .resto_client_parameters import ALLOWED_VERBOSITY
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

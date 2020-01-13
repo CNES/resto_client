@@ -17,8 +17,8 @@ import copy
 from typing import Dict, List, Any, Optional  # @UnusedImport
 import warnings
 
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.requests.base_request import BaseRequest
-from resto_client.settings.resto_client_parameters import RestoClientParameters
 
 from .resto_response import RestoResponse
 from .resto_response_error import RestoResponseError

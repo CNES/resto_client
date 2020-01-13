@@ -16,7 +16,8 @@ import argparse
 from typing import Optional
 
 from resto_client.services.resto_server import RestoServer
-from resto_client.settings.resto_client_parameters import RestoClientParameters
+
+from .resto_client_parameters import RestoClientParameters
 
 
 def build_resto_server(args: Optional[argparse.Namespace] = None) -> RestoServer:

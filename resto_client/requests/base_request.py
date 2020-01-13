@@ -23,10 +23,10 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError, SSLError
 
 from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.services.base_service import BaseService
-from resto_client.settings.resto_client_parameters import RestoClientParameters
 
 from .utils import AccesDeniedError, get_response
 
