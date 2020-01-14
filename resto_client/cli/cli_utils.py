@@ -15,9 +15,11 @@
 import argparse
 from typing import Optional
 
+
 from resto_client.services.resto_server import RestoServer
 
 from .resto_client_parameters import RestoClientParameters
+from .server_parameters import ServerParameters, RestoClientNoPersistedServer
 
 
 def build_resto_server(args: Optional[argparse.Namespace] = None) -> RestoServer:
@@ -26,6 +28,8 @@ def build_resto_server(args: Optional[argparse.Namespace] = None) -> RestoServer
     in CLI context.
 
     :param args: arguments as parsed by argparse
+    :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters and
+                                          no server name defined.
     :returns: RestoServer instance suitable for further processing in CLI context
     """
     if args is None:
@@ -37,14 +41,26 @@ def build_resto_server(args: Optional[argparse.Namespace] = None) -> RestoServer
         username = args.username if hasattr(args, 'username') else None
         password = args.password if hasattr(args, 'password') else None
 
-    if server_name is not None:
-        return RestoServer(server_name, username=username, password=password)
-
-    persisted_resto_server = RestoServer.persisted()
-    if username is not None or password is not None:
-        resto_service = persisted_resto_server.resto_service
-        resto_service.auth_service.set_credentials(username=username, password=password)
-    return persisted_resto_server
+    try:
+        persisted_server_parameters = ServerParameters.persisted()
+        if server_name is not None and server_name != persisted_server_parameters.server_name:
+            new_server = RestoServer(server_name, username=username, password=password)
+            persisted_server_parameters.server_name = server_name  # type: ignore
+            return new_server
+        # No server name specified or server name corresponds to the persistes server
+        persisted_resto_server = persisted_server_parameters.resto_server
+        if username is not None or password is not None:
+            resto_service = persisted_resto_server.resto_service
+            resto_service.auth_service.set_credentials(username=username, password=password)
+        return persisted_resto_server
+    except RestoClientNoPersistedServer:
+        if server_name is None:
+            msg = 'No server name specified and no server currently set in the parameters.'
+            raise RestoClientNoPersistedServer(msg)
+        new_server = RestoServer(server_name, username=username, password=password)
+        persisted_server_parameters = ServerParameters(server_name)
+        persisted_server_parameters.resto_server = new_server
+        return new_server
 
 
 def build_resto_client_params(args: argparse.Namespace) -> RestoClientParameters:

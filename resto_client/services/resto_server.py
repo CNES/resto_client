@@ -14,27 +14,16 @@
 """
 from typing import Optional
 
-from resto_client.base_exceptions import RestoClientUserError
-from resto_client.generic.property_decoration import managed_getter, managed_setter
-from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.servers_database import DB_SERVERS
 
-from .authentication_credentials import AuthenticationCredentials
 from .authentication_service import AuthenticationService
-from .resto_collections_manager import RestoCollectionsManager
 from .resto_service import RestoService
-
-
-class RestoClientNoPersistedServer(RestoClientUserError):
-    """ Exception raised when no persisted server found """
 
 
 class RestoServer():
     """
         A Resto Server, i.e. a valid resto accessible server
     """
-
-    properties_storage = RESTO_CLIENT_SETTINGS
 
     def __init__(self, server_name: str,
                  username: Optional[str]= None, password: Optional[str]=None) -> None:
@@ -52,41 +41,3 @@ class RestoServer():
                                           auth_service=self.authentication_service)
         self.resto_service.update_after_url_change()
         self.server_name = server_name  # type: ignore
-
-    @classmethod
-    def persisted(cls) -> 'RestoServer':
-        """
-        :returns: a resto server from the persisted parameters.
-        :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
-        """
-        # Retrieve persisted server name
-        persisted_server_name = cls.properties_storage.get('server_name')
-        if persisted_server_name is None:
-            msg = 'No server currently set in the persisted parameters.'
-            raise RestoClientNoPersistedServer(msg)
-        instance = cls(persisted_server_name)
-
-        # Update authentication service persisted parameters
-        authentication_service = instance.authentication_service
-        persisted_credentials = AuthenticationCredentials.persisted(authentication_service)
-        authentication_service.set_credentials(persisted_credentials)
-
-        # Retrieve persisted access to the resto service
-        resto_service = instance.resto_service
-        persisted_coll_manager = RestoCollectionsManager.persisted(resto_service)
-        resto_service.set_collection_mgr(persisted_coll_manager)
-        return instance
-
-    @property  # type: ignore
-    @managed_getter()
-    def server_name(self) -> Optional[str]:
-        """
-        :returns: the name of the server
-        """
-
-    @server_name.setter  # type: ignore
-    @managed_setter()
-    def server_name(self, server_name: str) -> None:
-        """
-        :param server_name: the name of the server in the servers database.
-        """

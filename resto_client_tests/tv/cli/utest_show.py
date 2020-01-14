@@ -100,7 +100,8 @@ class UTestCliShow(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'server'])
         output = out_string_io.getvalue()  # type: ignore
-        self.assertIn('No server currently set in the persisted parameters.', output)
+        expected_msg = 'No server name specified and no server currently set in the parameters.'
+        self.assertIn(expected_msg, output)
 
     def test_d_show_collection(self) -> None:
         """

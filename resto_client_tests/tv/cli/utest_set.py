@@ -19,7 +19,7 @@ import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.services.resto_server import RestoClientNoPersistedServer
+from resto_client.cli.server_parameters import RestoClientNoPersistedServer
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY,
