@@ -87,6 +87,18 @@ class RestoCollectionsManager():
             # There is exactly 1 collection. Use it as the current.
             self.current_collection = candidate_current_collection  # type: ignore
 
+    def ensure_collection(self, collection: Optional[str]=None) -> None:
+        """
+        Change the current_collection if a collection is specified
+
+        :param collection: the collection name to record.
+        :raises RestoClientUserError: when no current collection can be defined.
+        """
+        if collection is not None:
+            self.current_collection = collection  # type: ignore
+        if self.current_collection is None:
+            raise RestoClientUserError('No collection currently defined')
+
     @property  # type: ignore
     @managed_getter()
     def current_collection(self) -> Optional[str]:

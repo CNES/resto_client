@@ -136,8 +136,8 @@ class RestoService(ApplicationService):
         :returns: the requested collection or the current one.
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        collection = self._ensure_collection(collection)
-        return GetCollectionRequest(self, collection=collection).run()
+        self._collections_mgr.ensure_collection(collection)
+        return GetCollectionRequest(self, collection=self._collections_mgr.current_collection).run()
 
     def search_collection(self,
                           criteria: RestoCriteria,
@@ -150,8 +150,9 @@ class RestoService(ApplicationService):
         :returns: the result of the search
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        collection = self._ensure_collection(collection)
-        return SearchCollectionRequest(self, criteria, collection=collection).run()
+        self._collections_mgr.ensure_collection(collection)
+        return SearchCollectionRequest(self, criteria,
+                                       collection=self._collections_mgr.current_collection).run()
 
     def get_feature_by_id(self,
                           feature_id: str,
@@ -167,10 +168,13 @@ class RestoService(ApplicationService):
         :raises ValueError: when the retrieved feature has not the right id (case where uuid
                             incorrectly provided as argument)
         """
-        collection = self._ensure_collection(collection)
+        self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
 
-        feature_collection = SearchCollectionRequest(self, criteria, collection=collection).run()
+        feature_collection = \
+            SearchCollectionRequest(self,
+                                    criteria,
+                                    collection=self._collections_mgr.current_collection).run()
 
         if len(feature_collection['features']) > 1:
             raise IndexError('Several results found for id {}'.format(feature_id))
@@ -243,18 +247,3 @@ class RestoService(ApplicationService):
             # Retry file download after product staging
             downloaded_filename = self.download_feature_file(redo_feature, file_type, download_dir)
         return downloaded_filename
-
-    def _ensure_collection(self, collection: Optional[str]=None) -> str:
-        """
-        Change the current_collection if a collection is specified and returns the collection to
-        use for the request.
-
-        :param collection: the collection name to record.
-        :returns: the collection name to use for the request.
-        :raises RestoClientUserError: when no current collection can be defined.
-        """
-        if collection is not None:
-            self.current_collection = collection
-        if self.current_collection is None:
-            raise RestoClientUserError('No collection name defined')
-        return self.current_collection
