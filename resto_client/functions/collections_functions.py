@@ -20,15 +20,12 @@ from resto_client.services.resto_server import RestoServer
 from .resto_criteria import RestoCriteria
 
 
-# TODO: declare optional arguments
 def search_collection(resto_server: RestoServer,
-                      collection_name: str,
                       region: str,
                       criteria: Optional[Dict[str, Any]]=None) -> Optional[RestoFeatureCollection]:
     """
     Search in a collection using selection criteria
 
-    :param collection_name: name of the resto collection; iF None search all collections
     :param resto_server: the resto server to query
     :param region: the name of the region to use
     :param criteria: list of criterion for search
@@ -40,6 +37,7 @@ def search_collection(resto_server: RestoServer,
         new_criteria.update(criteria)
     new_criteria.update({'region': region})
 
+    collection_name = resto_server.current_collection
     # TODO: declare functions in RestoServer, as proxies
     search_feature_collection = resto_service.search_collection(new_criteria, collection_name)
     if len(search_feature_collection.all_id) == 1:

@@ -141,8 +141,7 @@ def cli_search_collection(args: Namespace) -> None:
     client_params = build_resto_client_params(args)
     resto_server = build_resto_server_parameters(args).resto_server
     # TODO: Use collection from resto_server_parameters
-    features_collection = search_collection(resto_server, resto_server.current_collection,
-                                            client_params.region, criteria_dict)
+    features_collection = search_collection(resto_server, client_params.region, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
@@ -169,9 +168,8 @@ def cli_search_collection(args: Namespace) -> None:
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:
-        # TODO: Use collection from resto_server_parameters
-        download_features_files_from_id(resto_server, args.collection, search_feature_id,
-                                        'product', Path(client_params.download_dir))
+        download_features_files_from_id(resto_server, search_feature_id, 'product',
+                                        Path(client_params.download_dir))
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

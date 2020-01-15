@@ -19,15 +19,12 @@ from resto_client.entities.resto_feature import RestoFeature
 from resto_client.services.resto_server import RestoServer
 
 
-# TODO: declare optional arguments
 def create_features_from_ids(server: RestoServer,
-                             collection_name: str,
                              features_ids: Union[str, List[str]]) -> List[RestoFeature]:
     """
     Creates a list of resto features by querying Resto
 
     :param server: Resto server
-    :param collection_name: Name of the collection containing features
     :param features_ids: Feature(s) identifier(s)
     :returns: a list of Resto features
     :raises ValueError: When retrieved feature id is different from requested feature id
@@ -36,6 +33,7 @@ def create_features_from_ids(server: RestoServer,
     if not isinstance(features_ids, list):
         features_ids = [features_ids]
 
+    collection_name = server.current_collection
     for feature_id in features_ids:
         # TODO: Declare method in RestoServer as proxies
         feature = server.resto_service.get_feature_by_id(feature_id, collection_name)
@@ -43,18 +41,15 @@ def create_features_from_ids(server: RestoServer,
 
     return features_list
 
-# TODO: declare optional arguments
 
-
+# TODO: move as a method of RestoServer ?
 def download_features_files_from_id(resto_server: RestoServer,
-                                    collection: str,
                                     features_ids: Union[str, List[str]],
                                     file: str,
                                     download_dir: Path) -> None:
     """
     Download different file from id(s)
 
-    :param collection: the resto collection name
     :param features_ids: id(s) of the feature(s) which as a file to download
     :param resto_server: the resto server to query
     :param download_dir: the path to the directory where download must be done.
@@ -67,7 +62,7 @@ def download_features_files_from_id(resto_server: RestoServer,
 
     # Issue a search request into the collection to retrieve features.
     resto_service = resto_server.resto_service
-    features = create_features_from_ids(resto_server, collection, features_ids)
+    features = create_features_from_ids(resto_server, features_ids)
 
     for feature in features:
         # Do download
