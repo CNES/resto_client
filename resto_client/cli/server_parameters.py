@@ -17,7 +17,6 @@ from typing import Optional
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 from resto_client.services.authentication_credentials import AuthenticationCredentials
-from resto_client.services.resto_collections_manager import RestoCollectionsManager
 from resto_client.services.resto_server import RestoServer
 from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
@@ -39,19 +38,14 @@ class ServerParameters():
 
         :param server_name: the name of the server.
         """
-        self.server_name = server_name  # type: ignore
 
-        self.resto_server = RestoServer(self.server_name)
+        self.resto_server = RestoServer(server_name)
+        self.server_name = server_name  # type: ignore
 
         # Update authentication service persisted parameters
         authentication_service = self.resto_server.authentication_service
         persisted_credentials = AuthenticationCredentials.persisted(authentication_service)
         authentication_service.set_credentials(persisted_credentials)
-
-        # Retrieve persisted access to the resto service
-        resto_service = self.resto_server.resto_service
-        persisted_coll_manager = RestoCollectionsManager.persisted(resto_service)
-        resto_service.set_collection_mgr(persisted_coll_manager)
 
     @classmethod
     def persisted(cls) -> 'ServerParameters':
@@ -61,12 +55,18 @@ class ServerParameters():
         :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
         :returns: an instance of ServerParameters built from persisted parameters
         """
-        # Retrieve persisted server name
+        # Retrieve persisted server name and build an empty server parameters instance
         persisted_server_name = ServerParameters.properties_storage.get('server_name')
         if persisted_server_name is None:
             msg = 'No server currently set in the persisted parameters.'
             raise RestoClientNoPersistedServer(msg)
         persisted_server_parameters = cls(persisted_server_name)
+
+        # Retrieve persisted collection name
+        persisted_collection_name = ServerParameters.properties_storage.get('current_collection')
+        # Update server parameters instance to trigger RestoServer update.
+        persisted_server_parameters.current_collection = persisted_collection_name  # type: ignore
+
         return persisted_server_parameters
 
     @property  # type: ignore
@@ -82,3 +82,26 @@ class ServerParameters():
         """
         :param server_name: the name of the server in the servers database.
         """
+        # This code is called only when this property has been changed from its previous value.
+        # Thus we need to reset the server parameters.
+        _ = server_name  # to get rid of pylint warning
+        self.current_collection = None  # type: ignore
+
+    @property  # type: ignore
+    @managed_getter()
+    def current_collection(self) -> Optional[str]:
+        """
+        :returns: the name of the current collection
+        """
+
+    @current_collection.setter  # type: ignore
+    @managed_setter()
+    def current_collection(self, collection_name: str) -> None:
+        """
+        :param collection_name: the name of the collection to set.
+        """
+        # This code is called only when this property has been changed from its previous value.
+        # Update resto_server proxified current collection.
+        self.resto_server.current_collection = collection_name
+        # In order to update persisted current collection name with right case.
+        self.current_collection = self.resto_server.current_collection  # type: ignore

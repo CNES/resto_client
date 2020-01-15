@@ -41,3 +41,17 @@ class RestoServer():
                                           auth_service=self.authentication_service)
         self.resto_service.update_after_url_change()
         self.server_name = server_name  # type: ignore
+
+    @property
+    def current_collection(self) -> Optional[str]:
+        """
+        :returns: the current collection
+        """
+        return self.resto_service.current_collection
+
+    @current_collection.setter
+    def current_collection(self, collection_name: Optional[str]) -> None:
+        """
+        :param collection_name: collection to use
+        """
+        self.resto_service.current_collection = collection_name

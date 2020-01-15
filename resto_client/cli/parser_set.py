@@ -16,7 +16,7 @@ import argparse
 
 from resto_client.functions.aoi_utils import find_region_choice
 
-from .cli_utils import build_resto_client_params, build_resto_server
+from .cli_utils import build_resto_client_params, build_resto_server, build_resto_server_parameters
 from .resto_client_parameters import ALLOWED_VERBOSITY
 
 
@@ -28,7 +28,7 @@ def cli_set_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    unused_server = build_resto_server(args)
+    _ = build_resto_server_parameters(args)
 
 
 def cli_set_collection(args: argparse.Namespace) -> None:
@@ -37,8 +37,9 @@ def cli_set_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    service = build_resto_server(args).resto_service
-    service.current_collection = args.collection
+    # TODO: process args.collection into build_resto_server_parameters()
+    parameters = build_resto_server_parameters(args)
+    parameters.current_collection = args.collection  # type: ignore
 
 
 def cli_set_account(args: argparse.Namespace) -> None:

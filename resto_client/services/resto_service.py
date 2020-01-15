@@ -19,7 +19,7 @@ from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
-from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
+from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_feature import RestoFeature
@@ -58,11 +58,11 @@ class RestoService(ApplicationService):
         :param auth_service: Authentication service associated to this resto service.
         """
         super(RestoService, self).__init__(service_access=resto_access, auth_service=auth_service)
-        self._collections_mgr = RestoCollectionsManager(self)
+        self._collections_mgr = RestoCollectionsManager()
 
     def reset(self) -> None:
         self.service_access.detected_protocol = None
-        self._collections_mgr.reset()
+        self._collections_mgr.collections_set = None
         super(RestoService, self).reset()
 
     def set_collection_mgr(self, collection_mgr: RestoCollectionsManager) -> None:
@@ -78,11 +78,11 @@ class RestoService(ApplicationService):
         Callback method to update service after base URL was possibly changed.
         """
         # Recreate the collections manager
-        self._collections_mgr = RestoCollectionsManager(self)
+        self._collections_mgr = RestoCollectionsManager()
         if self.service_access.base_url is not None:
-            self._collections_mgr.retrieve_collections()
+            self._collections_mgr.collections_set = self.get_collections()
         else:
-            self._collections_mgr.current_collection = None  # type: ignore
+            self.current_collection = None  # type: ignore
         # Reset the detected server type
         self.service_access.detected_protocol = None
 
@@ -136,8 +136,8 @@ class RestoService(ApplicationService):
         :returns: the requested collection or the current one.
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        self._collections_mgr.ensure_collection(collection)
-        return GetCollectionRequest(self, collection=self._collections_mgr.current_collection).run()
+        collection_name = self._collections_mgr.ensure_collection(collection)
+        return GetCollectionRequest(self, collection=collection_name).run()
 
     def search_collection(self,
                           criteria: RestoCriteria,
@@ -150,9 +150,8 @@ class RestoService(ApplicationService):
         :returns: the result of the search
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        self._collections_mgr.ensure_collection(collection)
-        return SearchCollectionRequest(self, criteria,
-                                       collection=self._collections_mgr.current_collection).run()
+        collection_name = self._collections_mgr.ensure_collection(collection)
+        return SearchCollectionRequest(self, criteria, collection=collection_name).run()
 
     def get_feature_by_id(self,
                           feature_id: str,
@@ -168,13 +167,13 @@ class RestoService(ApplicationService):
         :raises ValueError: when the retrieved feature has not the right id (case where uuid
                             incorrectly provided as argument)
         """
-        self._collections_mgr.ensure_collection(collection)
+        collection_name = self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
 
         feature_collection = \
             SearchCollectionRequest(self,
                                     criteria,
-                                    collection=self._collections_mgr.current_collection).run()
+                                    collection=collection_name).run()
 
         if len(feature_collection['features']) > 1:
             raise IndexError('Several results found for id {}'.format(feature_id))
