@@ -30,7 +30,7 @@ from resto_client.functions.collections_functions import search_collection
 from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
-from .cli_utils import build_resto_client_params, build_resto_server
+from .cli_utils import build_resto_client_params, build_resto_server_parameters
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
 from .server_parameters import RestoClientNoPersistedServer
@@ -41,8 +41,10 @@ def get_table_help_criteria() -> str:
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
     """
     try:
-        resto_protocol = build_resto_server().resto_service.service_access.protocol
+        resto_server = build_resto_server_parameters().resto_server
+        resto_protocol = resto_server.resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
+        # TODO: print server name instead of server protocol
         title_help = "Current {} server supports the following criteria (defined in the Resto API):"
         title_help = title_help.format(resto_protocol)
         dict_to_print = resto_criteria.criteria_keys
@@ -137,7 +139,8 @@ def cli_search_collection(args: Namespace) -> None:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     client_params = build_resto_client_params(args)
-    resto_server = build_resto_server(args)
+    resto_server = build_resto_server_parameters(args).resto_server
+    # TODO: Use collection from resto_server_parameters
     features_collection = search_collection(resto_server, args.collection,
                                             client_params.region, criteria_dict)
 
@@ -166,6 +169,7 @@ def cli_search_collection(args: Namespace) -> None:
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:
+        # TODO: Use collection from resto_server_parameters
         download_features_files_from_id(resto_server, args.collection, search_feature_id,
                                         'product', Path(client_params.download_dir))
 

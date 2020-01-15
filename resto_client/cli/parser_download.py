@@ -17,7 +17,7 @@ from pathlib import Path
 
 from resto_client.functions.feature_functions import download_features_files_from_id
 
-from .cli_utils import build_resto_client_params, build_resto_server
+from .cli_utils import build_resto_client_params, build_resto_server_parameters
 from .parser_common import credentials_parser, features_in_collection_parser, EPILOG_FEATURES
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
@@ -38,7 +38,8 @@ def cli_download_files(args: argparse.Namespace) -> None:
     :type args: :class:`argparse.Namespace`
     """
     client_params = build_resto_client_params(args)
-    resto_server = build_resto_server(args)
+    resto_server = build_resto_server_parameters(args).resto_server
+    # TODO: Use collection from resto_server_parameters
     download_features_files_from_id(resto_server, args.collection, args.feature_id,
                                     args.download_type, Path(client_params.download_dir))
 

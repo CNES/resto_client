@@ -21,31 +21,17 @@ from resto_client.services.resto_server import RestoServer
 from .resto_client_parameters import RestoClientParameters
 from .server_parameters import ServerParameters, RestoClientNoPersistedServer
 
-# TODO: refactor builders and their use
-
-
-def build_resto_server(args: Optional[argparse.Namespace] = None) -> RestoServer:
-    """
-    Build a RestoServer instance from parsed arguments, suitable for further processing
-    in CLI context.
-
-    :param args: arguments as parsed by argparse
-    :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters and
-                                          no server name defined.
-    :returns: RestoServer instance suitable for further processing in CLI context
-    """
-    return build_resto_server_parameters(args).resto_server
-
 
 def build_resto_server_parameters(args: Optional[argparse.Namespace] = None) -> ServerParameters:
+    # TODO: process supplementary args in build_resto_server_parameters (collection, etc.)
     """
-    Build a RestoServer instance from parsed arguments, suitable for further processing
-    in CLI context.
+    Build a ServerParameters instance from parsed arguments and persisted parameters, suitable
+    for further processing in CLI context.
 
     :param args: arguments as parsed by argparse
     :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters and
                                           no server name defined.
-    :returns: RestoServer instance suitable for further processing in CLI context
+    :returns: ServerParameters instance suitable for further processing in CLI context
     """
     if args is None:
         server_name = None
@@ -59,7 +45,7 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None) -> 
     try:
         server_parameters = ServerParameters.persisted()
         if server_name is not None and server_name != server_parameters.server_name:
-            server_parameters = build_new_server_parameters(server_name, username, password)
+            server_parameters = _new_server_parameters(server_name, username, password)
         # No server name specified or server name corresponds to the persisted server
         persisted_resto_server = server_parameters.resto_server
         if username is not None or password is not None:
@@ -69,15 +55,15 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None) -> 
         if server_name is None:
             msg = 'No server name specified and no server currently set in the parameters.'
             raise RestoClientNoPersistedServer(msg)
-        server_parameters = build_new_server_parameters(server_name, username, password)
+        server_parameters = _new_server_parameters(server_name, username, password)
     return server_parameters
 
 
-def build_new_server_parameters(server_name: str,
-                                username: Optional[str]=None,
-                                password: Optional[str] = None) -> ServerParameters:
+def _new_server_parameters(server_name: str,
+                           username: Optional[str]=None,
+                           password: Optional[str] = None) -> ServerParameters:
     """
-    Build a new RestoServer instance from parsed arguments, suitable for further processing
+    Build a new RestoServer instance from arguments, suitable for further processing
     in CLI context.
 
     :param server_name: name of the server to build
