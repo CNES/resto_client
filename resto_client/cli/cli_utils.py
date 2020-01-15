@@ -15,7 +15,7 @@
 import argparse
 from typing import Optional
 
-
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.services.resto_server import RestoServer
 
 from .resto_client_parameters import RestoClientParameters
@@ -23,7 +23,6 @@ from .server_parameters import ServerParameters, RestoClientNoPersistedServer
 
 
 def build_resto_server_parameters(args: Optional[argparse.Namespace] = None) -> ServerParameters:
-    # TODO: process supplementary args in build_resto_server_parameters (collection, etc.)
     """
     Build a ServerParameters instance from parsed arguments and persisted parameters, suitable
     for further processing in CLI context.
@@ -31,51 +30,71 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None) -> 
     :param args: arguments as parsed by argparse
     :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters and
                                           no server name defined.
+    :raises RestoClientUserError: when arguments are inconsistent with persisted parameters.
     :returns: ServerParameters instance suitable for further processing in CLI context
     """
     if args is None:
         server_name = None
         username = None
         password = None
+        collection_name = None
     else:
         server_name = args.server_name if hasattr(args, 'server_name') else None
         username = args.username if hasattr(args, 'username') else None
         password = args.password if hasattr(args, 'password') else None
-
+        collection_name = args.collection_name if hasattr(args, 'collection_name') else None
     try:
         server_parameters = ServerParameters.persisted()
         if server_name is not None and server_name != server_parameters.server_name:
-            server_parameters = _new_server_parameters(server_name, username, password)
-        # No server name specified or server name corresponds to the persisted server
-        persisted_resto_server = server_parameters.resto_server
+            # Persisted server does not fit requested server. Drop it.
+            raise RestoClientNoPersistedServer()
+
+        if collection_name is not None:
+            server_parameters.current_collection = collection_name  # type: ignore
+
         if username is not None or password is not None:
-            resto_service = persisted_resto_server.resto_service
+            resto_service = server_parameters.resto_server.resto_service
             resto_service.auth_service.set_credentials(username=username, password=password)
+
     except RestoClientNoPersistedServer:
+        # No persisted server or persisted one does not fit requested server_name
         if server_name is None:
             msg = 'No server name specified and no server currently set in the parameters.'
             raise RestoClientNoPersistedServer(msg)
-        server_parameters = _new_server_parameters(server_name, username, password)
+        server_parameters = _new_server_parameters(server_name, collection_name, username, password)
+
+    except RestoClientUserError:
+        raise
+
+    except Exception as excp:
+        print('other problem when dealing with persistence : {}'.format(str(excp)))
+
     return server_parameters
 
 
 def _new_server_parameters(server_name: str,
-                           username: Optional[str]=None,
+                           collection_name: Optional[str] = None,
+                           username: Optional[str] = None,
                            password: Optional[str] = None) -> ServerParameters:
     """
     Build a new RestoServer instance from arguments, suitable for further processing
     in CLI context.
 
     :param server_name: name of the server to build
+    :param collection_name: name of the collection to use
     :param username: account to use on this server
     :param password: account password on the server
     :returns: RestoServer instance suitable for further processing in CLI context
     """
     new_server = RestoServer(server_name, username=username, password=password)
-    new_server_parameters = ServerParameters(server_name)
-    new_collection = new_server.current_collection
-    new_server_parameters.current_collection = new_collection  # type: ignore
-    return new_server_parameters
+    server_parameters = ServerParameters(server_name)
+
+    if collection_name is None:
+        # Use current_collection from the new server (None or collection name is there is only one).
+        collection_name = new_server.current_collection  # type: ignore
+    server_parameters.current_collection = collection_name  # type: ignore
+
+    return server_parameters
 
 
 def build_resto_client_params(args: argparse.Namespace) -> RestoClientParameters:

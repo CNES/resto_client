@@ -56,7 +56,8 @@ def collection_parser() -> ArgumentParser:
     Creates a parser suitable to parse the collection option in different subparsers
     """
     parser = ArgumentParser(add_help=False, parents=[server_nickname_parser()])
-    parser.add_argument("--collection", help="name of the collection to be used")
+    parser.add_argument("--collection", help="name of the collection to be used",
+                        dest="collection_name")
     return parser
 
 
@@ -67,6 +68,8 @@ def features_in_collection_parser() -> ArgumentParser:
     parser = ArgumentParser(add_help=False, parents=[collection_parser()])
     parser.add_argument("feature_id", help="features identifiers or features UUIDs", nargs='+')
     return parser
+
+# TODO: Use in parser_set
 
 
 def verbosity_option_parser() -> ArgumentParser:

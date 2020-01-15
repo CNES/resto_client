@@ -41,9 +41,10 @@ def cli_show_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    unused_client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
-    service = build_resto_server_parameters(args).resto_server.resto_service
-    collection = service.get_collection(collection=args.name)
+    _ = build_resto_client_params(args)  # To retrieve verbosity level from CLI
+    resto_server = build_resto_server_parameters(args).resto_server
+    service = resto_server.resto_service
+    collection = service.get_collection(collection=resto_server.current_collection)
     print(collection)
     if not args.nostats:
         print(collection.statistics)
@@ -70,7 +71,8 @@ def cli_show_features(args: argparse.Namespace) -> None:
     unused_client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     resto_server = build_resto_server_parameters(args).resto_server
     # TODO: Use collection from resto_server_parameters
-    features = create_features_from_ids(resto_server, args.collection, args.feature_id)
+    features = create_features_from_ids(resto_server, resto_server.current_collection,
+                                        args.feature_id)
 
     for feature in features:
         print(feature)
@@ -94,7 +96,7 @@ def add_show_subparser(sub_parsers: argparse._SubParsersAction) -> None:
 
 def add_show_settings_parser(sub_parsers_show: argparse._SubParsersAction) -> None:
     """
-    Update the 'show' command subparser with options for 'show collection'
+    Update the 'show' command subparser with options for 'show settings'
     """
     subparser = sub_parsers_show.add_parser('settings', help='Show application settings',
                                             description='Show the currently defined settings.')
@@ -109,7 +111,7 @@ def add_show_collection_parser(sub_parsers_show: argparse._SubParsersAction) -> 
                                             description='Show the details of a collection including'
                                             ' statistics on its content.',
                                             parents=[server_nickname_parser()])
-    subparser.add_argument("name", help="name of the collection to show", nargs='?')
+    subparser.add_argument("collection_name", help="name of the collection to show", nargs='?')
     subparser.add_argument("--nostats", action="store_true", help="disable statistics details")
     subparser.set_defaults(func=cli_show_collection)
 

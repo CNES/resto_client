@@ -39,8 +39,8 @@ def cli_download_files(args: argparse.Namespace) -> None:
     """
     client_params = build_resto_client_params(args)
     resto_server = build_resto_server_parameters(args).resto_server
-    # TODO: Use collection from resto_server_parameters
-    download_features_files_from_id(resto_server, args.collection, args.feature_id,
+    # TODO: Use current_collection from resto_server_parameters
+    download_features_files_from_id(resto_server, resto_server.current_collection, args.feature_id,
                                     args.download_type, Path(client_params.download_dir))
 
 

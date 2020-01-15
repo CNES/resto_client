@@ -40,7 +40,7 @@ class RestoServer():
         self.resto_service = RestoService(resto_access=server_description.resto_access,
                                           auth_service=self.authentication_service)
         self.resto_service.update_after_url_change()
-        self.server_name = server_name  # type: ignore
+        self.server_name = server_name
 
     @property
     def current_collection(self) -> Optional[str]:

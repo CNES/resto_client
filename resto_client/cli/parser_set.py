@@ -37,10 +37,7 @@ def cli_set_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    # TODO: process args.collection into build_resto_server_parameters()
-    parameters = build_resto_server_parameters(args)
-    # TODO: Use collection from resto_server_parameters
-    parameters.current_collection = args.collection  # type: ignore
+    _ = build_resto_server_parameters(args)
 
 
 def cli_set_account(args: argparse.Namespace) -> None:
@@ -49,7 +46,7 @@ def cli_set_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    unused_server_parameters = build_resto_server_parameters(args)
+    _ = build_resto_server_parameters(args)
 
 
 def cli_set_download_dir(args: argparse.Namespace) -> None:
@@ -128,8 +125,7 @@ def add_set_collection_parser(sub_parsers_set: argparse._SubParsersAction) -> No
                                            epilog='If the collection does not exist in the current '
                                            'server, an error is issued and the previously stored '
                                            'collection is kept unmodified.')
-    # We can't used collection parent here because collection is here mandatory
-    subparser.add_argument("collection", help="name of the collection to be used")
+    subparser.add_argument("collection_name", help="name of the collection to be used")
     subparser.set_defaults(func=cli_set_collection)
 
 
