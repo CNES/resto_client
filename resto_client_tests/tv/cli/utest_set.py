@@ -24,7 +24,7 @@ from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY,
                                                  TOKEN_KEY, VERBOSITY_KEY, REGION_KEY,
-                                                 COLLECTION_KEY)
+                                                 COLLECTION_KEY, SERVER_KEY)
 
 
 class UTestCliSet(unittest.TestCase):
@@ -43,8 +43,8 @@ class UTestCliSet(unittest.TestCase):
         for server_name in WELL_KNOWN_SERVERS:
             resto_client_run(arguments=['set', 'server', server_name])
             # Verify that RESTO_CLIENT_SETTINGS contain all server info from server database
-            self.assertTrue('server_name' in RESTO_CLIENT_SETTINGS)
-            self.assertEqual(RESTO_CLIENT_SETTINGS['server_name'], server_name)
+            self.assertTrue(SERVER_KEY in RESTO_CLIENT_SETTINGS)
+            self.assertEqual(RESTO_CLIENT_SETTINGS[SERVER_KEY], server_name)
 
     def test_n_set_account(self) -> None:
         """
