@@ -135,7 +135,7 @@ class UTestCliSet(unittest.TestCase):
         """
         RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'server', 'ro'])
-        self.assertTrue(RESTO_CLIENT_SETTINGS[COLLECTION_KEY], 'ROHAITI')
+        self.assertEqual(RESTO_CLIENT_SETTINGS[COLLECTION_KEY], 'ROHAITI')
 
     def test_d_set_server(self) -> None:
         """
