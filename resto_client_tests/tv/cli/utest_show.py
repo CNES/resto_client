@@ -17,7 +17,7 @@ import io
 import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 class UTestCliShow(unittest.TestCase):
