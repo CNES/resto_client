@@ -140,7 +140,6 @@ def cli_search_collection(args: Namespace) -> None:
 
     client_params = build_resto_client_params(args)
     resto_server = build_resto_server_parameters(args).resto_server
-    # TODO: Use collection from resto_server_parameters
     features_collection = search_collection(resto_server, client_params.region, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '

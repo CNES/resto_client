@@ -70,7 +70,6 @@ def cli_show_features(args: argparse.Namespace) -> None:
     """
     unused_client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     resto_server = build_resto_server_parameters(args).resto_server
-    # TODO: Use collection from resto_server_parameters
     features = create_features_from_ids(resto_server, args.feature_id)
 
     for feature in features:
