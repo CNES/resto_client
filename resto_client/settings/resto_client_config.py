@@ -12,8 +12,6 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from .dict_settings import DictSettingsJson
-from .resto_client_config import RESTO_CLIENT_CONFIG_DIR
+from resto_client.generic.user_dirs import user_config_dir
 
-
-RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json')
+RESTO_CLIENT_CONFIG_DIR = user_config_dir(app_author='CNES', app_name='resto_client')
