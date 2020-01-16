@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+# TODO: Refactor in order to move into entities subpackage
 from typing import Type, Optional, Dict, Tuple, Sequence, Any  # @NoMove @UnusedImport
 
 from shapely.errors import WKTReadingError
@@ -107,35 +108,35 @@ COMMON_CRITERIA_KEYS = {'box': {'type': str, 'help':
 
 DOTCLOUD_KEYS: CriteriaDictType
 DOTCLOUD_KEYS = {
-                'identifiers': {'type': str, 'help': 'Accept multiple identifiers i1,i2,etc.'},
-                'producerProductId': {'type': str, 'help': 'Producer product identifier'},
-                'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
-                'metadataVisibility': {'type': str, 'help': 'Hiden access of product'},
+    'identifiers': {'type': str, 'help': 'Accept multiple identifiers i1,i2,etc.'},
+    'producerProductId': {'type': str, 'help': 'Producer product identifier'},
+    'location': {'type': str, 'help': 'Location string e.g. Paris, France'},
+    'metadataVisibility': {'type': str, 'help': 'Hiden access of product'},
 
-                'productMode': {'type': 'list', 'sub_type': str, 'help': 'Product production mode'},
-                'license': {'type': 'list', 'sub_type': str, 'help':
-                            'Identifier of applied license'},
-                'dotcloudType': {'type': 'list', 'sub_type': str, 'help':
-                                 'Dotcloud Product Type e.g. eo_image'},
-                'dotcloudSubType': {'type': 'list', 'sub_type': str, 'help':
-                                    'Dotcloud Product Sub-type e.g. optical'},
+    'productMode': {'type': 'list', 'sub_type': str, 'help': 'Product production mode'},
+    'license': {'type': 'list', 'sub_type': str, 'help':
+                'Identifier of applied license'},
+    'dotcloudType': {'type': 'list', 'sub_type': str, 'help':
+                     'Dotcloud Product Type e.g. eo_image'},
+    'dotcloudSubType': {'type': 'list', 'sub_type': str, 'help':
+                        'Dotcloud Product Sub-type e.g. optical'},
 
-                'publishedFrom': {'type': DateYMD, 'help':
-                                  INTERVAL_TXT.format('Beginning', "the product's publication")},
-                'publishedTo': {'type': DateYMD, 'help':
-                                INTERVAL_TXT.format('End', "the product's publication")},
-                'updatedFrom': {'type': DateYMD, 'help':
-                                INTERVAL_TXT.format('Beginning', "the product's update")},
-                'updatedTo': {'type': DateYMD, 'help':
-                              INTERVAL_TXT.format('End', "the product's update")},
+    'publishedFrom': {'type': DateYMD, 'help':
+                      INTERVAL_TXT.format('Beginning', "the product's publication")},
+    'publishedTo': {'type': DateYMD, 'help':
+                    INTERVAL_TXT.format('End', "the product's publication")},
+    'updatedFrom': {'type': DateYMD, 'help':
+                    INTERVAL_TXT.format('Beginning', "the product's update")},
+    'updatedTo': {'type': DateYMD, 'help':
+                  INTERVAL_TXT.format('End', "the product's update")},
 
-                'incidenceAngle': {'type': SquareInterval, 'help':
-                                   'Satellite incidence angle [n1,n2['},
+    'incidenceAngle': {'type': SquareInterval, 'help':
+                       'Satellite incidence angle [n1,n2['},
 
-                'onlyDownloadableProduct': {'type': bool, 'help':
-                                            "True or False : show only downlodable products for "
-                                            "the current account"},
-                 }
+    'onlyDownloadableProduct': {'type': bool, 'help':
+                                "True or False : show only downlodable products for "
+                                "the current account"},
+}
 
 PEPS_VERSION_KEYS: CriteriaDictType
 PEPS_VERSION_KEYS = {'latitudeBand': {'type': str, 'help': ''},
@@ -240,6 +241,7 @@ class RestoCriteria(dict):
     """
 
     def __init__(self, resto_protocol: str, **kwargs: str) -> None:
+        # TODO: pass a RestoService instead of a resto_protocol ?
         """
         Constructor
 
