@@ -47,7 +47,7 @@ class AuthenticationService(BaseService):
         super(AuthenticationService, self).__init__(auth_access)
         # Credentials and token need to exist before calling  update_after_url_change
         self.credentials = AuthenticationCredentials(self)
-        self.token = AuthenticationToken(self)
+        self._token = AuthenticationToken(self)
         self.update_after_url_change()
 
         # Need to set username before password because username update will reset password
@@ -56,7 +56,7 @@ class AuthenticationService(BaseService):
 
     def reset(self) -> None:
         self.credentials.reset()
-        self.token.reset()
+        self._token.reset()
         super(AuthenticationService, self).reset()
 
     @property
@@ -91,7 +91,7 @@ class AuthenticationService(BaseService):
         auth_service_access = AuthenticationServiceAccess.get_persisted_access()
         instance = cls(auth_access=auth_service_access)
         instance.credentials = AuthenticationCredentials.persisted(instance)
-        instance.token = AuthenticationToken.persisted(instance)
+        instance._token = AuthenticationToken.persisted(instance)
         return instance
 
     def update_after_url_change(self) -> None:
@@ -100,7 +100,7 @@ class AuthenticationService(BaseService):
         """
         self.credentials = AuthenticationCredentials(authentication_service=self)
         self.credentials.set(username=None)
-        self.token.reset()
+        self._token.reset()
 
     def get_http_basic_auth(self) -> HTTPBasicAuth:
         """
@@ -119,7 +119,7 @@ class AuthenticationService(BaseService):
         Callback function to be called by the setter of username. Reset the password and the
         token to None following a username change.
         """
-        self.token.reset()
+        self._token.reset()
 
     def update_authorization_header(self, headers: dict, token_required: bool) -> None:
         """
@@ -130,7 +130,7 @@ class AuthenticationService(BaseService):
                                provide it only if a valid token can be retrieved silently.
         """
         username_defined = self.credentials.username is not None
-        self.token.update_authorization_header(headers, token_required, username_defined)
+        self._token.update_authorization_header(headers, token_required, username_defined)
 
 # ++++++++ From here we have the supported request to the service ++++++++++++
 
@@ -153,7 +153,7 @@ class AuthenticationService(BaseService):
         """
         :returns: True if the token is still valid
         """
-        return CheckTokenRequest(self, self.token.token).run()
+        return CheckTokenRequest(self, self._token.token).run()
 
     def revoke_token(self) -> Optional[requests.Response]:
         """
@@ -161,6 +161,6 @@ class AuthenticationService(BaseService):
 
         :returns: unknown result at the moment (not working)
         """
-        if self.token.token is not None:
+        if self._token.token is not None:
             return RevokeTokenRequest(self).run()
         return None
