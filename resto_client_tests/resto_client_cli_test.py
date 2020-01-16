@@ -13,14 +13,14 @@
    limitations under the License.
 """
 import argparse
-import sys
-import io
-from typing import List
 from contextlib import redirect_stdout
+import io
+import sys
+from typing import List
 
-from resto_client.cli.resto_client_cli import build_parser, resto_client_run
-from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.base_exceptions import RestoClientError
+from resto_client.cli.resto_client_cli import build_parser, resto_client_run
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 def catch_output_from_run(test_args: dict) -> str:

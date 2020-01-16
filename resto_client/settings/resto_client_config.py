@@ -14,10 +14,4 @@
 """
 from resto_client.generic.user_dirs import user_config_dir
 
-from .dict_settings import DictSettingsJson
-
-
 RESTO_CLIENT_CONFIG_DIR = user_config_dir(app_author='CNES', app_name='resto_client')
-
-RESTO_CLIENT_SETTINGS_FILENAME = RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json'
-RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_SETTINGS_FILENAME)
