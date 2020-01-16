@@ -16,7 +16,7 @@ from pathlib import Path
 import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY, TOKEN_KEY,
                                                  VERBOSITY_KEY, REGION_KEY, COLLECTION_KEY)

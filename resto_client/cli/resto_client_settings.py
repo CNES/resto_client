@@ -12,8 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from .dict_settings import DictSettingsJson
-from .resto_client_config import RESTO_CLIENT_CONFIG_DIR
+from resto_client.settings.dict_settings import DictSettingsJson
+from resto_client.settings.resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
 
 RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json')

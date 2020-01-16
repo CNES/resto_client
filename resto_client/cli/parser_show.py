@@ -15,16 +15,15 @@
 import argparse
 
 from resto_client.functions.feature_functions import create_features_from_ids
-from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 from .cli_utils import build_resto_service, build_resto_client_params
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser)
+from .resto_client_settings import RESTO_CLIENT_SETTINGS
+
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
 # pylint: disable=protected-access
-
-
 def cli_show_settings(args: argparse.Namespace) -> None:
     """
     CLI adapter to show settings function

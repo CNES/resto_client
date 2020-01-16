@@ -59,9 +59,9 @@ from resto_client.cli.parser_search import add_search_subparser
 from resto_client.cli.parser_set import add_set_subparser
 from resto_client.cli.parser_show import add_show_subparser
 from resto_client.cli.parser_unset import add_unset_subparser
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.persistence import persist_settings
 from resto_client.settings.resto_client_parameters import RestoClientParameters
-from resto_client.settings.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 def build_parser() -> ArgumentParser:
