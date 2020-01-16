@@ -13,16 +13,19 @@
    limitations under the License.
 """
 import atexit
-from typing import Iterable
+from typing import Iterable, Optional, Callable
 from typing import List  # @UnusedImport
 from resto_client.settings.dict_settings import DictSettingsJson
 
 
-def persist_settings(settings: Iterable[DictSettingsJson], print_settings: bool = False) -> None:
+def persist_settings(settings: Iterable[DictSettingsJson],
+                     print_settings: Optional[bool] = False,
+                     last_chance_update_func: Optional[Callable] = None) -> None:
     """
     Initialize the settings from file(s) and register their recording at exit time.
 
     :param settings: an iterable containing settings for the application
+    :param last_chance_update_func: called at exit time with the settings as parameter
     :param print_settings: flag to print the settings either at load or at save time
     """
     persisted_settings: List[DictSettingsJson] = []
@@ -32,6 +35,8 @@ def persist_settings(settings: Iterable[DictSettingsJson], print_settings: bool 
         Function to save the application settings in a file. To be called once at exit time.
         """
         for setting in persisted_settings:
+            if last_chance_update_func is not None:
+                last_chance_update_func(setting)
             if print_settings:
                 print(setting)
             setting.save()
