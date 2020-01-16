@@ -97,7 +97,6 @@ class AuthenticationService(BaseService):
         """
         return self._credentials.get_authorization_header(authentication_required)
 
-
 # ++++++++ From here we have the requests supported by the service ++++++++++++
 
     def get_token(self) -> str:
