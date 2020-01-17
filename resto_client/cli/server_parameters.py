@@ -106,3 +106,12 @@ class ServerParameters():
         self.resto_server.current_collection = collection_name
         # In order to update persisted current collection name with right case.
         self.current_collection = self.resto_server.current_collection  # type: ignore
+
+    def update_persisted(self, persisted_params: dict) -> None:
+        self._update_persisted_attr(persisted_params, 'server_name')
+        self._update_persisted_attr(persisted_params, 'current_collection')
+
+    def _update_persisted_attr(self, persisted_params: dict, attr_name: str) -> None:
+        persisted_params[attr_name] = getattr(self, attr_name)
+        if persisted_params[attr_name] is None:
+            del persisted_params[attr_name]

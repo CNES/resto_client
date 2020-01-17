@@ -26,7 +26,9 @@ def cli_unset_server(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     # FIXME: not called at the right level
-    service = build_resto_server_parameters(args).resto_server.resto_service
+    args.server_params = build_resto_server_parameters(args)
+    resto_server = args.server_params.resto_server
+    service = resto_server.resto_service
     service.reset()
 
 
@@ -36,8 +38,8 @@ def cli_unset_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    parameters = build_resto_server_parameters(args)
-    parameters.current_collection = None  # type: ignore
+    args.server_params = build_resto_server_parameters(args)
+    args.server_params.current_collection = None  # type: ignore
 
 
 def cli_unset_account(args: argparse.Namespace) -> None:
@@ -47,7 +49,9 @@ def cli_unset_account(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     # FIXME: not called at the right level
-    service = build_resto_server_parameters(args).resto_server.authentication_service
+    args.server_params = build_resto_server_parameters(args)
+    resto_server = args.server_params.resto_server
+    service = resto_server.authentication_service
     service.reset()  # reset authentication service => reset username and password
 
 
@@ -57,8 +61,8 @@ def cli_unset_download_dir(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    client_parameters = build_resto_client_params(args)
-    client_parameters.download_dir = None  # type: ignore
+    args.client_params = build_resto_client_params(args)
+    args.client_params.download_dir = None  # type: ignore
 
 
 def cli_unset_region(args: argparse.Namespace) -> None:
@@ -67,8 +71,8 @@ def cli_unset_region(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    client_parameters = build_resto_client_params(args)
-    client_parameters.region = None  # type: ignore
+    args.client_params = build_resto_client_params(args)
+    args.client_params.region = None  # type: ignore
 
 
 def cli_unset_verbosity(args: argparse.Namespace) -> None:
@@ -77,8 +81,8 @@ def cli_unset_verbosity(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    client_parameters = build_resto_client_params(args)
-    client_parameters.verbosity = None  # type: ignore
+    args.client_params = build_resto_client_params(args)
+    args.client_params.verbosity = None  # type: ignore
 
 
 def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:

@@ -37,10 +37,11 @@ def cli_download_files(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     :type args: :class:`argparse.Namespace`
     """
-    client_params = build_resto_client_params(args)
-    resto_server = build_resto_server_parameters(args).resto_server
+    args.client_params = build_resto_client_params(args)
+    args.server_params = build_resto_server_parameters(args)
+    resto_server = args.server_params.resto_server
     download_features_files_from_id(resto_server, args.feature_id, args.download_type,
-                                    Path(client_params.download_dir))
+                                    Path(args.client_params.download_dir))
 
 
 def add_download_subparser(sub_parsers: argparse._SubParsersAction) -> None:

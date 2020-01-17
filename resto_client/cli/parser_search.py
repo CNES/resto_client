@@ -138,9 +138,10 @@ def cli_search_collection(args: Namespace) -> None:
     """
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
-    client_params = build_resto_client_params(args)
-    resto_server = build_resto_server_parameters(args).resto_server
-    features_collection = search_collection(resto_server, client_params.region, criteria_dict)
+    args.client_params = build_resto_client_params(args)
+    args.server_params = build_resto_server_parameters(args)
+    resto_server = args.server_params.resto_server
+    features_collection = search_collection(resto_server, args.client_params.region, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():

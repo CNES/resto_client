@@ -28,7 +28,7 @@ def cli_set_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    _ = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_parameters(args)
 
 
 def cli_set_collection(args: argparse.Namespace) -> None:
@@ -37,7 +37,7 @@ def cli_set_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    _ = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_parameters(args)
 
 
 def cli_set_account(args: argparse.Namespace) -> None:
@@ -46,7 +46,7 @@ def cli_set_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    _ = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_parameters(args)
 
 
 def cli_set_download_dir(args: argparse.Namespace) -> None:
@@ -55,8 +55,8 @@ def cli_set_download_dir(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    client_params = build_resto_client_params(args)
-    client_params.download_dir = args.path  # type: ignore
+    args.client_params = build_resto_client_params(args)
+    args.client_params.download_dir = args.path  # type: ignore
 
 
 def cli_set_region(args: argparse.Namespace) -> None:
@@ -65,8 +65,8 @@ def cli_set_region(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    client_params = build_resto_client_params(args)
-    client_params.region = args.region  # type: ignore
+    args.client_params = build_resto_client_params(args)
+    args.client_params.region = args.region  # type: ignore
 
 
 def cli_set_verbosity(args: argparse.Namespace) -> None:
@@ -75,8 +75,8 @@ def cli_set_verbosity(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    client_params = build_resto_client_params(args)
-    client_params.verbosity = args.verbosity  # type: ignore
+    args.client_params = build_resto_client_params(args)
+    args.client_params.verbosity = args.verbosity  # type: ignore
 
 
 def add_set_subparser(sub_parsers: argparse._SubParsersAction) -> None:

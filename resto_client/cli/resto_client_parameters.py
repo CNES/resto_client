@@ -167,3 +167,13 @@ class RestoClientParameters():
         :returns: True if verbosity is set
         """
         return RestoClientParameters.properties_storage.get(VERBOSITY_KEY) is not None
+
+    def update_persisted(self, persisted_params: dict) -> None:
+        self._update_persisted_attr(persisted_params, 'region')
+        self._update_persisted_attr(persisted_params, 'download_dir')
+        self._update_persisted_attr(persisted_params, 'verbosity')
+
+    def _update_persisted_attr(self, persisted_params: dict, attr_name: str) -> None:
+        persisted_params[attr_name] = getattr(self, attr_name)
+        if persisted_params[attr_name] is None:
+            del persisted_params[attr_name]
