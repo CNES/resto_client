@@ -44,7 +44,7 @@ class AuthenticationCredentials():
         self.parent_service = authentication_service
 
         self._password: Optional[str] = None
-        self._token = AuthenticationToken(self)
+        self._token = AuthenticationToken(self.parent_service)
 
     def set(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
         """
@@ -89,7 +89,7 @@ class AuthenticationCredentials():
         """
         # Retrieve persisted attributes.
         persisted_username = cls.properties_storage.get('username')
-        persisted_token = AuthenticationToken.get_persisted_token()
+        persisted_token = cls.properties_storage.get('token')  # type: ignore
 
         # Create a new instance and set persisted attributes.
         instance = cls(authentication_service)
@@ -201,4 +201,4 @@ class AuthenticationCredentials():
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,
                                                                 self._password,
-                                                                self._token.token)
+                                                                self.token_value)

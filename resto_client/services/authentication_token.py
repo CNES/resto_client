@@ -20,8 +20,8 @@ from resto_client.generic.property_decoration import managed_getter, managed_set
 
 
 if TYPE_CHECKING:
-    from resto_client.services.authentication_credentials import \
-        AuthenticationCredentials  # @UnusedImport
+    from resto_client.services.authentication_service import \
+        AuthenticationService  # @UnusedImport
 
 
 class AuthenticationToken():
@@ -30,26 +30,19 @@ class AuthenticationToken():
     """
     properties_storage = RESTO_CLIENT_SETTINGS
 
-    def __init__(self, parent_credentials: 'AuthenticationCredentials') -> None:
+    def __init__(self, parent_service: 'AuthenticationService') -> None:
         """
         Constructor
 
         :param parent_credentials: parent credentials of this token.
         """
-        self.parent_service = parent_credentials.parent_service
+        self.parent_service = parent_service
 
     def reset(self) -> None:
         """
         Reset the token unconditionally.
         """
         self.token = None  # type: ignore
-
-    @staticmethod
-    def get_persisted_token() -> 'str':
-        """
-        :returns: the persisted token value
-        """
-        return AuthenticationToken.properties_storage.get('token')  # type: ignore
 
     @property  # type: ignore
     @managed_getter()
@@ -77,9 +70,8 @@ class AuthenticationToken():
         _ = unused_arg  # to avoid pylint warning
         # Trigger content retrieval from persisted value, if any
         new_token = self.token
-        if self.parent_service is not None:
-            if not self.valid_token():
-                new_token = self.parent_service.get_token()
+        if not self.valid_token():
+            new_token = self.parent_service.get_token()
         return new_token
 
     def valid_token(self) -> bool:
@@ -89,8 +81,6 @@ class AuthenticationToken():
         """
         if self.token is None:
             return False
-        if self.parent_service is None:
-            raise RestoClientDesignError('Cannot validate token when no parent service defined')
         return self.parent_service.check_token()
 
     def get_authorization_header(self,
