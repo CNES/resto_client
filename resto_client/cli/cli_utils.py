@@ -20,7 +20,7 @@ from resto_client.services.resto_server import RestoServer
 
 from .resto_client_parameters import RestoClientParameters
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
-from .server_parameters import ServerParameters, RestoClientNoPersistedServer
+from .resto_server_parameters import ServerParameters, RestoClientNoPersistedServer
 
 
 def build_resto_server_parameters(args: Optional[argparse.Namespace] = None) -> ServerParameters:

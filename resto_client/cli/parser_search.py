@@ -33,7 +33,7 @@ from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA
 from .cli_utils import build_resto_client_params, build_resto_server_parameters
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
-from .server_parameters import RestoClientNoPersistedServer
+from .resto_server_parameters import RestoClientNoPersistedServer
 
 
 def get_table_help_criteria() -> str:
@@ -170,7 +170,7 @@ def cli_search_collection(args: Namespace) -> None:
 
     if args.download and search_feature_id is not None:
         download_features_files_from_id(resto_server, search_feature_id, args.download,
-                                        Path(client_params.download_dir))
+                                        Path(args.client_params.download_dir))
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
