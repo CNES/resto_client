@@ -62,11 +62,6 @@ class RestoService(ApplicationService):
         super(RestoService, self).__init__(resto_access, auth_service, parent_server)
         self._collections_mgr = RestoCollectionsManager()
 
-    def reset(self) -> None:
-        self.service_access.detected_protocol = None
-        self._collections_mgr.collections_set = None
-        super(RestoService, self).reset()
-
     def set_collection_mgr(self, collection_mgr: RestoCollectionsManager) -> None:
         """
         Set the collection manager to use

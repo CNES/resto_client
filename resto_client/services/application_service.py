@@ -46,14 +46,6 @@ class ApplicationService(BaseService):
         """
         super(ApplicationService, self).update_after_url_change()
 
-    @abstractmethod
-    def reset(self) -> None:
-        """
-        Reset the service to its creation state, and without any service access defined.
-        """
-        super(ApplicationService, self).reset()
-        self.auth_service.reset()
-
     def __str__(self) -> str:
         result = super(ApplicationService, self).__str__()
         if self.auth_service == self:

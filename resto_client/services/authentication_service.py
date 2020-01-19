@@ -55,10 +55,6 @@ class AuthenticationService(BaseService):
         """
         return self._credentials.token
 
-    def reset(self) -> None:
-        self._credentials.set()
-        super(AuthenticationService, self).reset()
-
     def set_credentials(self,
                         username: Optional[str]=None,
                         password: Optional[str]=None,

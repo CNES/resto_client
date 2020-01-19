@@ -45,12 +45,6 @@ class BaseService(ABC):
         Callback method to update service after base URL has been changed.
         """
 
-    @abstractmethod
-    def reset(self) -> None:
-        """
-        Reset the service to its creation state, and without any service access defined.
-        """
-
     @property
     def auth_service(self) -> 'AuthenticationService':
         """
