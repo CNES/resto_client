@@ -53,13 +53,13 @@ class RestoCollectionsManager():
                 # There is not exactly one collection in the collections.
                 try:
                     # Try to reuse previous current collection
-                    self.current_collection = previous_current_collection  # type: ignore
+                    self.current_collection = previous_current_collection
                 except RestoClientUserError:
                     # Previous current collection is not in the collections. Set current to None.
-                    self.current_collection = None  # type: ignore
+                    self.current_collection = None
             else:
                 # There is exactly 1 collection. Use it as the current.
-                self.current_collection = candidate_current_collection  # type: ignore
+                self.current_collection = candidate_current_collection
 
     @property
     def current_collection(self) -> Optional[str]:

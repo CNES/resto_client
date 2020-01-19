@@ -55,12 +55,12 @@ class RestoServerParameters():
         # Retrieve persisted collection name
         persisted_collection_name = persisted_params.get('current_collection')
         # Update server parameters instance to trigger RestoServer update.
-        persisted_server_parameters.current_collection = persisted_collection_name  # type: ignore
+        persisted_server_parameters.current_collection = persisted_collection_name
 
         # Retrieve persisted username
         persisted_username = persisted_params.get('username')
         # Update server parameters instance to trigger RestoServer update.
-        persisted_server_parameters.username = persisted_username  # type: ignore
+        persisted_server_parameters.username = persisted_username
 
         return persisted_server_parameters
 
@@ -74,24 +74,24 @@ class RestoServerParameters():
     @server_name.setter
     def server_name(self, server_name: Optional[str]) -> None:
         if server_name is None:
-            self.current_collection = None  # type: ignore
-            self.username = None  # type: ignore
+            self.current_collection = None
+            self.username = None
         else:
             server_name = server_name.lower()
             if server_name != self._server_name:
                 self.resto_server = RestoServer(server_name)
-                self.current_collection = None  # type: ignore
-                self.username = None  # type: ignore
+                self.current_collection = None
+                self.username = None
         self._server_name = server_name
 
-    @property  # type: ignore
+    @property
     def current_collection(self) -> Optional[str]:
         """
         :returns: the name of the current collection
         """
         return self.resto_server.current_collection
 
-    @current_collection.setter  # type: ignore
+    @current_collection.setter
     def current_collection(self, collection_name: str) -> None:
         self.resto_server.current_collection = collection_name
 

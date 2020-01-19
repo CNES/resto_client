@@ -53,14 +53,14 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
 
         if collection_name is not None:
             # ensure to delete previous collection in case it was equal to this one
-            server_parameters.current_collection = None  # type: ignore
-            server_parameters.current_collection = collection_name  # type: ignore
+            server_parameters.current_collection = None
+            server_parameters.current_collection = collection_name
 
         if username is not None or password is not None:
             if username is not None:
                 # ensure to delete previous username in case it was equal to this one
-                server_parameters.username = None  # type: ignore
-                server_parameters.username = username  # type: ignore
+                server_parameters.username = None
+                server_parameters.username = username
             resto_service = server_parameters.resto_server.resto_service
             resto_service.auth_service.set_credentials(username=username, password=password)
 
@@ -99,8 +99,8 @@ def _new_server_parameters(server_name: str,
     server_parameters = RestoServerParameters(server_name)
     if collection_name is None:
         # Use current_collection from the new server (None or collection name is there is only one).
-        collection_name = new_server.current_collection  # type: ignore
-    server_parameters.current_collection = collection_name  # type: ignore
+        collection_name = new_server.current_collection
+    server_parameters.current_collection = collection_name
 
     return server_parameters
 
