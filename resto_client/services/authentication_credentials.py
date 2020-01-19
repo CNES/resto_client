@@ -41,11 +41,14 @@ class AuthenticationCredentials():
         """
         self.parent_service = authentication_service
 
+        self._username: Optional[str] = None
         self._password: Optional[str] = None
         self._authentication_token = AuthenticationToken(self)
-        self._username: Optional[str] = None
 
-    def set(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
+    def set(self,
+            username: Optional[str]=None,
+            password: Optional[str]=None,
+            token_value: Optional[str]=None) -> None:
         """
         Set or reset the username or password or both.
 
@@ -56,25 +59,18 @@ class AuthenticationCredentials():
 
         :param username: the username to register
         :param password: the account password
+        :param token_value: a token associated to these credentials
         """
-        if username is None:
-            if password is None:
-                # Reset username because no new password specified
-                self._set_username(None)
-            self._authentication_token.token_value = None
+        if username is not None:
+            # resto server imposes lowercase account
+            username = username.lower()
         else:
-            username = username.lower()  # normalize username
-            # Set username and password if new username is different from stored one.
-            if username != self.username:
-                self._set_username(username)  # will trigger password reset
-                self._authentication_token.token_value = None
-        self._password = password  # set password either to None or to a defined value
-
-    def reset(self) -> None:
-        """
-        Reset the username and password unconditionally.
-        """
-        self.set(username=None, password=None)
+            # ignore other parameters
+            password = None
+            token_value = None
+        self._username = username
+        self._password = password
+        self._authentication_token.token_value = token_value
 
     @property
     def token(self) -> Optional[str]:
@@ -83,10 +79,6 @@ class AuthenticationCredentials():
         """
         return self._authentication_token.token_value
 
-    @token.setter
-    def token(self, token: Optional[str]) -> None:
-        self._authentication_token.token_value = token
-
     @property
     def username(self) -> Optional[str]:
         """
@@ -94,15 +86,12 @@ class AuthenticationCredentials():
         """
         return self._username
 
-    def _set_username(self, username: Optional[str]) -> None:
-        if username is not None:
-            username = username.lower()
-            if username == self._username:
-                # Nothing to change
-                return
-        self._username = username
-        self._password = None  # reset password
-        self._authentication_token.token_value = None  # reset token
+    @property
+    def password(self) -> Optional[str]:
+        """
+        :returns: the password
+        """
+        return self._password
 
     @property
     def username_b64(self) -> str:
@@ -124,10 +113,10 @@ class AuthenticationCredentials():
         server_name = self.parent_service.parent_server_name
         if self.username is None:
             msg = "Please enter your username for {} server: ".format(server_name)
-            self._set_username(AuthenticationCredentials.asking_input['shown'](msg))
-        if self._password is None:
+            self.set(AuthenticationCredentials.asking_input['shown'](msg))
+        if self.password is None:
             msg = "Please enter your password for {} server: ".format(server_name)
-            self._password = AuthenticationCredentials.asking_input['hidden'](msg)
+            self.set(self.username, AuthenticationCredentials.asking_input['hidden'](msg))
 
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:
@@ -136,7 +125,7 @@ class AuthenticationCredentials():
         """
         self._ensure_credentials()
         return {'ident': self.username,
-                'pass': self._password}
+                'pass': self.password}
 
     @property
     def http_basic_auth(self) -> HTTPBasicAuth:
@@ -146,13 +135,13 @@ class AuthenticationCredentials():
                                         password is undefined.
         """
         self._ensure_credentials()
-        if self._password is None:
+        if self.password is None:
             msg = 'Unable to provide http_basic_auth when password undefined'
             raise RestoClientDesignError(msg)
         if self.username is None:
             msg = 'Unable to provide http_basic_auth when username undefined'
             raise RestoClientDesignError(msg)
-        return HTTPBasicAuth(self.username.encode('utf-8'), self._password.encode('utf-8'))
+        return HTTPBasicAuth(self.username.encode('utf-8'), self.password.encode('utf-8'))
 
     def get_authorization_header(self, authentication_required: bool) -> dict:
         """
@@ -175,5 +164,5 @@ class AuthenticationCredentials():
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,
-                                                                self._password,
+                                                                self.password,
                                                                 self.token)

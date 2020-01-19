@@ -53,7 +53,7 @@ class AuthenticationService(BaseService):
         self._credentials.set(username=username)
 
     def reset(self) -> None:
-        self._credentials.reset()
+        self._credentials.set()
         super(AuthenticationService, self).reset()
 
     def set_credentials(self, credentials: Optional[AuthenticationCredentials]=None,
