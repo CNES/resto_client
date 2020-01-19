@@ -25,29 +25,65 @@ class RestoServer():
         A Resto Server, i.e. a valid resto accessible server
     """
 
-    def __init__(self, server_name: str) -> None:
+    def __init__(self, server_name: Optional[str] = None) -> None:
         """
         Constructor
 
         :param server_name: the name of the server to use in the database
         """
+        self.authentication_service: Optional[AuthenticationService] = None
+        self.resto_service: Optional[RestoService] = None
+
+        self._server_name: Optional[str] = None
+
+        # set server_name which triggers server creation from the database if not None.
+        self.server_name = server_name
+
+    def _init_from_db(self, server_name: str) -> None:
+        """
+        Initialize or reinitialize the server from the servers database
+
+        :param server_name: the name of the server to use in the database
+       """
         server_description = DB_SERVERS.get_server(server_name)
         self.authentication_service = AuthenticationService(server_description.auth_access,
                                                             server_name)
         self.resto_service = RestoService(server_description.resto_access,
                                           self.authentication_service, server_name)
-        self.server_name = server_name
+
+    @property
+    def server_name(self) -> Optional[str]:
+        """
+        :returns: the name of the server
+        """
+        return self._server_name
+
+    @server_name.setter
+    def server_name(self, server_name: Optional[str]) -> None:
+        if server_name is not None:
+            server_name = server_name.lower()
+            if server_name != self.server_name:
+                self._init_from_db(server_name)
+                self.current_collection = None
+                self.set_credentials(username=None)
+        else:
+            self.authentication_service = None
+            self.resto_service = None
+        self._server_name = server_name
 
     @property
     def current_collection(self) -> Optional[str]:
         """
         :returns: the current collection
         """
+        if self.server_name is None or self.resto_service is None:
+            return None
         return self.resto_service.current_collection
 
     @current_collection.setter
     def current_collection(self, collection_name: Optional[str]) -> None:
-        self.resto_service.current_collection = collection_name
+        if self.resto_service is not None:
+            self.resto_service.current_collection = collection_name
 
     def set_credentials(self,
                         username: Optional[str]=None,
@@ -60,15 +96,18 @@ class RestoServer():
         :param password: account password
         :param token_value: a token associated to these credentials
         """
-        self.authentication_service.set_credentials(username=username,
-                                                    password=password,
-                                                    token_value=token_value)
+        if self.authentication_service is not None:
+            self.authentication_service.set_credentials(username=username,
+                                                        password=password,
+                                                        token_value=token_value)
 
     @property
     def username(self) -> Optional[str]:
         """
         :returns: the username to use with this server
         """
+        if self.server_name is None or self.authentication_service is None:
+            return None
         return self.authentication_service.username
 
     @property
@@ -76,6 +115,8 @@ class RestoServer():
         """
         :return: the token value currently active on this server, or None.
         """
+        if self.server_name is None or self.authentication_service is None:
+            return None
         return self.authentication_service.token
 
     def __str__(self) -> str:
