@@ -60,7 +60,9 @@ class RestoService(ApplicationService):
         :param parent_server: Name of the server which uses this service.
         """
         super(RestoService, self).__init__(resto_access, auth_service, parent_server)
+        self.service_access.detected_protocol = None
         self._collections_mgr = RestoCollectionsManager()
+        self._collections_mgr.collections_set = self.get_collections()
 
     def set_collection_mgr(self, collection_mgr: RestoCollectionsManager) -> None:
         """
@@ -69,19 +71,6 @@ class RestoService(ApplicationService):
         :param collection_mgr: the collection manager
         """
         self._collections_mgr = collection_mgr
-
-    def update_after_url_change(self) -> None:
-        """
-        Callback method to update service after base URL was possibly changed.
-        """
-        # Recreate the collections manager
-        self._collections_mgr = RestoCollectionsManager()
-        if self.service_access.base_url is not None:
-            self._collections_mgr.collections_set = self.get_collections()
-        else:
-            self.current_collection = None  # type: ignore
-        # Reset the detected server type
-        self.service_access.detected_protocol = None
 
     @property
     def current_collection(self) -> Optional[str]:
@@ -97,7 +86,7 @@ class RestoService(ApplicationService):
         :param collection_name: collection to use
         :raises ValueError: when given collection not in server
         """
-        self._collections_mgr.current_collection = collection_name  # type: ignore
+        self._collections_mgr.current_collection = collection_name
 
     def show(self, with_stats: bool=True) -> str:
         """

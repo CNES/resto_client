@@ -12,8 +12,6 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import abstractmethod
-
 from .authentication_service import AuthenticationService
 from .base_service import BaseService
 from .service_access import ServiceAccess
@@ -38,13 +36,6 @@ class ApplicationService(BaseService):
         """
         super(ApplicationService, self).__init__(service_access, parent_server)
         self.auth_service = auth_service
-
-    @abstractmethod
-    def update_after_url_change(self) -> None:
-        """
-        Callback method to update service after base URL has been changed.
-        """
-        super(ApplicationService, self).update_after_url_change()
 
     def __str__(self) -> str:
         result = super(ApplicationService, self).__str__()

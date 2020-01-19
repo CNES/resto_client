@@ -36,7 +36,6 @@ class RestoServer():
                                                             server_name)
         self.resto_service = RestoService(server_description.resto_access,
                                           self.authentication_service, server_name)
-        self.resto_service.update_after_url_change()
         self.server_name = server_name
 
     @property

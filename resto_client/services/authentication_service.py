@@ -68,12 +68,6 @@ class AuthenticationService(BaseService):
         """
         self._credentials.set(username=username, password=password, token_value=token_value)
 
-    def update_after_url_change(self) -> None:
-        """
-        Callback method to update service after base URL was possibly changed.
-        """
-        self._credentials.set()
-
     @property
     def http_basic_auth(self) -> HTTPBasicAuth:
         """

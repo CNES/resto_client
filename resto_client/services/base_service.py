@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import TYPE_CHECKING, cast
 
 from .service_access import ServiceAccess
@@ -38,12 +38,6 @@ class BaseService(ABC):
         self.service_access = service_access
         self._auth_service = self
         self.parent_server_name = parent_server
-
-    @abstractmethod
-    def update_after_url_change(self) -> None:
-        """
-        Callback method to update service after base URL has been changed.
-        """
 
     @property
     def auth_service(self) -> 'AuthenticationService':
