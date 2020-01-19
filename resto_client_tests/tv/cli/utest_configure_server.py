@@ -18,6 +18,7 @@ import unittest
 
 from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.settings.servers_database import (DB_SERVERS,
                                                     RESTO_URL_KEY, RESTO_PROTOCOL_KEY,
                                                     AUTH_URL_KEY, AUTH_PROTOCOL_KEY)
@@ -33,6 +34,7 @@ class UTestCliConfigureServer(unittest.TestCase):
         """
         Unit test of config_server show in nominal cases
         """
+        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['configure_server', 'show'])
         output = out_string_io.getvalue()  # type: ignore
@@ -42,6 +44,7 @@ class UTestCliConfigureServer(unittest.TestCase):
         """
         Unit test of config_server create in nominal cases
         """
+        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['configure_server', 'create', 'kalid',
                                     'https://www.kalideos.fr/resto2', 'dotcloud',
                                     'https://www.kalideos.fr/resto2', 'default',
@@ -59,6 +62,7 @@ class UTestCliConfigureServer(unittest.TestCase):
         """
         Unit test of config_server create in degraded cases
         """
+        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # if server already exist
         with self.assertRaises(RestoClientUserError) as context:
@@ -81,6 +85,7 @@ class UTestCliConfigureServer(unittest.TestCase):
         """
         Unit test of config_server edit in degraded cases cause not implemented
         """
+        RESTO_CLIENT_SETTINGS.clear()
         # configure_server edit not implemented yet
         with self.assertRaises(RestoClientDesignError) as context:
             resto_client_run(arguments=['configure_server', 'edit', 'kalideos',
