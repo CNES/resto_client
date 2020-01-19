@@ -79,6 +79,9 @@ class RestoCollectionsManager():
             collection_name = self.collections_set.normalize_name(collection_name)
         else:
             # if a default_collection exists keep it, even if collection_name is None
+            if self.collections_set is None:
+                msg = 'Cannot reset current collection when there is no collections set'
+                raise RestoClientDesignError(msg)
             collection_name = self.collections_set.default_collection
         self._current_collection = collection_name
 
