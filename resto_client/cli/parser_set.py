@@ -19,9 +19,9 @@ from resto_client.functions.aoi_utils import find_region_choice
 from .cli_utils import build_resto_client_params, build_resto_server_parameters
 from .resto_client_parameters import ALLOWED_VERBOSITY
 
+# TODO: factorize -> _cli_set_client_parameter() and _cli_set_server_parameter()
 
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
+
 def cli_set_server(args: argparse.Namespace) -> None:
     """
     CLI adapter to set the persistent server parameters
@@ -56,6 +56,7 @@ def cli_set_download_dir(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.client_params = build_resto_client_params(args)
+    # FIXME: wrong argument name in parser
     args.client_params.download_dir = args.path  # type: ignore
 
 
@@ -66,7 +67,6 @@ def cli_set_region(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.client_params = build_resto_client_params(args)
-    args.client_params.region = args.region  # type: ignore
 
 
 def cli_set_verbosity(args: argparse.Namespace) -> None:
@@ -76,9 +76,10 @@ def cli_set_verbosity(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.client_params = build_resto_client_params(args)
-    args.client_params.verbosity = args.verbosity  # type: ignore
 
 
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 def add_set_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'set' subparser

@@ -25,11 +25,8 @@ def cli_unset_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    # FIXME: not called at the right level
     args.server_params = build_resto_server_parameters(args)
-    resto_server = args.server_params.resto_server
-    service = resto_server.resto_service
-    service.reset()
+    args.server_params.server_name = None
 
 
 def cli_unset_collection(args: argparse.Namespace) -> None:
@@ -39,7 +36,7 @@ def cli_unset_collection(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.server_params = build_resto_server_parameters(args)
-    args.server_params.current_collection = None  # type: ignore
+    args.server_params.current_collection = None
 
 
 def cli_unset_account(args: argparse.Namespace) -> None:
@@ -48,11 +45,8 @@ def cli_unset_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    # FIXME: not called at the right level
     args.server_params = build_resto_server_parameters(args)
-    resto_server = args.server_params.resto_server
-    service = resto_server.authentication_service
-    service.reset()  # reset authentication service => reset username and password
+    args.server_params.username = None
 
 
 def cli_unset_download_dir(args: argparse.Namespace) -> None:
