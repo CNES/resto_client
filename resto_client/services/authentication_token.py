@@ -14,7 +14,6 @@
 """
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
-from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 

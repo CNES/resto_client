@@ -17,8 +17,6 @@ from typing import Optional
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.services.resto_server import RestoServer
 
-from .resto_client_settings import RESTO_CLIENT_SETTINGS
-
 
 class RestoClientNoPersistedServer(RestoClientUserError):
     """ Exception raised when no persisted server found """
