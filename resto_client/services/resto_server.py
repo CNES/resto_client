@@ -63,7 +63,7 @@ class RestoServer():
 
     @username.setter
     def username(self, username: Optional[str]) -> None:
-        self.authentication_service.username = username
+        self.authentication_service.set_credentials(username=username)
 
     def __str__(self) -> str:
         msg_fmt = 'server_name: {}, current_collection: {}, username: {}'

@@ -48,28 +48,29 @@ class AuthenticationService(BaseService):
         """
         return self._credentials.username
 
-    @username.setter
-    def username(self, username: Optional[str]) -> None:
-        self._credentials.set(username=username)
+    @property
+    def token(self) -> Optional[str]:
+        """
+        :return: the token value currently active on this AuthenticationService, or None.
+        """
+        return self._credentials.token
 
     def reset(self) -> None:
         self._credentials.set()
         super(AuthenticationService, self).reset()
 
-    def set_credentials(self, credentials: Optional[AuthenticationCredentials]=None,
-                        username: Optional[str]=None, password: Optional[str]=None) -> None:
+    def set_credentials(self,
+                        username: Optional[str]=None,
+                        password: Optional[str]=None,
+                        token_value: Optional[str]=None) -> None:
         """
-        Set the credentials associated to this authentication service, either by providing
-        a AuthenticationCredentials object or by specifying username or password or both.
+        Set the credentials associated to this authentication service.
 
-        :param credentials: Credentials to associate to this authentication service
         :param username: name of the account on the server
-        :param  password: user password
+        :param password: account password
+        :param token_value: a token associated to these credentials
         """
-        if credentials is not None:
-            self._credentials = credentials
-        else:
-            self._credentials.set(username=username, password=password)
+        self._credentials.set(username=username, password=password, token_value=token_value)
 
     def update_after_url_change(self) -> None:
         """
@@ -119,10 +120,9 @@ class AuthenticationService(BaseService):
         try:
             new_token = GetTokenRequest(self).run()
         except AccesDeniedError as excp:
-            # prevent from saving username by reset
-            self._credentials.set()  # reset username and password
+            self._credentials.set()  # reset credentials
             msg = 'Access Denied : (username, password) does not fit the server : {}'
-            msg += '\nFollowing denied access, the username was reset.'
+            msg += '\nFollowing denied access, credentials were reset.'
             raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp
         return new_token
 
