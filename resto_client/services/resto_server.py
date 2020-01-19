@@ -25,19 +25,15 @@ class RestoServer():
         A Resto Server, i.e. a valid resto accessible server
     """
 
-    def __init__(self, server_name: str,
-                 username: Optional[str]= None, password: Optional[str]=None) -> None:
+    def __init__(self, server_name: str) -> None:
         """
         Constructor
 
         :param server_name: the name of the server to use in the database
-        :param username: name of the account on the server
-        :param password: user password
         """
         server_description = DB_SERVERS.get_server(server_name)
         self.authentication_service = AuthenticationService(server_description.auth_access,
                                                             server_name)
-        self.authentication_service.set_credentials(username=username, password=password)
         self.resto_service = RestoService(server_description.resto_access,
                                           self.authentication_service, server_name)
         self.resto_service.update_after_url_change()
@@ -54,6 +50,21 @@ class RestoServer():
     def current_collection(self, collection_name: Optional[str]) -> None:
         self.resto_service.current_collection = collection_name
 
+    def set_credentials(self,
+                        username: Optional[str]=None,
+                        password: Optional[str]=None,
+                        token_value: Optional[str]=None) -> None:
+        """
+        Set the credentials to be used by the authentication service.
+
+        :param username: name of the account on the server
+        :param password: account password
+        :param token_value: a token associated to these credentials
+        """
+        self.authentication_service.set_credentials(username=username,
+                                                    password=password,
+                                                    token_value=token_value)
+
     @property
     def username(self) -> Optional[str]:
         """
@@ -61,10 +72,13 @@ class RestoServer():
         """
         return self.authentication_service.username
 
-    @username.setter
-    def username(self, username: Optional[str]) -> None:
-        self.authentication_service.set_credentials(username=username)
+    @property
+    def token(self) -> Optional[str]:
+        """
+        :return: the token value currently active on this server, or None.
+        """
+        return self.authentication_service.token
 
     def __str__(self) -> str:
-        msg_fmt = 'server_name: {}, current_collection: {}, username: {}'
-        return msg_fmt.format(self.server_name, self.current_collection, self.username)
+        msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'
+        return msg_fmt.format(self.server_name, self.current_collection, self.username, self.token)

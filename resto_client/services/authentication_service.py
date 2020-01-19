@@ -64,7 +64,7 @@ class AuthenticationService(BaseService):
                         password: Optional[str]=None,
                         token_value: Optional[str]=None) -> None:
         """
-        Set the credentials associated to this authentication service.
+        Set the credentials to be used this authentication service.
 
         :param username: name of the account on the server
         :param password: account password

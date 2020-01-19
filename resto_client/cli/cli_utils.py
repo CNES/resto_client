@@ -94,7 +94,8 @@ def _new_server_parameters(server_name: str,
     :param password: account password on the server
     :returns: RestoServer instance suitable for further processing in CLI context
     """
-    new_server = RestoServer(server_name, username=username, password=password)
+    new_server = RestoServer(server_name)
+    new_server.set_credentials(username=username, password=password)
     server_parameters = RestoServerParameters(server_name)
     if collection_name is None:
         # Use current_collection from the new server (None or collection name is there is only one).

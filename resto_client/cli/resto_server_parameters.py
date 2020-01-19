@@ -104,7 +104,7 @@ class RestoServerParameters():
 
     @username.setter
     def username(self, username: Optional[str]) -> None:
-        self.resto_server.username = username
+        self.resto_server.set_credentials(username=username)
 
     def update_persisted(self, persisted_params: dict) -> None:
         self._update_persisted_attr(persisted_params, 'server_name')
