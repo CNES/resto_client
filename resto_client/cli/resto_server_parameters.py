@@ -59,8 +59,11 @@ class RestoServerParameters():
 
         # Retrieve persisted username
         persisted_username = persisted_params.get('username')
+        # Retrieve persisted token
+        persisted_token = persisted_params.get('token')
         # Update server parameters instance to trigger RestoServer update.
-        persisted_server_parameters.username = persisted_username
+        persisted_server_parameters.set_credentials(username=persisted_username,
+                                                    token_value=persisted_token)
 
         return persisted_server_parameters
 
@@ -75,13 +78,13 @@ class RestoServerParameters():
     def server_name(self, server_name: Optional[str]) -> None:
         if server_name is None:
             self.current_collection = None
-            self.username = None
+            self.set_credentials(username=None)
         else:
             server_name = server_name.lower()
             if server_name != self._server_name:
                 self.resto_server = RestoServer(server_name)
                 self.current_collection = None
-                self.username = None
+                self.set_credentials(username=None)
         self._server_name = server_name
 
     @property
@@ -95,6 +98,21 @@ class RestoServerParameters():
     def current_collection(self, collection_name: str) -> None:
         self.resto_server.current_collection = collection_name
 
+    def set_credentials(self,
+                        username: Optional[str]=None,
+                        password: Optional[str]=None,
+                        token_value: Optional[str]=None) -> None:
+        """
+        Set the credentials to be used by the RestoServer.
+
+        :param username: name of the account on the server
+        :param password: account password
+        :param token_value: a token associated to these credentials
+        """
+        self.resto_server.set_credentials(username=username,
+                                          password=password,
+                                          token_value=token_value)
+
     @property
     def username(self) -> Optional[str]:
         """
@@ -102,14 +120,18 @@ class RestoServerParameters():
         """
         return self.resto_server.username
 
-    @username.setter
-    def username(self, username: Optional[str]) -> None:
-        self.resto_server.set_credentials(username=username)
+    @property
+    def token(self) -> Optional[str]:
+        """
+        :returns: the token to use with this server
+        """
+        return self.resto_server.token
 
     def update_persisted(self, persisted_params: dict) -> None:
         self._update_persisted_attr(persisted_params, 'server_name')
         self._update_persisted_attr(persisted_params, 'current_collection')
         self._update_persisted_attr(persisted_params, 'username')
+        self._update_persisted_attr(persisted_params, 'token')
 
     def _update_persisted_attr(self, persisted_params: dict, attr_name: str) -> None:
         persisted_params[attr_name] = getattr(self, attr_name)

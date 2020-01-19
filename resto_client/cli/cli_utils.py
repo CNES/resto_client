@@ -57,12 +57,7 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
             server_parameters.current_collection = collection_name
 
         if username is not None or password is not None:
-            if username is not None:
-                # ensure to delete previous username in case it was equal to this one
-                server_parameters.username = None
-                server_parameters.username = username
-            resto_service = server_parameters.resto_server.resto_service
-            resto_service.auth_service.set_credentials(username=username, password=password)
+            server_parameters.set_credentials(username=username, password=password)
 
     except RestoClientNoPersistedServer:
         # No persisted server or persisted one does not fit requested server_name

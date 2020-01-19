@@ -46,7 +46,7 @@ def cli_unset_account(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.server_params = build_resto_server_parameters(args)
-    args.server_params.username = None
+    args.server_params.set_credentials(username=None)
 
 
 def cli_unset_download_dir(args: argparse.Namespace) -> None:
