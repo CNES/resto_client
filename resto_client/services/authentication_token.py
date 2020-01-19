@@ -14,72 +14,51 @@
 """
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
-from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.generic.property_decoration import managed_getter, managed_setter
-
 
 if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from .authentication_credentials import AuthenticationCredentials  # @UnusedImport
 
 
 class AuthenticationToken():
     """
     Class implementing the token for a connexion.
     """
-    properties_storage = RESTO_CLIENT_SETTINGS
 
-    def __init__(self, parent_service: 'AuthenticationService') -> None:
+    def __init__(self, parent_credentials: 'AuthenticationCredentials') -> None:
         """
         Constructor
 
         :param parent_credentials: parent credentials of this token.
         """
-        self.parent_service = parent_service
+        self.parent_credentials = parent_credentials
+        self._token_value: Optional[str] = None
 
     def reset(self) -> None:
         """
         Reset the token unconditionally.
         """
-        self.token = None  # type: ignore
+        self._token_value = None
 
-    @property  # type: ignore
-    @managed_getter()
-    def token(self) -> Optional[str]:
+    @property
+    def token_value(self) -> Optional[str]:
         """
         :returns: The current token value
         """
+        return self._token_value
 
-    @token.setter  # type: ignore
-    @managed_setter(pre_set_func='_check_token')
-    def token(self, token_value: str) -> None:
+    @token_value.setter
+    def token_value(self, token_value: str) -> None:
         """
         Set the token value.
 
         :param token_value: If None, reset the token. If anything else, validate the current
                                    token or renew it if it is invalid.
         """
-
-    def _check_token(self, unused_arg: Any) -> str:
-        """
-        Check function used by token setter as a callback.
-
-        :returns: the token to use, either the previous one if still valid, or a new valid one
-        """
-        _ = unused_arg  # to avoid pylint warning
-        # Trigger content retrieval from persisted value, if any
-        new_token = self.token
-        if not self.valid_token():
-            new_token = self.parent_service.get_token()
-        return new_token
-
-    def valid_token(self) -> bool:
-        """
-        :returns: True if the token is still valid, False otherwise
-        :raises RestoClientDesignError: when token cannot be validated (parent service is None).
-        """
-        if self.token is None:
-            return False
-        return self.parent_service.check_token()
+        if token_value is not None:
+            if token_value != self._token_value:
+                if self.token_value is None or not self.parent_credentials.check_token():
+                    token_value = self.parent_credentials.get_token()
+        self._token_value = token_value
 
     def get_authorization_header(self,
                                  authentication_required: bool,
@@ -95,14 +74,14 @@ class AuthenticationToken():
         """
         authorization_header = {}
         if authentication_required:
-            self.token = 'A fake token value to trigger get_token()'  # type: ignore
+            self.token_value = 'A fake token value to trigger get_token()'
         else:
             # If the token is valid use it, otherwise renew it if the username is not None
-            if not self.valid_token():
+            if self.token_value is None or not self.parent_credentials.check_token():
                 # Token is None or has been revoked. Make sure to store None for persistence
                 self.reset()
                 if username_defined:
-                    self.token = 'A fake token value to trigger get_token()'  # type: ignore
-        if self.token is not None:
-            authorization_header['Authorization'] = 'Bearer ' + self.token
+                    self.token_value = 'Another fake token value to trigger get_token()'
+        if self.token_value is not None:
+            authorization_header['Authorization'] = 'Bearer ' + self.token_value
         return authorization_header

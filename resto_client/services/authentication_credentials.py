@@ -42,7 +42,7 @@ class AuthenticationCredentials():
         self.parent_service = authentication_service
 
         self._password: Optional[str] = None
-        self._authentication_token = AuthenticationToken(self.parent_service)
+        self._authentication_token = AuthenticationToken(self)
         self._username: Optional[str] = None
 
     def set(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
@@ -60,7 +60,7 @@ class AuthenticationCredentials():
         if username is None:
             if password is None:
                 # Reset username because no new password specified
-                self.username = None  # type: ignore
+                self.username = None
             self._authentication_token.reset()
         else:
             username = username.lower()  # normalize username
@@ -81,20 +81,20 @@ class AuthenticationCredentials():
         """
         :return: the token value associated to these credentials, or None if not available.
         """
-        return self._authentication_token.token
+        return self._authentication_token.token_value
 
     @token.setter
     def token(self, token: str) -> None:
-        self._authentication_token.token = token  # type: ignore
+        self._authentication_token.token_value = token
 
-    @property  # type: ignore
+    @property
     def username(self) -> Optional[str]:
         """
         :returns: the username
         """
         return self._username
 
-    @username.setter  # type: ignore
+    @username.setter
     def username(self, username: Optional[str]) -> None:
         if username is not None:
             username = username.lower()
@@ -124,7 +124,7 @@ class AuthenticationCredentials():
         """
         if self.username is None:
             msg = "Please enter your username : "
-            self.username = AuthenticationCredentials.asking_input['shown'](msg)  # type: ignore
+            self.username = AuthenticationCredentials.asking_input['shown'](msg)
         if self._password is None:
             msg = "Please enter your password : "
             self._password = AuthenticationCredentials.asking_input['hidden'](msg)
@@ -166,6 +166,12 @@ class AuthenticationCredentials():
         username_defined = self.username is not None
         return self._authentication_token.get_authorization_header(authentication_required,
                                                                    username_defined)
+
+    def check_token(self) -> bool:
+        return self.parent_service.check_token()
+
+    def get_token(self) -> str:
+        return self.parent_service.get_token()
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,
