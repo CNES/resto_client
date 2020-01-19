@@ -60,13 +60,13 @@ class AuthenticationCredentials():
         if username is None:
             if password is None:
                 # Reset username because no new password specified
-                self.username = None
+                self._set_username(None)
             self._authentication_token.token_value = None
         else:
             username = username.lower()  # normalize username
             # Set username and password if new username is different from stored one.
             if username != self.username:
-                self.username = username  # will trigger password reset
+                self._set_username(username)  # will trigger password reset
                 self._authentication_token.token_value = None
         self._password = password  # set password either to None or to a defined value
 
@@ -94,8 +94,7 @@ class AuthenticationCredentials():
         """
         return self._username
 
-    @username.setter
-    def username(self, username: Optional[str]) -> None:
+    def _set_username(self, username: Optional[str]) -> None:
         if username is not None:
             username = username.lower()
             if username == self._username:
@@ -122,12 +121,12 @@ class AuthenticationCredentials():
         Verify that both username and password are defined, and request their values if it
         is not the case
         """
-        # TODO: add server name in messages
+        server_name = self.parent_service.parent_server_name
         if self.username is None:
-            msg = "Please enter your username : "
-            self.username = AuthenticationCredentials.asking_input['shown'](msg)
+            msg = "Please enter your username for {} server: ".format(server_name)
+            self._set_username(AuthenticationCredentials.asking_input['shown'](msg))
         if self._password is None:
-            msg = "Please enter your password : "
+            msg = "Please enter your password for {} server: ".format(server_name)
             self._password = AuthenticationCredentials.asking_input['hidden'](msg)
 
     @property

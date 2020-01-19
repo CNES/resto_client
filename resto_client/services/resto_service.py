@@ -50,14 +50,16 @@ class RestoService(ApplicationService):
 
     def __init__(self,
                  resto_access: RestoServiceAccess,
-                 auth_service: AuthenticationService) -> None:
+                 auth_service: AuthenticationService,
+                 parent_server: str) -> None:
         """
         Constructor
 
         :param resto_access: access to resto service.
         :param auth_service: Authentication service associated to this resto service.
+        :param parent_server: Name of the server which uses this service.
         """
-        super(RestoService, self).__init__(service_access=resto_access, auth_service=auth_service)
+        super(RestoService, self).__init__(resto_access, auth_service, parent_server)
         self._collections_mgr = RestoCollectionsManager()
 
     def reset(self) -> None:

@@ -26,15 +26,17 @@ class ApplicationService(BaseService):
 
     def __init__(self,
                  service_access: ServiceAccess,
-                 auth_service: AuthenticationService) -> None:
+                 auth_service: AuthenticationService,
+                 parent_server: str) -> None:
         """
         Constructor
 
         :param service_access: access to application service.
         :param auth_service: access to the Authentication service associated to this application
                              service.
+        :param parent_server: Name of the server which uses this service.
         """
-        super(ApplicationService, self).__init__(service_access=service_access)
+        super(ApplicationService, self).__init__(service_access, parent_server)
         self.auth_service = auth_service
 
     @abstractmethod

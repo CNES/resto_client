@@ -35,10 +35,11 @@ class RestoServer():
         :param password: user password
         """
         server_description = DB_SERVERS.get_server(server_name)
-        self.authentication_service = AuthenticationService(server_description.auth_access)
+        self.authentication_service = AuthenticationService(server_description.auth_access,
+                                                            server_name)
         self.authentication_service.set_credentials(username=username, password=password)
-        self.resto_service = RestoService(resto_access=server_description.resto_access,
-                                          auth_service=self.authentication_service)
+        self.resto_service = RestoService(server_description.resto_access,
+                                          self.authentication_service, server_name)
         self.resto_service.update_after_url_change()
         self.server_name = server_name
 

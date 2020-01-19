@@ -27,16 +27,17 @@ class BaseService(ABC):
     An abstract base class for all services
     """
 
-    def __init__(self, service_access: ServiceAccess) -> None:
+    def __init__(self, service_access: ServiceAccess, parent_server: str) -> None:
         """
         Constructor
 
         :param service_access: Service access.
+        :param parent_server: Name of the server which uses this service.
         :raises RestoClientDesignError: when service_access is not of the right type
         """
-        # Initialize from service_access.
         self.service_access = service_access
         self._auth_service = self
+        self.parent_server_name = parent_server
 
     @abstractmethod
     def update_after_url_change(self) -> None:

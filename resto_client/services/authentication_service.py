@@ -31,13 +31,14 @@ class AuthenticationService(BaseService):
         An authentication Service able to provide tokens, given credentials.
     """
 
-    def __init__(self, auth_access: AuthenticationServiceAccess) -> None:
+    def __init__(self, auth_access: AuthenticationServiceAccess, parent_server: str) -> None:
         """
         Constructor
 
         :param auth_access: access to the authentication server.
+        :param parent_server: Name of the server which uses this service.
         """
-        super(AuthenticationService, self).__init__(auth_access)
+        super(AuthenticationService, self).__init__(auth_access, parent_server)
         self._credentials = AuthenticationCredentials(authentication_service=self)
 
     @property
