@@ -15,8 +15,6 @@
 from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.generic.property_decoration import managed_getter, managed_setter
-from resto_client.services.authentication_credentials import AuthenticationCredentials
 from resto_client.services.resto_server import RestoServer
 
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
@@ -31,25 +29,18 @@ class ServerParameters():
     A class holding the persisted server parameters
     """
 
-    properties_storage = RESTO_CLIENT_SETTINGS
-
     def __init__(self, server_name: str) -> None:
         """
         Constructor
 
         :param server_name: the name of the server.
         """
-
+        server_name = server_name.lower()
         self.resto_server = RestoServer(server_name)
-        self.server_name = server_name  # type: ignore
-
-        # Update authentication service persisted parameters
-        authentication_service = self.resto_server.authentication_service
-        persisted_credentials = AuthenticationCredentials.persisted(authentication_service)
-        authentication_service.set_credentials(persisted_credentials)
+        self._server_name: Optional[str] = server_name
 
     @classmethod
-    def persisted(cls) -> 'ServerParameters':
+    def persisted(cls, persisted_params: dict) -> 'ServerParameters':
         """
         Build an instance from the persisted server parameters.
 
@@ -57,61 +48,76 @@ class ServerParameters():
         :returns: an instance of ServerParameters built from persisted parameters
         """
         # Retrieve persisted server name and build an empty server parameters instance
-        persisted_server_name = ServerParameters.properties_storage.get('server_name')
+        persisted_server_name = persisted_params.get('server_name')
         if persisted_server_name is None:
             msg = 'No server currently set in the persisted parameters.'
             raise RestoClientNoPersistedServer(msg)
         persisted_server_parameters = cls(persisted_server_name)
 
         # Retrieve persisted collection name
-        persisted_collection_name = ServerParameters.properties_storage.get('current_collection')
+        persisted_collection_name = persisted_params.get('current_collection')
         # Update server parameters instance to trigger RestoServer update.
         persisted_server_parameters.current_collection = persisted_collection_name  # type: ignore
 
+        # Retrieve persisted username
+        persisted_username = persisted_params.get('username')
+        # Update server parameters instance to trigger RestoServer update.
+        persisted_server_parameters.username = persisted_username  # type: ignore
+
         return persisted_server_parameters
 
-    @property  # type: ignore
-    @managed_getter()
+    @property
     def server_name(self) -> Optional[str]:
         """
         :returns: the name of the server
         """
+        return self._server_name
 
-    @server_name.setter  # type: ignore
-    @managed_setter()
-    def server_name(self, server_name: str) -> None:
-        """
-        :param server_name: the name of the server in the servers database.
-        """
-        # This code is called only when this property has been changed from its previous value.
-        # Thus we need to reset the server parameters.
-        _ = server_name  # to get rid of pylint warning
-        self.current_collection = None  # type: ignore
+    @server_name.setter
+    def server_name(self, server_name: Optional[str]) -> None:
+        if server_name is None:
+            self.current_collection = None  # type: ignore
+            self.username = None  # type: ignore
+        else:
+            server_name = server_name.lower()
+            if server_name != self._server_name:
+                self.resto_server = RestoServer(server_name)
+                self.current_collection = None  # type: ignore
+                self.username = None  # type: ignore
+        self._server_name = server_name
 
     @property  # type: ignore
-    @managed_getter()
     def current_collection(self) -> Optional[str]:
         """
         :returns: the name of the current collection
         """
+        return self.resto_server.current_collection
 
     @current_collection.setter  # type: ignore
-    @managed_setter()
     def current_collection(self, collection_name: str) -> None:
-        """
-        :param collection_name: the name of the collection to set.
-        """
-        # This code is called only when this property has been changed from its previous value.
-        # Update resto_server proxified current collection.
         self.resto_server.current_collection = collection_name
-        # In order to update persisted current collection name with right case.
-        self.current_collection = self.resto_server.current_collection  # type: ignore
+
+    @property
+    def username(self) -> Optional[str]:
+        """
+        :returns: the username to use with this server
+        """
+        return self.resto_server.username
+
+    @username.setter
+    def username(self, username: Optional[str]) -> None:
+        self.resto_server.username = username
 
     def update_persisted(self, persisted_params: dict) -> None:
         self._update_persisted_attr(persisted_params, 'server_name')
         self._update_persisted_attr(persisted_params, 'current_collection')
+        self._update_persisted_attr(persisted_params, 'username')
 
     def _update_persisted_attr(self, persisted_params: dict, attr_name: str) -> None:
         persisted_params[attr_name] = getattr(self, attr_name)
         if persisted_params[attr_name] is None:
             del persisted_params[attr_name]
+
+    def __str__(self) -> str:
+        msg_fmt = 'server_name: {}, current_collection: {}, username: {}'
+        return msg_fmt.format(self.server_name, self.current_collection, self.username)

@@ -18,8 +18,7 @@ from getpass import getpass
 
 from requests.auth import HTTPBasicAuth
 
-from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.generic.property_decoration import managed_getter, managed_setter
+from resto_client.base_exceptions import RestoClientDesignError
 
 from .authentication_token import AuthenticationToken
 
@@ -33,7 +32,6 @@ class AuthenticationCredentials():
     Class implementing the credentials for a connection: username, password.
     """
     asking_input: Dict[str, Callable] = {'shown': input, 'hidden': getpass}
-    properties_storage = RESTO_CLIENT_SETTINGS
 
     def __init__(self, authentication_service: 'AuthenticationService') -> None:
         """
@@ -44,7 +42,8 @@ class AuthenticationCredentials():
         self.parent_service = authentication_service
 
         self._password: Optional[str] = None
-        self._token = AuthenticationToken(self.parent_service)
+        self._authentication_token = AuthenticationToken(self.parent_service)
+        self._username: Optional[str] = None
 
     def set(self, username: Optional[str]=None, password: Optional[str]=None) -> None:
         """
@@ -62,13 +61,13 @@ class AuthenticationCredentials():
             if password is None:
                 # Reset username because no new password specified
                 self.username = None  # type: ignore
-            self._token.reset()
+            self._authentication_token.reset()
         else:
-            username = self._check_username(username)  # normalize username
+            username = username.lower()  # normalize username
             # Set username and password if new username is different from stored one.
             if username != self.username:
                 self.username = username    # type: ignore # will trigger password reset
-                self._token.reset()
+                self._authentication_token.reset()
         self._password = password  # set password either to None or to a defined value
 
     def reset(self) -> None:
@@ -77,80 +76,45 @@ class AuthenticationCredentials():
         """
         self.set(username=None, password=None)
 
-    @classmethod
-    def persisted(cls,
-                  authentication_service: 'AuthenticationService') -> 'AuthenticationCredentials':
-        """
-        Create an instance from persisted attributes (username), connected to a provided
-        authentication service.
-
-        :param authentication_service: authentication service onto which these credentials are valid
-        :returns: a credentials instance from the persisted username
-        """
-        # Retrieve persisted attributes.
-        persisted_username = cls.properties_storage.get('username')
-        persisted_token = cls.properties_storage.get('token')  # type: ignore
-
-        # Create a new instance and set persisted attributes.
-        instance = cls(authentication_service)
-        instance.username = persisted_username  # type: ignore
-        instance.token_value = persisted_token
-        return instance
-
     @property
-    def token_value(self) -> Optional[str]:
+    def token(self) -> Optional[str]:
         """
         :return: the token value associated to these credentials, or None if not available.
         """
-        return self._token.token
+        return self._authentication_token.token
 
-    @token_value.setter
-    def token_value(self, token: str) -> None:
-        self._token.token = token  # type: ignore
+    @token.setter
+    def token(self, token: str) -> None:
+        self._authentication_token.token = token  # type: ignore
 
     @property  # type: ignore
-    @managed_getter()
     def username(self) -> Optional[str]:
         """
         :returns: the username
         """
+        return self._username
 
     @username.setter  # type: ignore
-    @managed_setter(pre_set_func='_check_username')
-    def username(self, username: str) -> None:
-        """
-        Set the username
-
-        :param username: the username to set
-        """
-        # Following code is called by managed_setter if and only if base_url has changed.
-        # At that time, the property has been updated and can be gotten through the getter.
-        _ = username  # to avoid pylint warning
-
+    def username(self, username: Optional[str]) -> None:
+        if username is not None:
+            username = username.lower()
+            if username == self._username:
+                # Nothing to change
+                return
+        self._username = username
         self._password = None  # reset password
-        self._token.reset()  # reset token
-
-    def _check_username(self, username: str) -> str:
-        """
-        Check function used by username setter as a callback.
-
-        :param username: the resto username to register
-        :returns: the lowercased username
-        :raises ValueError: when setting username while no server defined.
-        """
-        # Normalize username as lowercase
-        username = username.lower()
-        # if there is no service but a try to set account
-        if self.parent_service.service_access.base_url is None:
-            raise ValueError('You can t set an account without first setting up a server')
-        return username
+        self._authentication_token.reset()  # reset token
 
     @property
     def username_b64(self) -> str:
         """
 
         :returns: the username encoded as base64, suitable to insert in URLs
+        :raises RestoClientDesignError: when trying to get base64 username while it is undefined.
         """
+        if self.username is None:
+            msg = 'Unable to provide base64 username when username undefined'
+            raise RestoClientDesignError(msg)
         return b64encode(self.username.encode('UTF-8')).decode('UTF-8')
 
     def _ensure_credentials(self) -> None:
@@ -178,13 +142,17 @@ class AuthenticationCredentials():
     def http_basic_auth(self) -> HTTPBasicAuth:
         """
         :returns: the basic HTTP authorization for the service
+        :raises RestoClientDesignError: when trying to build authentication while username or
+                                        password is undefined.
         """
         self._ensure_credentials()
         if self._password is None:
-            encoded_password = None
-        else:
-            encoded_password = self._password.encode('utf-8')
-        return HTTPBasicAuth(self.username.encode('utf-8'), encoded_password)
+            msg = 'Unable to provide http_basic_auth when password undefined'
+            raise RestoClientDesignError(msg)
+        if self.username is None:
+            msg = 'Unable to provide http_basic_auth when username undefined'
+            raise RestoClientDesignError(msg)
+        return HTTPBasicAuth(self.username.encode('utf-8'), self._password.encode('utf-8'))
 
     def get_authorization_header(self, authentication_required: bool) -> dict:
         """
@@ -196,9 +164,10 @@ class AuthenticationCredentials():
         :returns: the authorization header
         """
         username_defined = self.username is not None
-        return self._token.get_authorization_header(authentication_required, username_defined)
+        return self._authentication_token.get_authorization_header(authentication_required,
+                                                                   username_defined)
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,
                                                                 self._password,
-                                                                self.token_value)
+                                                                self.token)

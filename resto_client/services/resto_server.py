@@ -51,7 +51,19 @@ class RestoServer():
 
     @current_collection.setter
     def current_collection(self, collection_name: Optional[str]) -> None:
-        """
-        :param collection_name: collection to use
-        """
         self.resto_service.current_collection = collection_name
+
+    @property
+    def username(self) -> Optional[str]:
+        """
+        :returns: the username to use with this server
+        """
+        return self.authentication_service.username
+
+    @username.setter
+    def username(self, username: Optional[str]) -> None:
+        self.authentication_service.username = username
+
+    def __str__(self) -> str:
+        msg_fmt = 'server_name: {}, current_collection: {}, username: {}'
+        return msg_fmt.format(self.server_name, self.current_collection, self.username)

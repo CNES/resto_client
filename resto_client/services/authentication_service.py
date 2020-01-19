@@ -40,6 +40,17 @@ class AuthenticationService(BaseService):
         super(AuthenticationService, self).__init__(auth_access)
         self._credentials = AuthenticationCredentials(authentication_service=self)
 
+    @property
+    def username(self) -> Optional[str]:
+        """
+        :returns: the username to use with this authentication service
+        """
+        return self._credentials.username
+
+    @username.setter
+    def username(self, username: Optional[str]) -> None:
+        self._credentials.username = username
+
     def reset(self) -> None:
         self._credentials.reset()
         super(AuthenticationService, self).reset()
@@ -120,8 +131,8 @@ class AuthenticationService(BaseService):
         """
         :returns: True if the token is still valid
         """
-        if self._credentials.token_value is not None:
-            return CheckTokenRequest(self, self._credentials.token_value).run()
+        if self._credentials.token is not None:
+            return CheckTokenRequest(self, self._credentials.token).run()
         return False
 
     def revoke_token(self) -> Optional[requests.Response]:
@@ -130,7 +141,7 @@ class AuthenticationService(BaseService):
 
         :returns: unknown result at the moment (not working)
         """
-        if self._credentials.token_value is not None:
+        if self._credentials.token is not None:
             return RevokeTokenRequest(self).run()
         return None
 
