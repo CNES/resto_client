@@ -22,7 +22,7 @@ class RestoClientNoPersistedServer(RestoClientUserError):
     """ Exception raised when no persisted server found """
 
 
-class ServerParameters():
+class RestoServerParameters():
     """
     A class holding the persisted server parameters
     """
@@ -38,12 +38,12 @@ class ServerParameters():
         self._server_name: Optional[str] = server_name
 
     @classmethod
-    def persisted(cls, persisted_params: dict) -> 'ServerParameters':
+    def persisted(cls, persisted_params: dict) -> 'RestoServerParameters':
         """
         Build an instance from the persisted server parameters.
 
         :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
-        :returns: an instance of ServerParameters built from persisted parameters
+        :returns: an instance of RestoServerParameters built from persisted parameters
         """
         # Retrieve persisted server name and build an empty server parameters instance
         persisted_server_name = persisted_params.get('server_name')
