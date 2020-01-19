@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Optional
 
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
@@ -58,14 +58,13 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
     request_action = 'searching'
 
     def __init__(self, service: 'RestoService',
-                 criteria: RestoCriteria, collection: str) -> None:
+                 collection: str, criteria: Optional[RestoCriteria] = None) -> None:
         """
         Constructor
 
         :param service: resto service
-        :param criteria: give all criteria for search using a dictionnary
         :param collection: collection name
-        :raises ValueError: When no collection can be found (given or persisted)
+        :param criteria: give all criteria for search using a dictionnary
         """
         # initiate request with asking number of total items
         criteria_url = '_rc=true&'

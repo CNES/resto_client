@@ -151,7 +151,7 @@ class RestoService(ApplicationService):
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        return SearchCollectionRequest(self, criteria, collection=collection_name).run()
+        return SearchCollectionRequest(self, collection_name, criteria=criteria).run()
 
     def get_feature_by_id(self,
                           feature_id: str,
@@ -171,9 +171,7 @@ class RestoService(ApplicationService):
         criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
 
         feature_collection = \
-            SearchCollectionRequest(self,
-                                    criteria,
-                                    collection=collection_name).run()
+            SearchCollectionRequest(self, collection_name, criteria=criteria).run()
 
         if len(feature_collection['features']) > 1:
             raise IndexError('Several results found for id {}'.format(feature_id))
