@@ -61,13 +61,13 @@ class AuthenticationCredentials():
             if password is None:
                 # Reset username because no new password specified
                 self.username = None
-            self._authentication_token.reset()
+            self._authentication_token.token_value = None
         else:
             username = username.lower()  # normalize username
             # Set username and password if new username is different from stored one.
             if username != self.username:
-                self.username = username    # type: ignore # will trigger password reset
-                self._authentication_token.reset()
+                self.username = username  # will trigger password reset
+                self._authentication_token.token_value = None
         self._password = password  # set password either to None or to a defined value
 
     def reset(self) -> None:
@@ -84,7 +84,7 @@ class AuthenticationCredentials():
         return self._authentication_token.token_value
 
     @token.setter
-    def token(self, token: str) -> None:
+    def token(self, token: Optional[str]) -> None:
         self._authentication_token.token_value = token
 
     @property
@@ -103,7 +103,7 @@ class AuthenticationCredentials():
                 return
         self._username = username
         self._password = None  # reset password
-        self._authentication_token.reset()  # reset token
+        self._authentication_token.token_value = None  # reset token
 
     @property
     def username_b64(self) -> str:
@@ -122,6 +122,7 @@ class AuthenticationCredentials():
         Verify that both username and password are defined, and request their values if it
         is not the case
         """
+        # TODO: add server name in messages
         if self.username is None:
             msg = "Please enter your username : "
             self.username = AuthenticationCredentials.asking_input['shown'](msg)
@@ -167,8 +168,8 @@ class AuthenticationCredentials():
         return self._authentication_token.get_authorization_header(authentication_required,
                                                                    username_defined)
 
-    def check_token(self) -> bool:
-        return self.parent_service.check_token()
+    def check_token(self, token: str) -> bool:
+        return self.parent_service.check_token(token)
 
     def get_token(self) -> str:
         return self.parent_service.get_token()

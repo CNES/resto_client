@@ -32,32 +32,31 @@ class AuthenticationToken():
         """
         self.parent_credentials = parent_credentials
         self._token_value: Optional[str] = None
-
-    def reset(self) -> None:
-        """
-        Reset the token unconditionally.
-        """
-        self._token_value = None
+        self._unvalidated_token = True
 
     @property
     def token_value(self) -> Optional[str]:
         """
-        :returns: The current token value
+        :returns: The current token, either None or a validated value.
         """
+        if self._token_value is not None:
+            if self._unvalidated_token:
+                self._unvalidated_token = not self.parent_credentials.check_token(self._token_value)
+                if self._unvalidated_token:
+                    self._token_value = self.parent_credentials.get_token()
+                    self._unvalidated_token = self._token_value is None
         return self._token_value
 
     @token_value.setter
-    def token_value(self, token_value: str) -> None:
+    def token_value(self, token_value: Optional[str]) -> None:
         """
         Set the token value.
 
-        :param token_value: If None, reset the token. If anything else, validate the current
+        :param token_value: If None, reset the token. If different from current value,
+                            validate the current
                                    token or renew it if it is invalid.
         """
-        if token_value is not None:
-            if token_value != self._token_value:
-                if self.token_value is None or not self.parent_credentials.check_token():
-                    token_value = self.parent_credentials.get_token()
+        self._unvalidated_token = token_value is None or token_value != self.token_value
         self._token_value = token_value
 
     def get_authorization_header(self,
@@ -76,12 +75,8 @@ class AuthenticationToken():
         if authentication_required:
             self.token_value = 'A fake token value to trigger get_token()'
         else:
-            # If the token is valid use it, otherwise renew it if the username is not None
-            if self.token_value is None or not self.parent_credentials.check_token():
-                # Token is None or has been revoked. Make sure to store None for persistence
-                self.reset()
-                if username_defined:
-                    self.token_value = 'Another fake token value to trigger get_token()'
+            if username_defined:
+                self.token_value = 'A fake token value to trigger get_token()'
         if self.token_value is not None:
             authorization_header['Authorization'] = 'Bearer ' + self.token_value
         return authorization_header

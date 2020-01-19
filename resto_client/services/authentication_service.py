@@ -49,7 +49,7 @@ class AuthenticationService(BaseService):
 
     @username.setter
     def username(self, username: Optional[str]) -> None:
-        self._credentials.username = username
+        self._credentials.set(username=username)
 
     def reset(self) -> None:
         self._credentials.reset()
@@ -119,21 +119,17 @@ class AuthenticationService(BaseService):
             new_token = GetTokenRequest(self).run()
         except AccesDeniedError as excp:
             # prevent from saving username by reset
-            print(self._credentials.username)
-            print(self._credentials._password)
             self._credentials.set()  # reset username and password
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, the username was reset.'
             raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp
         return new_token
 
-    def check_token(self) -> bool:
+    def check_token(self, token: str) -> bool:
         """
         :returns: True if the token is still valid
         """
-        if self._credentials.token is not None:
-            return CheckTokenRequest(self, self._credentials.token).run()
-        return False
+        return CheckTokenRequest(self, token).run()
 
     def revoke_token(self) -> Optional[requests.Response]:
         """
