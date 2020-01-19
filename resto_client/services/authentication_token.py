@@ -20,8 +20,7 @@ from resto_client.generic.property_decoration import managed_getter, managed_set
 
 
 if TYPE_CHECKING:
-    from resto_client.services.authentication_service import \
-        AuthenticationService  # @UnusedImport
+    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class AuthenticationToken():

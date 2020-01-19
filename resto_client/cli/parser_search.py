@@ -40,6 +40,7 @@ def get_table_help_criteria() -> str:
     """
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
     """
+    # TODO: First part should go into resto_criteria
     try:
         resto_server = build_resto_server_parameters().resto_server
         resto_protocol = resto_server.resto_service.service_access.protocol
