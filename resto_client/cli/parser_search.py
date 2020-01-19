@@ -42,7 +42,7 @@ def get_table_help_criteria() -> str:
     """
     # TODO: First part should go into resto_criteria
     try:
-        resto_server = build_resto_server_parameters().resto_server
+        resto_server = build_resto_server_parameters()
         resto_protocol = resto_server.resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
         # TODO: print server name instead of server protocol

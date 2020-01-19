@@ -42,7 +42,7 @@ def cli_show_collection(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.server_params = build_resto_server_parameters(args)
-    resto_server = args.server_params.resto_server
+    resto_server = args.server_params
     service = resto_server.resto_service
     collection = service.get_collection(collection=resto_server.current_collection)
     print(collection)
@@ -59,7 +59,7 @@ def cli_show_server(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.server_params = build_resto_server_parameters(args)
-    resto_server = args.server_params.resto_server
+    resto_server = args.server_params
     service = resto_server.resto_service
     print(service.show(with_stats=args.stats))
 
@@ -72,7 +72,7 @@ def cli_show_features(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.server_params = build_resto_server_parameters(args)
-    resto_server = args.server_params.resto_server
+    resto_server = args.server_params
     features = create_features_from_ids(resto_server, args.feature_id)
 
     for feature in features:

@@ -12,8 +12,6 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional
-
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.services.resto_server import RestoServer
 
@@ -22,20 +20,10 @@ class RestoClientNoPersistedServer(RestoClientUserError):
     """ Exception raised when no persisted server found """
 
 
-class RestoServerParameters():
+class RestoServerParameters(RestoServer):
     """
     A class holding the persisted server parameters
     """
-
-    def __init__(self, server_name: str) -> None:
-        """
-        Constructor
-
-        :param server_name: the name of the server.
-        """
-        server_name = server_name.lower()
-        self.resto_server = RestoServer(server_name)
-        self._server_name: Optional[str] = server_name
 
     @classmethod
     def persisted(cls, persisted_params: dict) -> 'RestoServerParameters':
@@ -43,7 +31,7 @@ class RestoServerParameters():
         Build an instance from the persisted server parameters.
 
         :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
-        :returns: an instance of RestoServerParameters built from persisted parameters
+        :returns: a RestoServer built from persisted parameters
         """
         # Retrieve persisted server name and build an empty server parameters instance
         persisted_server_name = persisted_params.get('server_name')
@@ -66,66 +54,6 @@ class RestoServerParameters():
                                                     token_value=persisted_token)
 
         return persisted_server_parameters
-
-    @property
-    def server_name(self) -> Optional[str]:
-        """
-        :returns: the name of the server
-        """
-        return self._server_name
-
-    @server_name.setter
-    def server_name(self, server_name: Optional[str]) -> None:
-        if server_name is None:
-            self.current_collection = None
-            self.set_credentials(username=None)
-        else:
-            server_name = server_name.lower()
-            if server_name != self._server_name:
-                self.resto_server = RestoServer(server_name)
-                self.current_collection = None
-                self.set_credentials(username=None)
-        self._server_name = server_name
-
-    @property
-    def current_collection(self) -> Optional[str]:
-        """
-        :returns: the name of the current collection
-        """
-        return self.resto_server.current_collection
-
-    @current_collection.setter
-    def current_collection(self, collection_name: str) -> None:
-        self.resto_server.current_collection = collection_name
-
-    def set_credentials(self,
-                        username: Optional[str]=None,
-                        password: Optional[str]=None,
-                        token_value: Optional[str]=None) -> None:
-        """
-        Set the credentials to be used by the RestoServer.
-
-        :param username: name of the account on the server
-        :param password: account password
-        :param token_value: a token associated to these credentials
-        """
-        self.resto_server.set_credentials(username=username,
-                                          password=password,
-                                          token_value=token_value)
-
-    @property
-    def username(self) -> Optional[str]:
-        """
-        :returns: the username to use with this server
-        """
-        return self.resto_server.username
-
-    @property
-    def token(self) -> Optional[str]:
-        """
-        :returns: the token to use with this server
-        """
-        return self.resto_server.token
 
     def update_persisted(self, persisted_params: dict) -> None:
         self._update_persisted_attr(persisted_params, 'server_name')
