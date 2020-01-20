@@ -54,7 +54,7 @@ def build_resto_server_persistable(args: Optional[argparse.Namespace] = None
             msg = 'No server name specified and no server currently set in the parameters.'
             raise RestoClientNoPersistedServer(msg)
         server = RestoServerPersistable.new_server(server_name=server_name,
-                                                   collection_name=collection_name,
+                                                   current_collection=collection_name,
                                                    username=username, password=password)
 
     except RestoClientUserError:
@@ -81,16 +81,22 @@ def build_persisted_server(server_name: Optional[str] = None,
     :returns: RestoServer instance suitable for further processing in CLI context
     :raises RestoClientNoPersistedServer: when no persisted server can be found
     """
-    server = RestoServerPersistable.build_from(RESTO_CLIENT_SETTINGS)
-    if server_name is not None and server_name != server.server_name:
-        # Persisted server does not fit requested server. Drop it.
+    # Firstly discard the case where a server is persisted and is not the requested server
+    persisted_server_name = RESTO_CLIENT_SETTINGS.get('server_name')
+    if server_name is not None and persisted_server_name is not None:
+        if server_name.lower() != persisted_server_name.lower():
+            # Persisted server does not fit requested server. Drop it.
+            raise RestoClientNoPersistedServer()
+
+    # build the server from the persisted parameters
+    try:
+        server = RestoServerPersistable.build_from_dict(RESTO_CLIENT_SETTINGS)
+    except KeyError:
         raise RestoClientNoPersistedServer()
 
+    # update the server with parameters specified as arguments
     if collection_name is not None:
-        # ensure to delete previous collection in case it was equal to this one
-        server.current_collection = None
         server.current_collection = collection_name
-
     if username is not None or password is not None:
         server.set_credentials(username=username, password=password)
     return server

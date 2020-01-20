@@ -22,38 +22,8 @@ class RestoClientNoPersistedServer(RestoClientUserError):
 
 class RestoServerPersistable(RestoServer):
     """
-    A class for building a RestoSerevr whose parameters can be persisted
+    A class for building a RestoServer whose parameters can be persisted
     """
-
-    @classmethod
-    def build_from(cls, persisted_params: dict) -> 'RestoServerPersistable':
-        """
-        Build an instance from a set of persisted server parameters.
-
-        :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
-        :returns: a RestoServer built from persisted parameters
-        """
-        # Retrieve persisted server name and build an empty server parameters instance
-        persisted_server_name = persisted_params.get('server_name')
-        if persisted_server_name is None:
-            msg = 'No server currently set in the persisted parameters.'
-            raise RestoClientNoPersistedServer(msg)
-        persisted_server_parameters = cls(persisted_server_name)
-
-        # Retrieve persisted collection name
-        persisted_collection_name = persisted_params.get('current_collection')
-        # Update server parameters instance to trigger RestoServer update.
-        persisted_server_parameters.current_collection = persisted_collection_name
-
-        # Retrieve persisted username
-        persisted_username = persisted_params.get('username')
-        # Retrieve persisted token
-        persisted_token = persisted_params.get('token')
-        # Update server parameters instance to trigger RestoServer update.
-        persisted_server_parameters.set_credentials(username=persisted_username,
-                                                    token_value=persisted_token)
-
-        return persisted_server_parameters
 
     def update_persisted(self, persisted_params: dict) -> None:
         self._update_persisted_attr(persisted_params, 'server_name')

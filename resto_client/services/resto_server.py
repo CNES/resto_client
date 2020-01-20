@@ -44,7 +44,7 @@ class RestoServer():
     @classmethod
     def new_server(cls: Type[RestoServerType],
                    server_name: str,
-                   collection_name: Optional[str] = None,
+                   current_collection: Optional[str] = None,
                    username: Optional[str] = None,
                    password: Optional[str] = None,
                    token: Optional[str] = None) -> 'RestoServerType':
@@ -52,7 +52,7 @@ class RestoServer():
         Build a new RestoServer instance from arguments.
 
         :param server_name: name of the server to build
-        :param collection_name: name of the collection to use
+        :param current_collection: name of the collection to use
         :param username: account to use on this server
         :param password: account password on the server
         :param token: an existing token associated to this account (will be checked prior its use)
@@ -60,8 +60,33 @@ class RestoServer():
         """
         server = cls(server_name)
         server.set_credentials(username=username, password=password, token_value=token)
-        server.current_collection = collection_name
+        server.current_collection = current_collection
         return server
+
+    @classmethod
+    def build_from_dict(cls: Type[RestoServerType],
+                        server_parameters: dict) -> 'RestoServerType':
+        """
+        Build an instance from a set of parameters defined in a dictionary.
+
+        :param server_parameters: the set of parameters needed for building the server
+        :raises KeyError: when no server name is found in the parameters
+        :returns: a RestoServer built from server parameters
+        """
+        # Retrieve the server name in the dictionary
+        server_name = server_parameters.get('server_name')
+        if server_name is None:
+            msg = 'No server name defined in the server parameters.'
+            raise KeyError(msg)
+
+        # Retrieve other server parameters in the dictionary
+        collection_name = server_parameters.get('current_collection')
+        username = server_parameters.get('username')
+        token = server_parameters.get('token')
+
+        # Build a new_server with these parameters
+        return cls.new_server(server_name, current_collection=collection_name,
+                              username=username, token=token)
 
     def _init_from_db(self, server_name: str) -> None:
         """
