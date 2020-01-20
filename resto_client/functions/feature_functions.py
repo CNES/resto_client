@@ -31,17 +31,12 @@ def create_features_from_ids(server: RestoServer,
     :raises RestoClientUserError: when the resto service is not initialized
     :raises ValueError: When retrieved feature id is different from requested feature id
     """
-    if server.resto_service is None:
-        raise RestoClientUserError('No resto service currently defined.')
-
     features_list = []
     if not isinstance(features_ids, list):
         features_ids = [features_ids]
 
-    collection_name = server.current_collection
     for feature_id in features_ids:
-        # TODO: Declare method in RestoServer as proxies
-        feature = server.resto_service.get_feature_by_id(feature_id, collection_name)
+        feature = server.get_feature_by_id(feature_id)
         features_list.append(feature)
 
     return features_list

@@ -15,12 +15,14 @@
 from typing import Optional, TypeVar, Type
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.resto_criteria import RestoCriteria
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .authentication_service import AuthenticationService
 from .resto_service import RestoService
+
 
 RestoServerType = TypeVar('RestoServerType', bound='RestoServer')
 
@@ -175,13 +177,27 @@ class RestoServer():
 # +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
 
     def search_current_collection(self, criteria: RestoCriteria) -> RestoFeatureCollection:
-        # TODO: change to pass a dict instead of a RestoCriteria and build RestoCriteria internally
         """
         Search the current collection using search criteria
         """
+        # TODO: change to pass a dict instead of a RestoCriteria and build RestoCriteria internally
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         return self.resto_service.search_collection(criteria, self.current_collection)
+
+    def get_feature_by_id(self, feature_id: str, collection_name: Optional[str] = None) \
+            -> RestoFeature:
+        """
+        Search a collection using search criteria
+
+        :param feature_id: the feature identifier in the collection
+        :param collection_name: name of the collection to use. Default to the current collection.
+        :returns: a resto feature
+        :raises RestoClientUserError: when the resto service is not initialized
+        """
+        if self.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
+        return self.resto_service.get_feature_by_id(feature_id, collection_name)
 
     def __str__(self) -> str:
         msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'
