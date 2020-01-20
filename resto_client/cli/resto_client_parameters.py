@@ -20,6 +20,7 @@ from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 from resto_client.generic.user_dirs import user_download_dir
 
+from .persistence import PersistedAttributes
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
@@ -76,11 +77,12 @@ def _check_region(key_region: str) -> str:
     return key_region
 
 
-class RestoClientParameters():
+class RestoClientParameters(PersistedAttributes):
     """
     Class implementing parameters used by resto client.
     """
     properties_storage = RESTO_CLIENT_SETTINGS
+    persisted_attributes = ['region', 'download_dir', 'verbosity']
 
     def __init__(self,
                  region: Optional[str]=None,
@@ -167,13 +169,3 @@ class RestoClientParameters():
         :returns: True if verbosity is set
         """
         return RestoClientParameters.properties_storage.get(VERBOSITY_KEY) is not None
-
-    def update_persisted(self, persisted_params: dict) -> None:
-        self._update_persisted_attr(persisted_params, 'region')
-        self._update_persisted_attr(persisted_params, 'download_dir')
-        self._update_persisted_attr(persisted_params, 'verbosity')
-
-    def _update_persisted_attr(self, persisted_params: dict, attr_name: str) -> None:
-        persisted_params[attr_name] = getattr(self, attr_name)
-        if persisted_params[attr_name] is None:
-            del persisted_params[attr_name]

@@ -12,9 +12,11 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from abc import abstractmethod
 import atexit
 from typing import Iterable, Optional, Callable
 from typing import List  # @UnusedImport
+
 from resto_client.settings.dict_settings import DictSettingsJson
 
 
@@ -47,3 +49,28 @@ def persist_settings(settings: Iterable[DictSettingsJson],
         persisted_settings.append(setting)
 
     atexit.register(_save_settings)
+
+
+class PersistedAttributes():
+    """
+    A class for persisting declared attributes of inheriting classes
+    """
+
+    @property
+    @abstractmethod
+    def persisted_attributes(self) -> List[str]:
+        """
+        :returns: the attributes to persist, defined at the inheriting class level.
+        """
+
+    def update_persisted(self, persisted_params: dict) -> None:
+        """
+        Update the dictionary given as argument by recording the (attribute_name, attribute_value)
+        pairs in it or removing the attribute_name entry if attribute_value is  None.
+
+        :param persisted_params: dictionary to update with peristed attributes
+        """
+        for attr_name in self.persisted_attributes:
+            persisted_params[attr_name] = getattr(self, attr_name)
+            if persisted_params[attr_name] is None:
+                del persisted_params[attr_name]
