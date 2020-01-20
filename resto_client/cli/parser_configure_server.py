@@ -73,7 +73,7 @@ def add_configure_server_subparser(sub_parsers: argparse._SubParsersAction) -> N
         description='Allows to create, modify or delete servers characteristics: url, type, etc.',
         epilog='Servers definition is stored in a configuration file and can be edited using this'
         ' command.')
-    help_msg = 'For more help: {} configure_server <parameter> -h'
+    help_msg = 'For more help: {} <parameter> -h'
     sub_parsers_configure_server = parser_configure_server.add_subparsers(
         description=help_msg.format(parser_configure_server.prog))
 

@@ -48,7 +48,7 @@ def add_download_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     parser_download = sub_parsers.add_parser('download', help='download features files: '
                                              'product, quicklook, thumbnail or annexes',
                                              description='Download feature files from the server.')
-    help_msg = 'For more help: {} download <feature-file> -h'
+    help_msg = 'For more help: {} <file-type> -h'
     sub_parsers_download = parser_download.add_subparsers(
         description=help_msg.format(parser_download.prog), dest='download_type')
 

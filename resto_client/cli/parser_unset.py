@@ -88,7 +88,7 @@ def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                           'verbosity',
                                           description='Reset application parameters to their '
                                           ' default values.')
-    help_msg = 'For more help: {} unset <parameter> -h'
+    help_msg = 'For more help: {} <parameter> -h'
     sub_parsers_unset = parser_unset.add_subparsers(description=help_msg.format(parser_unset.prog))
 
     add_unset_server_parser(sub_parsers_unset)
