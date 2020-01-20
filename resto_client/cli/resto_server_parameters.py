@@ -20,13 +20,13 @@ class RestoClientNoPersistedServer(RestoClientUserError):
     """ Exception raised when no persisted server found """
 
 
-class RestoServerParameters(RestoServer):
+class RestoServerPersistable(RestoServer):
     """
-    A class holding the persisted server parameters
+    A class for building a RestoSerevr whose parameters can be persisted
     """
 
     @classmethod
-    def persisted(cls, persisted_params: dict) -> 'RestoServerParameters':
+    def persisted(cls, persisted_params: dict) -> 'RestoServerPersistable':
         """
         Build an instance from the persisted server parameters.
 

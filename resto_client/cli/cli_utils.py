@@ -19,20 +19,20 @@ from resto_client.base_exceptions import RestoClientUserError
 
 from .resto_client_parameters import RestoClientParameters
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
-from .resto_server_parameters import RestoServerParameters, RestoClientNoPersistedServer
+from .resto_server_parameters import RestoServerPersistable, RestoClientNoPersistedServer
 
 
 def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
-                                  ) -> RestoServerParameters:
+                                  ) -> RestoServerPersistable:
     """
-    Build a RestoServerParameters instance from parsed arguments and persisted parameters, suitable
+    Build a RestoServerPersistable instance from parsed arguments and persisted parameters, suitable
     for further processing in CLI context.
 
     :param args: arguments as parsed by argparse
     :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters and
                                           no server name defined.
     :raises RestoClientUserError: when arguments are inconsistent with persisted parameters.
-    :returns: RestoServerParameters instance suitable for further processing in CLI context
+    :returns: a RestoServer instance suitable for further processing in CLI context
     """
     if args is None:
         server_name = None
@@ -45,7 +45,7 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
         password = args.password if hasattr(args, 'password') else None
         collection_name = args.collection_name if hasattr(args, 'collection_name') else None
     try:
-        server = RestoServerParameters.persisted(RESTO_CLIENT_SETTINGS)
+        server = RestoServerPersistable.persisted(RESTO_CLIENT_SETTINGS)
         if server_name is not None and server_name != server:
             # Persisted server does not fit requested server. Drop it.
             raise RestoClientNoPersistedServer()
@@ -77,7 +77,7 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
 def _new_server(server_name: str,
                 collection_name: Optional[str] = None,
                 username: Optional[str] = None,
-                password: Optional[str] = None) -> RestoServerParameters:
+                password: Optional[str] = None) -> RestoServerPersistable:
     """
     Build a new RestoServer instance from arguments, suitable for further processing
     in CLI context.
@@ -88,7 +88,7 @@ def _new_server(server_name: str,
     :param password: account password on the server
     :returns: RestoServer instance suitable for further processing in CLI context
     """
-    server = RestoServerParameters(server_name)
+    server = RestoServerPersistable(server_name)
     server.set_credentials(username=username, password=password)
     server.current_collection = collection_name
     return server
