@@ -15,7 +15,6 @@
 from pathlib import Path
 from typing import List, Union
 
-from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.services.resto_server import RestoServer
 
@@ -45,7 +44,7 @@ def create_features_from_ids(server: RestoServer,
 # TODO: move as a method of RestoServer ?
 def download_features_files_from_id(resto_server: RestoServer,
                                     features_ids: Union[str, List[str]],
-                                    file: str,
+                                    file_type: str,
                                     download_dir: Path) -> None:
     """
     Download different file from id(s)
@@ -53,23 +52,16 @@ def download_features_files_from_id(resto_server: RestoServer,
     :param features_ids: id(s) of the feature(s) which as a file to download
     :param resto_server: the resto server to query
     :param download_dir: the path to the directory where download must be done.
-    :param file: file to download product, quicklook, thumbnail or annexes
-    :raises ValueError: if the file type is not supported
-    :raises ValueError: if the product id is not found in the current collection
-    :raises RestoClientUserError: when the resto service is not initialized
+    :param file_type: type of file to download: product, quicklook, thumbnail or annexes
     """
     if not isinstance(features_ids, list):
         features_ids = [features_ids]
 
     # Issue a search request into the collection to retrieve features.
-    resto_service = resto_server.resto_service
-    if resto_service is None:
-        raise RestoClientUserError('No resto service currently defined.')
     features = create_features_from_ids(resto_server, features_ids)
 
     for feature in features:
         # Do download
-        # TODO: Declare method in RestoServer as proxies
-        unused_downloaded_filename = resto_service.download_feature_file(feature,
-                                                                         file,
-                                                                         download_dir)
+        unused_downloaded_filename = resto_server.download_feature_file(feature,
+                                                                        file_type,
+                                                                        download_dir)

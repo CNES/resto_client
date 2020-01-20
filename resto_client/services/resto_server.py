@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from pathlib import Path
 from typing import Optional, TypeVar, Type
 
 from resto_client.base_exceptions import RestoClientUserError
@@ -204,6 +205,21 @@ class RestoServer():
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         return self.resto_service.get_feature_by_id(feature_id, collection_name)
+
+    def download_feature_file(self, feature: RestoFeature,
+                              file_type: str, download_dir: Path) -> Optional[str]:
+        """
+        Download different files of a feature
+
+        :param feature: a resto feature
+        :param download_dir: the path to the directory where download must be done.
+        :param file_type: type of file to download: product, quicklook, thumbnail or annexes
+        :returns: the path of the downloaded file
+        :raises RestoClientUserError: when the resto service is not initialized
+        """
+        if self.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
+        return self.resto_service.download_feature_file(feature, file_type, download_dir)
 
     def __str__(self) -> str:
         msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'
