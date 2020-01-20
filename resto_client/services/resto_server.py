@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Optional, TypeVar, Type, List, Union
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.resto_criteria import RestoCriteria
@@ -251,6 +252,28 @@ class RestoServer():
             if downloaded_filename is not None:
                 downloaded_filenames.append(downloaded_filename)
         return downloaded_filenames
+
+    def show_server(self, with_stats: bool=True) -> str:
+        """
+        :param  with_stats: if True the collections statistics are shown.
+        :returns: The server description as a tabulated listing
+        :raises RestoClientUserError: when the resto service is not initialized
+        """
+        if self.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
+        return self.resto_service.show(with_stats=with_stats)
+
+    def get_collection(self, collection: Optional[str]=None) -> RestoCollection:
+        """
+        Get a collection description from the resto service.
+
+        :param collection: the name of the collection to retrieve
+        :returns: the requested collection or the current one.
+        :raises RestoClientUserError: if collection is None and no current collection defined.
+        """
+        if self.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
+        return self.resto_service.get_collection(collection=collection)
 
     def __str__(self) -> str:
         msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'

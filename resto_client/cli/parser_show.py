@@ -14,8 +14,6 @@
 """
 import argparse
 
-from resto_client.base_exceptions import RestoClientUserError
-
 from .cli_utils import build_resto_server_persistable, build_resto_client_params
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser)
@@ -43,10 +41,7 @@ def cli_show_collection(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
-    service = args.resto_server.resto_service
-    if service is None:
-        raise RestoClientUserError('No resto service currently defined.')
-    collection = service.get_collection(collection=args.resto_server.current_collection)
+    collection = args.resto_server.get_collection(collection=args.resto_server.current_collection)
     print(collection)
     if not args.nostats:
         print(collection.statistics)
@@ -61,11 +56,8 @@ def cli_show_server(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
-    # TODO: change to show the server, not only the service
-    service = args.resto_server.resto_service
-    if service is None:
-        raise RestoClientUserError('No resto service currently defined.')
-    print(service.show(with_stats=args.stats))
+    server_description = args.resto_server.show_server(with_stats=args.stats)
+    print(server_description)
 
 
 def cli_show_features(args: argparse.Namespace) -> None:
@@ -77,7 +69,6 @@ def cli_show_features(args: argparse.Namespace) -> None:
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
     features = args.resto_server.get_features_from_ids(args.feature_id)
-
     for feature in features:
         print(feature)
 
@@ -89,7 +80,7 @@ def add_show_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     parser_show = sub_parsers.add_parser('show', help='show resto_client entities: '
                                          'settings, server, collection, feature',
                                          description='Show different resto_client entities.')
-    help_msg = 'For more help: {} show <entity> -h'
+    help_msg = 'For more help: {} <entity> -h'
     sub_parsers_show = parser_show.add_subparsers(description=help_msg.format(parser_show.prog))
 
     add_show_settings_parser(sub_parsers_show)
