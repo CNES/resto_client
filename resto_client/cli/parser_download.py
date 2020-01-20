@@ -15,8 +15,6 @@
 import argparse
 from pathlib import Path
 
-from resto_client.functions.feature_functions import download_features_files_from_id
-
 from .cli_utils import build_resto_client_params, build_resto_server_persistable
 from .parser_common import credentials_parser, features_in_collection_parser, EPILOG_FEATURES
 
@@ -31,7 +29,7 @@ is specified a default one is used, whose location depends on your system.
 
 def cli_download_files(args: argparse.Namespace) -> None:
     """
-    CLI adapter to download_features_files_from_id used by product, quicklook, thumbnail and annexes
+    CLI adapter to download_features_file_from_ids used by product, quicklook, thumbnail and annexes
     download sub-commands.
 
     :param args: arguments parsed by the CLI parser
@@ -39,8 +37,8 @@ def cli_download_files(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)
     args.resto_server = build_resto_server_persistable(args)
-    download_features_files_from_id(args.resto_server, args.feature_id, args.download_type,
-                                    Path(args.client_params.download_dir))
+    args.resto_server.download_features_file_from_ids(args.feature_id, args.download_type,
+                                                      Path(args.client_params.download_dir))
 
 
 def add_download_subparser(sub_parsers: argparse._SubParsersAction) -> None:

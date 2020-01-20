@@ -192,35 +192,24 @@ class RestoServer():
             raise RestoClientUserError('No resto service currently defined.')
         return self.resto_service.search_collection(criteria, collection_name)
 
-    def get_feature_by_id(self, feature_id: str, collection_name: Optional[str] = None) \
-            -> RestoFeature:
+    def get_features_from_ids(self, features_ids: Union[str, List[str]],
+                              collection_name: Optional[str] = None) -> List[RestoFeature]:
         """
-        Retrieve a feature by its identifier in a collection
-
-        :param feature_id: the feature identifier in the collection
-        :param collection_name: name of the collection to use. Default to the current collection.
-        :returns: a resto feature
-        :raises RestoClientUserError: when the resto service is not initialized
-        """
-        # FIXME: delete in favor of get_features_from_ids after adding collection_naame?
-        if self.resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
-        return self.resto_service.get_feature_by_id(feature_id, collection_name)
-
-    def get_features_from_ids(self, features_ids: Union[str, List[str]]) -> List[RestoFeature]:
-        """
-        Get a list of resto features in the current collection retrieved by their identifiers
+        Get a list of resto features retrieved by their identifiers
 
         :param features_ids: Feature(s) identifier(s)
+        :param collection_name: name of the collection to use. Default to the current collection.
         :returns: a list of Resto features
         :raises RestoClientUserError: when the resto service is not initialized
         """
+        if self.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
         features_list = []
         if not isinstance(features_ids, list):
             features_ids = [features_ids]
 
         for feature_id in features_ids:
-            feature = self.get_feature_by_id(feature_id)
+            feature = self.resto_service.get_feature_by_id(feature_id, collection_name)
             features_list.append(feature)
 
         return features_list
@@ -239,6 +228,29 @@ class RestoServer():
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         return self.resto_service.download_feature_file(feature, file_type, download_dir)
+
+    def download_features_file_from_ids(self,
+                                        features_ids: Union[str, List[str]],
+                                        file_type: str,
+                                        download_dir: Path) -> List[str]:
+        """
+        Download different file types from feature id(s)
+
+        :param features_ids: id(s) of the feature(s) which as a file to download
+        :param download_dir: the path to the directory where download must be done.
+        :param file_type: type of file to download: product, quicklook, thumbnail or annexes
+        :returns: the list of downloaded files paths
+        """
+        # Issue a search request into the collection to retrieve features.
+        features = self.get_features_from_ids(features_ids)
+
+        downloaded_filenames: List[str] = []
+        for feature in features:
+            # Do download
+            downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
+            if downloaded_filename is not None:
+                downloaded_filenames.append(downloaded_filename)
+        return downloaded_filenames
 
     def __str__(self) -> str:
         msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'

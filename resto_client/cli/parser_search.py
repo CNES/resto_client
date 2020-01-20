@@ -27,7 +27,6 @@ from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_current_collection
-from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
 from .cli_utils import build_resto_client_params, build_resto_server_persistable
@@ -172,8 +171,8 @@ def cli_search_collection(args: Namespace) -> None:
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:
-        download_features_files_from_id(args.resto_server, search_feature_id, args.download,
-                                        Path(args.client_params.download_dir))
+        args.resto_server.download_features_file_from_ids(search_feature_id, args.download,
+                                                          Path(args.client_params.download_dir))
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
