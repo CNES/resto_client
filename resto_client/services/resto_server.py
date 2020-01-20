@@ -12,12 +12,14 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional
+from typing import Optional, TypeVar, Type
 
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .authentication_service import AuthenticationService
 from .resto_service import RestoService
+
+RestoServerType = TypeVar('RestoServerType', bound='RestoServer')
 
 
 class RestoServer():
@@ -38,6 +40,26 @@ class RestoServer():
 
         # set server_name which triggers server creation from the database if not None.
         self.server_name = server_name
+
+    @classmethod
+    def new_server(cls: Type[RestoServerType],
+                   server_name: str,
+                   collection_name: Optional[str] = None,
+                   username: Optional[str] = None,
+                   password: Optional[str] = None) -> 'RestoServerType':
+        """
+        Build a new RestoServer instance from arguments.
+
+        :param server_name: name of the server to build
+        :param collection_name: name of the collection to use
+        :param username: account to use on this server
+        :param password: account password on the server
+        :returns: a new resto server built from arguments and servers database
+        """
+        server = cls(server_name)
+        server.set_credentials(username=username, password=password)
+        server.current_collection = collection_name
+        return server
 
     def _init_from_db(self, server_name: str) -> None:
         """
