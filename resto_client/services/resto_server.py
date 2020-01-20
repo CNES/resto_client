@@ -46,7 +46,8 @@ class RestoServer():
                    server_name: str,
                    collection_name: Optional[str] = None,
                    username: Optional[str] = None,
-                   password: Optional[str] = None) -> 'RestoServerType':
+                   password: Optional[str] = None,
+                   token: Optional[str] = None) -> 'RestoServerType':
         """
         Build a new RestoServer instance from arguments.
 
@@ -54,10 +55,11 @@ class RestoServer():
         :param collection_name: name of the collection to use
         :param username: account to use on this server
         :param password: account password on the server
+        :param token: an existing token associated to this account (will be checked prior its use)
         :returns: a new resto server built from arguments and servers database
         """
         server = cls(server_name)
-        server.set_credentials(username=username, password=password)
+        server.set_credentials(username=username, password=password, token_value=token)
         server.current_collection = collection_name
         return server
 
