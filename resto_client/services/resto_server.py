@@ -13,7 +13,7 @@
    limitations under the License.
 """
 from pathlib import Path
-from typing import Optional, TypeVar, Type
+from typing import Optional, TypeVar, Type, List, Union
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
@@ -202,9 +202,28 @@ class RestoServer():
         :returns: a resto feature
         :raises RestoClientUserError: when the resto service is not initialized
         """
+        # FIXME: delete in favor of get_features_from_ids after adding collection_naame?
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         return self.resto_service.get_feature_by_id(feature_id, collection_name)
+
+    def get_features_from_ids(self, features_ids: Union[str, List[str]]) -> List[RestoFeature]:
+        """
+        Get a list of resto features in the current collection retrieved by their identifiers
+
+        :param features_ids: Feature(s) identifier(s)
+        :returns: a list of Resto features
+        :raises RestoClientUserError: when the resto service is not initialized
+        """
+        features_list = []
+        if not isinstance(features_ids, list):
+            features_ids = [features_ids]
+
+        for feature_id in features_ids:
+            feature = self.get_feature_by_id(feature_id)
+            features_list.append(feature)
+
+        return features_list
 
     def download_feature_file(self, feature: RestoFeature,
                               file_type: str, download_dir: Path) -> Optional[str]:

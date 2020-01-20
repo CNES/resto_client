@@ -15,7 +15,6 @@
 import argparse
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.functions.feature_functions import create_features_from_ids
 
 from .cli_utils import build_resto_server_persistable, build_resto_client_params
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
@@ -77,7 +76,7 @@ def cli_show_features(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
-    features = create_features_from_ids(args.resto_server, args.feature_id)
+    features = args.resto_server.get_features_from_ids(args.feature_id)
 
     for feature in features:
         print(feature)
