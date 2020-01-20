@@ -25,8 +25,8 @@ def cli_unset_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_persistable(args)
-    args.server_params.server_name = None
+    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server.server_name = None
 
 
 def cli_unset_collection(args: argparse.Namespace) -> None:
@@ -35,8 +35,8 @@ def cli_unset_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_persistable(args)
-    args.server_params.current_collection = None
+    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server.current_collection = None
 
 
 def cli_unset_account(args: argparse.Namespace) -> None:
@@ -45,8 +45,8 @@ def cli_unset_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_persistable(args)
-    args.server_params.set_credentials(username=None)
+    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server.set_credentials(username=None)
 
 
 def cli_unset_download_dir(args: argparse.Namespace) -> None:

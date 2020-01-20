@@ -140,9 +140,9 @@ def cli_search_collection(args: Namespace) -> None:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     args.client_params = build_resto_client_params(args)
-    args.server_params = build_resto_server_persistable(args)
-    resto_server = args.server_params
-    features_collection = search_collection(resto_server, args.client_params.region, criteria_dict)
+    args.resto_server = build_resto_server_persistable(args)
+    features_collection = search_collection(args.resto_server, args.client_params.region,
+                                            criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
@@ -169,7 +169,7 @@ def cli_search_collection(args: Namespace) -> None:
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:
-        download_features_files_from_id(resto_server, search_feature_id, args.download,
+        download_features_files_from_id(args.resto_server, search_feature_id, args.download,
                                         Path(args.client_params.download_dir))
 
 

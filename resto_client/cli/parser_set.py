@@ -28,7 +28,7 @@ def cli_set_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_persistable(args)
+    args.resto_server = build_resto_server_persistable(args)
 
 
 def cli_set_collection(args: argparse.Namespace) -> None:
@@ -37,7 +37,7 @@ def cli_set_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_persistable(args)
+    args.resto_server = build_resto_server_persistable(args)
 
 
 def cli_set_account(args: argparse.Namespace) -> None:
@@ -46,7 +46,7 @@ def cli_set_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_persistable(args)
+    args.resto_server = build_resto_server_persistable(args)
 
 
 def cli_set_download_dir(args: argparse.Namespace) -> None:

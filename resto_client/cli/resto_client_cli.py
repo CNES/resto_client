@@ -105,8 +105,8 @@ def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
             with colorama_text():
                 print(Fore.RED + Style.BRIGHT + str(excp) + Style.RESET_ALL)
 
-    if hasattr(args, 'server_params'):
-        args.server_params.update_persisted(RESTO_CLIENT_SETTINGS)
+    if hasattr(args, 'resto_server'):
+        args.resto_server.update_persisted(RESTO_CLIENT_SETTINGS)
 
     if hasattr(args, 'client_params'):
         args.client_params.update_persisted(RESTO_CLIENT_SETTINGS)
