@@ -310,13 +310,11 @@ class RestoCriteria(dict):
             else:
                 raise RestoClientDesignError('region must be a str or None')
 
-    def update(self, criteria: dict) -> None:  # type:ignore
+    def update(self, *args: Any, **kwargs: Any) -> None:
         """
-        Update the Criteria dict with new criteria and test them
-
-        :param criteria : dict of criteria
+        Update this dictionary such that __setitem__ is called
         """
-        for key, value in criteria.items():
+        for key, value in dict(*args, **kwargs).items():
             self[key] = value
 
     def _manage_geometry(self, region: Optional[str]=None) -> None:
