@@ -39,10 +39,13 @@ from .resto_server_persistable import RestoClientNoPersistedServer
 def get_table_help_criteria() -> str:
     """
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
+    :raises RestoClientUserError: when the resto service is not initialized
     """
     # TODO: First part should go into resto_criteria
     try:
         resto_server = build_resto_server_persistable()
+        if resto_server.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
         resto_protocol = resto_server.resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
         # TODO: print server name instead of server protocol

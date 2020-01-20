@@ -157,9 +157,18 @@ class AuthenticationCredentials():
                                                                    username_defined)
 
     def check_token(self, token: str) -> bool:
+        """
+        Callback to the parent service to run a check token request.
+
+        :param token: the token value to check
+        :returns: True if the token is valid, False otherwise
+        """
         return self.parent_service.check_token(token)
 
     def get_token(self) -> str:
+        """
+        Callback to the parent service to run a get token request.
+        """
         return self.parent_service.get_token()
 
     def __str__(self) -> str:

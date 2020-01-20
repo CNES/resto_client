@@ -14,6 +14,7 @@
 """
 from typing import Optional, Dict, Any
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.services.resto_server import RestoServer
 
@@ -30,8 +31,11 @@ def search_collection(resto_server: RestoServer,
     :param region: the name of the region to use
     :param criteria: list of criterion for search
     :returns: the collection of retrieved features
+    :raises RestoClientUserError: when the resto service is not initialized
     """
     resto_service = resto_server.resto_service
+    if resto_service is None:
+        raise RestoClientUserError('No resto service currently defined.')
     new_criteria = RestoCriteria(resto_service.service_access.protocol)
     if criteria is not None:
         new_criteria.update(criteria)

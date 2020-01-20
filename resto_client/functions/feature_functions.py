@@ -15,6 +15,7 @@
 from pathlib import Path
 from typing import List, Union
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.services.resto_server import RestoServer
 
@@ -27,8 +28,12 @@ def create_features_from_ids(server: RestoServer,
     :param server: Resto server
     :param features_ids: Feature(s) identifier(s)
     :returns: a list of Resto features
+    :raises RestoClientUserError: when the resto service is not initialized
     :raises ValueError: When retrieved feature id is different from requested feature id
     """
+    if server.resto_service is None:
+        raise RestoClientUserError('No resto service currently defined.')
+
     features_list = []
     if not isinstance(features_ids, list):
         features_ids = [features_ids]
@@ -56,12 +61,15 @@ def download_features_files_from_id(resto_server: RestoServer,
     :param file: file to download product, quicklook, thumbnail or annexes
     :raises ValueError: if the file type is not supported
     :raises ValueError: if the product id is not found in the current collection
+    :raises RestoClientUserError: when the resto service is not initialized
     """
     if not isinstance(features_ids, list):
         features_ids = [features_ids]
 
     # Issue a search request into the collection to retrieve features.
     resto_service = resto_server.resto_service
+    if resto_service is None:
+        raise RestoClientUserError('No resto service currently defined.')
     features = create_features_from_ids(resto_server, features_ids)
 
     for feature in features:

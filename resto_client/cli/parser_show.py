@@ -14,6 +14,7 @@
 """
 import argparse
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.functions.feature_functions import create_features_from_ids
 
 from .cli_utils import build_resto_server_persistable, build_resto_client_params
@@ -39,10 +40,13 @@ def cli_show_collection(args: argparse.Namespace) -> None:
     CLI adapter to list_collection function
 
     :param args: arguments parsed by the CLI parser
+    :raises RestoClientUserError: when the resto service is not initialized
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
     service = args.resto_server.resto_service
+    if service is None:
+        raise RestoClientUserError('No resto service currently defined.')
     collection = service.get_collection(collection=args.resto_server.current_collection)
     print(collection)
     if not args.nostats:
@@ -58,7 +62,10 @@ def cli_show_server(args: argparse.Namespace) -> None:
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
+    # TODO: change to show the server, not only the service
     service = args.resto_server.resto_service
+    if service is None:
+        raise RestoClientUserError('No resto service currently defined.')
     print(service.show(with_stats=args.stats))
 
 
