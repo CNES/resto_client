@@ -17,6 +17,7 @@ import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.generic.user_dirs import user_download_dir
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY, TOKEN_KEY,
                                                  VERBOSITY_KEY, REGION_KEY, COLLECTION_KEY)
@@ -115,11 +116,12 @@ class UTestCliUnset(unittest.TestCase):
         # With download directory already persisted
         directory_test = str(Path.home())
         resto_client_run(arguments=['set', 'download_dir', directory_test])
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], directory_test)
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertTrue(DOWNLOAD_DIR_KEY not in RESTO_CLIENT_SETTINGS)
-        # With no download directory persisted
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], str(user_download_dir()))
+        # With default directory persisted
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertTrue(DOWNLOAD_DIR_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], str(user_download_dir()))
 
     def test_n_unset_verbosity(self) -> None:
         """
