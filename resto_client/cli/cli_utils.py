@@ -19,7 +19,7 @@ from resto_client.base_exceptions import RestoClientUserError
 
 from .resto_client_parameters import RestoClientParameters
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
-from .resto_server_parameters import RestoServerPersistable, RestoClientNoPersistedServer
+from .resto_server_persistable import RestoServerPersistable, RestoClientNoPersistedServer
 
 
 def build_resto_server_parameters(args: Optional[argparse.Namespace] = None

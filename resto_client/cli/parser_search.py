@@ -33,7 +33,7 @@ from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA
 from .cli_utils import build_resto_client_params, build_resto_server_parameters
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
-from .resto_server_parameters import RestoClientNoPersistedServer
+from .resto_server_persistable import RestoClientNoPersistedServer
 
 
 def get_table_help_criteria() -> str:
@@ -141,7 +141,7 @@ def cli_search_collection(args: Namespace) -> None:
 
     args.client_params = build_resto_client_params(args)
     args.server_params = build_resto_server_parameters(args)
-    resto_server = args.server_params.resto_server
+    resto_server = args.server_params
     features_collection = search_collection(resto_server, args.client_params.region, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
