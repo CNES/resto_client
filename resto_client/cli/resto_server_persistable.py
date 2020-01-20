@@ -26,9 +26,9 @@ class RestoServerPersistable(RestoServer):
     """
 
     @classmethod
-    def persisted(cls, persisted_params: dict) -> 'RestoServerPersistable':
+    def build_from(cls, persisted_params: dict) -> 'RestoServerPersistable':
         """
-        Build an instance from the persisted server parameters.
+        Build an instance from a set of persisted server parameters.
 
         :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
         :returns: a RestoServer built from persisted parameters

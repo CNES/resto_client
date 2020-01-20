@@ -78,7 +78,7 @@ def build_persisted_server(server_name: Optional[str] = None,
     :returns: RestoServer instance suitable for further processing in CLI context
     :raises RestoClientNoPersistedServer: when no persisted server can be found
     """
-    server = RestoServerPersistable.persisted(RESTO_CLIENT_SETTINGS)
+    server = RestoServerPersistable.build_from(RESTO_CLIENT_SETTINGS)
     if server_name is not None and server_name != server.server_name:
         # Persisted server does not fit requested server. Drop it.
         raise RestoClientNoPersistedServer()
