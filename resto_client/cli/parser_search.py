@@ -30,7 +30,7 @@ from resto_client.functions.collections_functions import search_collection
 from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
-from .cli_utils import build_resto_client_params, build_resto_server_parameters
+from .cli_utils import build_resto_client_params, build_resto_server_persistable
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
 from .resto_server_persistable import RestoClientNoPersistedServer
@@ -42,7 +42,7 @@ def get_table_help_criteria() -> str:
     """
     # TODO: First part should go into resto_criteria
     try:
-        resto_server = build_resto_server_parameters()
+        resto_server = build_resto_server_persistable()
         resto_protocol = resto_server.resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
         # TODO: print server name instead of server protocol
@@ -140,7 +140,7 @@ def cli_search_collection(args: Namespace) -> None:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     args.client_params = build_resto_client_params(args)
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     resto_server = args.server_params
     features_collection = search_collection(resto_server, args.client_params.region, criteria_dict)
 

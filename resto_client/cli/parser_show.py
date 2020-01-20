@@ -16,7 +16,7 @@ import argparse
 
 from resto_client.functions.feature_functions import create_features_from_ids
 
-from .cli_utils import build_resto_server_parameters, build_resto_client_params
+from .cli_utils import build_resto_server_persistable, build_resto_client_params
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser)
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
@@ -41,7 +41,7 @@ def cli_show_collection(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     resto_server = args.server_params
     service = resto_server.resto_service
     collection = service.get_collection(collection=resto_server.current_collection)
@@ -58,7 +58,7 @@ def cli_show_server(args: argparse.Namespace) -> None:
     :raises RestoClientUserError: when no current server defined.
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     resto_server = args.server_params
     service = resto_server.resto_service
     print(service.show(with_stats=args.stats))
@@ -71,7 +71,7 @@ def cli_show_features(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     """
     args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     resto_server = args.server_params
     features = create_features_from_ids(resto_server, args.feature_id)
 

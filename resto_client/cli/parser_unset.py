@@ -14,7 +14,7 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_parameters
+from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
@@ -25,7 +25,7 @@ def cli_unset_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     args.server_params.server_name = None
 
 
@@ -35,7 +35,7 @@ def cli_unset_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     args.server_params.current_collection = None
 
 
@@ -45,7 +45,7 @@ def cli_unset_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.server_params = build_resto_server_parameters(args)
+    args.server_params = build_resto_server_persistable(args)
     args.server_params.set_credentials(username=None)
 
 

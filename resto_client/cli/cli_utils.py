@@ -22,8 +22,8 @@ from .resto_client_settings import RESTO_CLIENT_SETTINGS
 from .resto_server_persistable import RestoServerPersistable, RestoClientNoPersistedServer
 
 
-def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
-                                  ) -> RestoServerPersistable:
+def build_resto_server_persistable(args: Optional[argparse.Namespace] = None
+                                   ) -> RestoServerPersistable:
     """
     Build a RestoServerPersistable instance from parsed arguments and persisted parameters, suitable
     for further processing in CLI context.
@@ -45,25 +45,14 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
         password = args.password if hasattr(args, 'password') else None
         collection_name = args.collection_name if hasattr(args, 'collection_name') else None
     try:
-        server = RestoServerPersistable.persisted(RESTO_CLIENT_SETTINGS)
-        if server_name is not None and server_name != server:
-            # Persisted server does not fit requested server. Drop it.
-            raise RestoClientNoPersistedServer()
-
-        if collection_name is not None:
-            # ensure to delete previous collection in case it was equal to this one
-            server.current_collection = None
-            server.current_collection = collection_name
-
-        if username is not None or password is not None:
-            server.set_credentials(username=username, password=password)
+        server = build_persisted_server(server_name, collection_name, username, password)
 
     except RestoClientNoPersistedServer:
         # No persisted server or persisted one does not fit requested server_name
         if server_name is None:
             msg = 'No server name specified and no server currently set in the parameters.'
             raise RestoClientNoPersistedServer(msg)
-        server = _new_server(server_name, collection_name, username, password)
+        server = build_new_server(server_name, collection_name, username, password)
 
     except RestoClientUserError:
         raise
@@ -74,10 +63,40 @@ def build_resto_server_parameters(args: Optional[argparse.Namespace] = None
     return server
 
 
-def _new_server(server_name: str,
-                collection_name: Optional[str] = None,
-                username: Optional[str] = None,
-                password: Optional[str] = None) -> RestoServerPersistable:
+def build_persisted_server(server_name: Optional[str] = None,
+                           collection_name: Optional[str] = None,
+                           username: Optional[str] = None,
+                           password: Optional[str] = None) -> RestoServerPersistable:
+    """
+    Build a RestoServer instance from arguments and perisited parameters,
+    suitable for further processing in CLI context.
+
+    :param server_name: name of the server to build
+    :param collection_name: name of the collection to use
+    :param username: account to use on this server
+    :param password: account password on the server
+    :returns: RestoServer instance suitable for further processing in CLI context
+    :raises RestoClientNoPersistedServer: when no persisted server can be found
+    """
+    server = RestoServerPersistable.persisted(RESTO_CLIENT_SETTINGS)
+    if server_name is not None and server_name != server.server_name:
+        # Persisted server does not fit requested server. Drop it.
+        raise RestoClientNoPersistedServer()
+
+    if collection_name is not None:
+        # ensure to delete previous collection in case it was equal to this one
+        server.current_collection = None
+        server.current_collection = collection_name
+
+    if username is not None or password is not None:
+        server.set_credentials(username=username, password=password)
+    return server
+
+
+def build_new_server(server_name: str,
+                     collection_name: Optional[str] = None,
+                     username: Optional[str] = None,
+                     password: Optional[str] = None) -> RestoServerPersistable:
     """
     Build a new RestoServer instance from arguments, suitable for further processing
     in CLI context.
