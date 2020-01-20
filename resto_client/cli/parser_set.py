@@ -19,59 +19,27 @@ from resto_client.functions.aoi_utils import find_region_choice
 from .cli_utils import build_resto_client_params, build_resto_server_persistable
 from .resto_client_parameters import ALLOWED_VERBOSITY
 
-# TODO: factorize -> _cli_set_client_parameter() and _cli_set_server_parameter()
 
-
-def cli_set_server(args: argparse.Namespace) -> None:
+def cli_set_server_parameter(args: argparse.Namespace) -> None:
     """
     CLI adapter to set the persistent server parameters
 
-    :param args: arguments parsed by the CLI parser
-    """
-    args.resto_server = build_resto_server_persistable(args)
-
-
-def cli_set_collection(args: argparse.Namespace) -> None:
-    """
-    CLI adapter to set the collection to use
+    Parameters which can be set must belong to RestoServerPersistable.persisted_attributes list.
+    They must appear with this exact name in the argparse.Namespace argument. However they can
+    be absent or equal to None.
 
     :param args: arguments parsed by the CLI parser
     """
     args.resto_server = build_resto_server_persistable(args)
 
 
-def cli_set_account(args: argparse.Namespace) -> None:
+def cli_set_client_parameter(args: argparse.Namespace) -> None:
     """
-    CLI adapter to set the account to use
+    CLI adapter to set the persistent client parameters
 
-    :param args: arguments parsed by the CLI parser
-    """
-    args.resto_server = build_resto_server_persistable(args)
-
-
-def cli_set_download_dir(args: argparse.Namespace) -> None:
-    """
-    CLI adapter to set the default download directory
-
-    :param args: arguments parsed by the CLI parser
-    """
-    args.client_params = build_resto_client_params(args)
-    # FIXME: wrong argument name in parser
-    args.client_params.download_dir = args.path  # type: ignore
-
-
-def cli_set_region(args: argparse.Namespace) -> None:
-    """
-    CLI adapter to set the default region/AOI for search
-
-    :param args: arguments parsed by the CLI parser
-    """
-    args.client_params = build_resto_client_params(args)
-
-
-def cli_set_verbosity(args: argparse.Namespace) -> None:
-    """
-    CLI adapter to set the verbosity level
+    Parameters which can be set must belong to RestoClientParameters.persisted_attributes list.
+    They must appear with this exact name in the argparse.Namespace argument. However they can
+    be absent or equal to None.
 
     :param args: arguments parsed by the CLI parser
     """
@@ -95,7 +63,7 @@ def add_set_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                         'changed by issuing another set command or '
                                         'by providing their new value through commands options. '
                                         'See the unset subcommand to restore their default values.')
-    help_msg = 'For more help: {} set <parameter> -h'
+    help_msg = 'For more help: {} <parameter> -h'
     sub_parsers_set = parser_set.add_subparsers(description=help_msg.format(parser_set.prog))
 
     add_set_server_parser(sub_parsers_set)
@@ -113,7 +81,7 @@ def add_set_server_parser(sub_parsers_set: argparse._SubParsersAction) -> None:
     subparser = sub_parsers_set.add_parser('server', help='Set the resto server to use',
                                            description='Set the resto server to use.')
     subparser.add_argument("server_name", help="name of the resto server")
-    subparser.set_defaults(func=cli_set_server)
+    subparser.set_defaults(func=cli_set_server_parameter)
 
 
 def add_set_collection_parser(sub_parsers_set: argparse._SubParsersAction) -> None:
@@ -127,7 +95,7 @@ def add_set_collection_parser(sub_parsers_set: argparse._SubParsersAction) -> No
                                            'server, an error is issued and the previously stored '
                                            'collection is kept unmodified.')
     subparser.add_argument("collection_name", help="name of the collection to be used")
-    subparser.set_defaults(func=cli_set_collection)
+    subparser.set_defaults(func=cli_set_server_parameter)
 
 
 def add_set_account_parser(sub_parser_set: argparse._SubParsersAction) -> None:
@@ -142,7 +110,7 @@ def add_set_account_parser(sub_parser_set: argparse._SubParsersAction) -> None:
                                           'the server an error will be issued by the first '
                                           'command which will try to use it.')
     subparser.add_argument("username", help="server account to use for subsequent requests")
-    subparser.set_defaults(func=cli_set_account)
+    subparser.set_defaults(func=cli_set_server_parameter)
 
 
 def add_set_download_dir_parser(sub_parser_set: argparse._SubParsersAction) -> None:
@@ -153,8 +121,8 @@ def add_set_download_dir_parser(sub_parser_set: argparse._SubParsersAction) -> N
                                           description='Set the download directory to use in '
                                           'subsequent download.',
                                           epilog='The path need to exist to be operational.')
-    subparser.add_argument("path", help="full path of the directory to use for download")
-    subparser.set_defaults(func=cli_set_download_dir)
+    subparser.add_argument("download_dir", help="full path of the directory to use for download")
+    subparser.set_defaults(func=cli_set_client_parameter)
 
 
 def add_set_region_parser(sub_parser_set: argparse._SubParsersAction) -> None:
@@ -169,7 +137,7 @@ def add_set_region_parser(sub_parser_set: argparse._SubParsersAction) -> None:
     region_choices = find_region_choice()
     subparser.add_argument('region', help='the chosen key-word will search for the corresponding '
                            'file in the appropriate folder', choices=region_choices, type=str.lower)
-    subparser.set_defaults(func=cli_set_region)
+    subparser.set_defaults(func=cli_set_client_parameter)
 
 
 def add_set_verbosity_parser(sub_parser_set: argparse._SubParsersAction) -> None:
@@ -181,4 +149,4 @@ def add_set_verbosity_parser(sub_parser_set: argparse._SubParsersAction) -> None
                                           'resto_client.')
     subparser.add_argument('verbosity', help='the verbosity level', choices=ALLOWED_VERBOSITY,
                            type=str.upper)
-    subparser.set_defaults(func=cli_set_verbosity)
+    subparser.set_defaults(func=cli_set_client_parameter)
