@@ -38,7 +38,7 @@ class AuthenticationService(BaseService):
         :param auth_access: access to the authentication server.
         :param parent_server: Name of the server which uses this service.
         """
-        super(AuthenticationService, self).__init__(auth_access, parent_server)
+        super(AuthenticationService, self).__init__(auth_access, self, parent_server)
         self._credentials = AuthenticationCredentials(authentication_service=self)
 
     @property

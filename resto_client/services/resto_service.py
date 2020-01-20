@@ -37,13 +37,13 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
 
-from .application_service import ApplicationService
 from .authentication_service import AuthenticationService
+from .base_service import BaseService
 from .resto_collections_manager import RestoCollectionsManager
 from .service_access import RestoServiceAccess
 
 
-class RestoService(ApplicationService):
+class RestoService(BaseService):
     """
         A Resto Service, i.e. a valid resto accessible server
     """

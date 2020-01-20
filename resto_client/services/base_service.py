@@ -13,7 +13,7 @@
    limitations under the License.
 """
 from abc import ABC
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from .service_access import ServiceAccess
 
@@ -27,16 +27,20 @@ class BaseService(ABC):
     An abstract base class for all services
     """
 
-    def __init__(self, service_access: ServiceAccess, parent_server: str) -> None:
+    def __init__(self,
+                 service_access: ServiceAccess,
+                 auth_service: 'AuthenticationService',
+                 parent_server: str) -> None:
         """
         Constructor
 
         :param service_access: Service access.
+        :param auth_service: Authentication service associated to this service.
         :param parent_server: Name of the server which uses this service.
         :raises RestoClientDesignError: when service_access is not of the right type
         """
         self.service_access = service_access
-        self._auth_service = self
+        self._auth_service = auth_service
         self.parent_server_name = parent_server
 
     @property
@@ -44,11 +48,16 @@ class BaseService(ABC):
         """
         :returns: the authentication service associated to this application service.
         """
-        return cast('AuthenticationService', self._auth_service)
+        return self._auth_service
 
     @auth_service.setter
     def auth_service(self, auth_service: 'AuthenticationService') -> None:
         self._auth_service = auth_service
 
     def __str__(self) -> str:
-        return str(self.service_access)
+        result = str(self.service_access)
+        if self.auth_service == self:
+            result += '    associated authentication service : self'
+        else:
+            result += '    associated authentication service : {}'.format(self.auth_service)
+        return result
