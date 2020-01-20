@@ -14,6 +14,9 @@
 """
 from typing import Optional, TypeVar, Type
 
+from resto_client.base_exceptions import RestoClientUserError
+from resto_client.entities.resto_feature_collection import RestoFeatureCollection
+from resto_client.functions.resto_criteria import RestoCriteria
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .authentication_service import AuthenticationService
@@ -100,6 +103,7 @@ class RestoServer():
         self.resto_service = RestoService(server_description.resto_access,
                                           self.authentication_service, server_name)
 
+# +++++++++++++++++++++++ server properties section ++++++++++++++++++++++++++++++++++++
     @property
     def server_name(self) -> Optional[str]:
         """
@@ -167,6 +171,17 @@ class RestoServer():
         if self.server_name is None or self.authentication_service is None:
             return None
         return self.authentication_service.token
+
+# +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
+
+    def search_current_collection(self, criteria: RestoCriteria) -> RestoFeatureCollection:
+        # TODO: change to pass a dict instead of a RestoCriteria and build RestoCriteria internally
+        """
+        Search the current collection using search criteria
+        """
+        if self.resto_service is None:
+            raise RestoClientUserError('No resto service currently defined.')
+        return self.resto_service.search_collection(criteria, self.current_collection)
 
     def __str__(self) -> str:
         msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'

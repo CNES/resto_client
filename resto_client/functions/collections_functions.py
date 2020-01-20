@@ -29,21 +29,20 @@ def search_collection(resto_server: RestoServer,
 
     :param resto_server: the resto server to query
     :param region: the name of the region to use
-    :param criteria: list of criterion for search
+    :param criteria: set of searching criteria
     :returns: the collection of retrieved features
     :raises RestoClientUserError: when the resto service is not initialized
     """
+    # FIXME: remove when RestoCriteria is built by RestoServer
     resto_service = resto_server.resto_service
     if resto_service is None:
         raise RestoClientUserError('No resto service currently defined.')
-    new_criteria = RestoCriteria(resto_service.service_access.protocol)
+    search_criteria = RestoCriteria(resto_service.service_access.protocol)
     if criteria is not None:
-        new_criteria.update(criteria)
-    new_criteria.update({'region': region})
+        search_criteria.update(criteria)
+    search_criteria.update({'region': region})
 
-    collection_name = resto_server.current_collection
-    # TODO: declare functions in RestoServer, as proxies
-    search_feature_collection = resto_service.search_collection(new_criteria, collection_name)
+    search_feature_collection = resto_server.search_current_collection(search_criteria)
     if len(search_feature_collection.all_id) == 1:
         search_result = search_feature_collection.features[0]
     elif not search_feature_collection.all_id:
