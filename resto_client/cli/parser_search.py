@@ -26,7 +26,7 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
-from resto_client.functions.collections_functions import search_collection
+from resto_client.functions.collections_functions import search_current_collection
 from resto_client.functions.feature_functions import download_features_files_from_id
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
@@ -136,7 +136,7 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
 
 def cli_search_collection(args: Namespace) -> None:
     """
-    CLI adapter to search_collection function
+    CLI adapter to search_current_collection function
 
     :param args: arguments parsed by the CLI parser
     """
@@ -144,8 +144,8 @@ def cli_search_collection(args: Namespace) -> None:
 
     args.client_params = build_resto_client_params(args)
     args.resto_server = build_resto_server_persistable(args)
-    features_collection = search_collection(args.resto_server, args.client_params.region,
-                                            criteria_dict)
+    features_collection = search_current_collection(args.resto_server, args.client_params.region,
+                                                    criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():

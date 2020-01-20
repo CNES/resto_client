@@ -21,11 +21,11 @@ from resto_client.services.resto_server import RestoServer
 from .resto_criteria import RestoCriteria
 
 
-def search_collection(resto_server: RestoServer,
-                      region: str,
-                      criteria: Optional[Dict[str, Any]]=None) -> Optional[RestoFeatureCollection]:
+def search_current_collection(resto_server: RestoServer, region: str,
+                              criteria: Optional[Dict[str, Any]]=None) \
+        -> Optional[RestoFeatureCollection]:
     """
-    Search in a collection using selection criteria
+    Search in the current collection using selection criteria
 
     :param resto_server: the resto server to query
     :param region: the name of the region to use
@@ -42,7 +42,7 @@ def search_collection(resto_server: RestoServer,
         search_criteria.update(criteria)
     search_criteria.update({'region': region})
 
-    search_feature_collection = resto_server.search_current_collection(search_criteria)
+    search_feature_collection = resto_server.search_collection(search_criteria)
     if len(search_feature_collection.all_id) == 1:
         search_result = search_feature_collection.features[0]
     elif not search_feature_collection.all_id:

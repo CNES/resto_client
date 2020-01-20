@@ -176,19 +176,25 @@ class RestoServer():
 
 # +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
 
-    def search_current_collection(self, criteria: RestoCriteria) -> RestoFeatureCollection:
+    def search_collection(self, criteria: RestoCriteria,
+                          collection_name: Optional[str] = None) -> RestoFeatureCollection:
         """
-        Search the current collection using search criteria
+        Search a collection using search criteria
+
+        :param criteria: searching criteria
+        :param collection_name: name of the collection to use. Default to the current collection.
+        :returns: a collection of resto features
+        :raises RestoClientUserError: when the resto service is not initialized
         """
         # TODO: change to pass a dict instead of a RestoCriteria and build RestoCriteria internally
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
-        return self.resto_service.search_collection(criteria, self.current_collection)
+        return self.resto_service.search_collection(criteria, collection_name)
 
     def get_feature_by_id(self, feature_id: str, collection_name: Optional[str] = None) \
             -> RestoFeature:
         """
-        Search a collection using search criteria
+        Retrieve a feature by its identifier in a collection
 
         :param feature_id: the feature identifier in the collection
         :param collection_name: name of the collection to use. Default to the current collection.
