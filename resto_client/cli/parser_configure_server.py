@@ -18,9 +18,6 @@ from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.services.service_access import (AuthenticationServiceAccess, RestoServiceAccess)
 from resto_client.settings.servers_database import DB_SERVERS
 
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
-
 
 def cli_create_server(args: argparse.Namespace) -> None:
     """
@@ -62,6 +59,8 @@ def cli_show_servers(args: argparse.Namespace) -> None:
     print(DB_SERVERS)
 
 
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 def add_configure_server_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'configure_server' subparser
@@ -93,14 +92,14 @@ def add_config_server_create_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'create', help='create a new server',
         description='Create a new server in the servers configuration database.')
-    subparser.add_argument("server_name", help="name of the server to create.")
+    subparser.add_argument('server_name', help='name of the server to create.')
     group_resto = subparser.add_argument_group('resto service')
-    group_resto.add_argument("resto_url", help="URL of the resto server.")
-    group_resto.add_argument("resto_protocol", help="Protocol of the resto server.",
+    group_resto.add_argument('resto_url', help='URL of the resto server.')
+    group_resto.add_argument('resto_protocol', help='Protocol of the resto server.',
                              choices=RestoServiceAccess.supported_protocols())
     group_auth = subparser.add_argument_group('authentication service')
-    group_auth.add_argument("auth_url", help="URL of the authentication server.", nargs='?')
-    group_auth.add_argument("auth_protocol", help="Protocol of the authentication server.",
+    group_auth.add_argument('auth_url', help='URL of the authentication server.', nargs='?')
+    group_auth.add_argument('auth_protocol', help='Protocol of the authentication server',
                             choices=AuthenticationServiceAccess.supported_protocols())
     subparser.set_defaults(func=cli_create_server)
 
@@ -115,7 +114,7 @@ def add_config_server_delete_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'delete', help='delete an existing server',
         description='Delete a server from the configuration database.')
-    subparser.add_argument("server_name", help="name of the server to delete.")
+    subparser.add_argument('server_name', help='name of the server to delete')
     subparser.set_defaults(func=cli_delete_server)
 
 
@@ -129,14 +128,14 @@ def add_config_server_edit_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'edit', help='edit server characteristics',
         description='Edit the characteristics of a server existing in the configuration database.')
-    subparser.add_argument("server_name", help="name of the server to edit.")
+    subparser.add_argument('server_name', help='name of the server to edit')
     group_resto = subparser.add_argument_group('resto service')
-    group_resto.add_argument("resto_url", help="URL of the resto server.")
-    group_resto.add_argument("resto_protocol", help="Protocol of the resto server.",
+    group_resto.add_argument('resto_url', help='URL of the resto server')
+    group_resto.add_argument('resto_protocol', help='Protocol of the resto server',
                              choices=RestoServiceAccess.supported_protocols())
     group_auth = subparser.add_argument_group('authentication service')
-    group_auth.add_argument("auth_url", help="URL of the authentication server.", nargs='?')
-    group_auth.add_argument("auth_protocol", help="Protocol of the authentication server.",
+    group_auth.add_argument('auth_url', help='URL of the authentication server', nargs='?')
+    group_auth.add_argument('auth_protocol', help='Protocol of the authentication server',
                             choices=AuthenticationServiceAccess.supported_protocols())
     subparser.set_defaults(func=cli_edit_server)
 

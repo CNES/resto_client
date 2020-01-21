@@ -48,11 +48,11 @@ def get_table_help_criteria() -> str:
         resto_protocol = resto_server.resto_service.service_access.protocol
         resto_criteria = RestoCriteria(resto_protocol)
         # TODO: print server name instead of server protocol
-        title_help = "Current {} server supports the following criteria (defined in the Resto API):"
+        title_help = 'Current {} server supports the following criteria (defined in the Resto API):'
         title_help = title_help.format(resto_protocol)
         dict_to_print = resto_criteria.criteria_keys
     except RestoClientNoPersistedServer:
-        title_help = "Criteria supported by all servers (more available when a server is selected):"
+        title_help = 'Criteria supported by all servers (more available when a server is selected):'
         dict_to_print = COMMON_CRITERIA_KEYS
 
     criteria_table = PrettyTable()
@@ -69,7 +69,7 @@ def get_table_help_criteria() -> str:
                     criteria_table.add_row([sub_key, sub_value['help']])
         else:
             criteria_table.add_row([key, value['help']])
-    print_help = criteria_table.get_string(sortby="Criteria Key")
+    print_help = criteria_table.get_string(sortby='Criteria Key')
     return print_help
 
 
@@ -108,10 +108,10 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
                     raise RestoClientUserError(msg_err)
 
     if maxrecords is not None:
-        criteria_dict["maxRecords"] = maxrecords
+        criteria_dict['maxRecords'] = maxrecords
 
     if page is not None:
-        criteria_dict["page"] = page
+        criteria_dict['page'] = page
 
     if 'lat' in criteria_dict or 'lon' in criteria_dict:
         try:
@@ -189,15 +189,15 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                            'selection criteria.',
                                            epilog=epilog_total,
                                            parents=[collection_parser(), credentials_parser()])
-    parser_search.add_argument("--criteria",
+    parser_search.add_argument('--criteria',
                                help='search criteria (format --criteria=key:value)', nargs='*')
 
     region_choices = find_region_choice()
-    parser_search.add_argument("--region", help='add region criteria using .geojson, see set '
+    parser_search.add_argument('--region', help='add region criteria using .geojson, see set '
                                'region for more info', choices=region_choices, type=str.lower)
-    parser_search.add_argument("--maxrecords", help="maximum records to show", type=int)
-    parser_search.add_argument("--page", help="the number of the page to display", type=int)
-    parser_search.add_argument("--download", nargs='?', default=False, const='product',
+    parser_search.add_argument('--maxrecords', help='maximum records to show', type=int)
+    parser_search.add_argument('--page', help='the number of the page to display', type=int)
+    parser_search.add_argument('--download', nargs='?', default=False, const='product',
                                help='download files corresponding to found features, by default'
                                ' product will be downloaded',
                                choices=['product', 'quicklook', 'annexes', 'thumbnail'])

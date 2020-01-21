@@ -36,8 +36,8 @@ def credentials_parser() -> ArgumentParser:
     Creates a parser suitable to parse the credentials options for different subparsers
     """
     parser = ArgumentParser(add_help=False)
-    parser.add_argument("--username", help="registered resto account")
-    parser.add_argument("--password", help="account password")
+    parser.add_argument('--username', help='registered resto account')
+    parser.add_argument('--password', help='account password')
     return parser
 
 
@@ -46,7 +46,7 @@ def server_nickname_parser() -> ArgumentParser:
     Creates a parser suitable to parse the server nickname option in different subparsers
     """
     parser = ArgumentParser(add_help=False, parents=[verbosity_option_parser()])
-    parser.add_argument("--server", help="name of the server to be used (default: current server)",
+    parser.add_argument('--server', help='name of the server to be used (default: current server)',
                         dest='server_name')
     return parser
 
@@ -56,8 +56,8 @@ def collection_parser() -> ArgumentParser:
     Creates a parser suitable to parse the collection option in different subparsers
     """
     parser = ArgumentParser(add_help=False, parents=[server_nickname_parser()])
-    parser.add_argument("--collection", help="name of the collection to be used",
-                        dest="collection_name")
+    parser.add_argument('--collection', help='name of the collection to use',
+                        dest='collection_name')
     return parser
 
 
@@ -66,7 +66,7 @@ def features_in_collection_parser() -> ArgumentParser:
     Creates a parser suitable to parse the options describing features in different subparsers
     """
     parser = ArgumentParser(add_help=False, parents=[collection_parser()])
-    parser.add_argument("feature_id", help="features identifiers or features UUIDs", nargs='+')
+    parser.add_argument('feature_id', help='features identifiers or features UUIDs', nargs='+')
     return parser
 
 # TODO: Use in parser_set
@@ -77,7 +77,7 @@ def verbosity_option_parser() -> ArgumentParser:
     Creates a parser suitable to parse the verbosity option in different subparsers
     """
     parser = ArgumentParser(add_help=False)
-    parser.add_argument("--verbosity",
+    parser.add_argument('--verbosity',
                         help='verbosity level to use for this command and subsequent ones.',
                         choices=ALLOWED_VERBOSITY,
                         type=str.upper)

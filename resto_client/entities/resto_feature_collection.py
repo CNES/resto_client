@@ -72,6 +72,6 @@ class RestoFeatureCollection(geojson.FeatureCollection):
     @property
     def all_id(self) -> List[str]:
         """
-        :returns: the identifiers of all feature in this feature collection
+        :returns: the identifiers of all features in this feature collection
         """
         return [feature.product_identifier for feature in self.features]

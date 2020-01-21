@@ -20,8 +20,6 @@ from .parser_common import (features_in_collection_parser, credentials_parser, E
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
 def cli_show_settings(args: argparse.Namespace) -> None:
     """
     CLI adapter to show settings function
@@ -73,6 +71,8 @@ def cli_show_features(args: argparse.Namespace) -> None:
         print(feature)
 
 
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 def add_show_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'show' subparser
@@ -106,8 +106,8 @@ def add_show_collection_parser(sub_parsers_show: argparse._SubParsersAction) -> 
                                             description='Show the details of a collection including'
                                             ' statistics on its content.',
                                             parents=[server_nickname_parser()])
-    subparser.add_argument("collection_name", help="name of the collection to show", nargs='?')
-    subparser.add_argument("--nostats", action="store_true", help="disable statistics details")
+    subparser.add_argument('collection_name', help='name of the collection to show', nargs='?')
+    subparser.add_argument('--nostats', action='store_true', help='disable statistics details')
     subparser.set_defaults(func=cli_show_collection)
 
 
@@ -120,8 +120,8 @@ def add_show_server_parser(sub_parsers_show: argparse._SubParsersAction) -> None
                                             'with its collections and optionally their statistics.'
                                             'If no server name is provided, the current server '
                                             'will be displayed.')
-    subparser.add_argument("--stats", action="store_true", help="show collections statistics")
-    subparser.add_argument("server_name", help="name of the server to explore", nargs='?')
+    subparser.add_argument('--stats', action='store_true', help='show collections statistics')
+    subparser.add_argument('server_name', help='name of the server to explore', nargs='?')
     subparser.set_defaults(func=cli_show_server)
 
 

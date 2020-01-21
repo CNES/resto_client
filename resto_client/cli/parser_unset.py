@@ -17,8 +17,6 @@ import argparse
 from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
 
 
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
 def cli_unset_server(args: argparse.Namespace) -> None:
     """
     CLI adapter to unset the persistent server parameters
@@ -79,6 +77,8 @@ def cli_unset_verbosity(args: argparse.Namespace) -> None:
     args.client_params.verbosity = None  # type: ignore
 
 
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'unset' subparser
@@ -99,6 +99,7 @@ def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     add_unset_verbosity(sub_parsers_unset)
 
 
+# FIXME: what is the difference with configure_server delete ?
 def add_unset_server_parser(sub_parsers_unset: argparse._SubParsersAction) -> None:
     """
     Update the 'unset' command subparser with options for 'unset server'
@@ -107,7 +108,7 @@ def add_unset_server_parser(sub_parsers_unset: argparse._SubParsersAction) -> No
                                              description='Unset the stored resto server.',
                                              epilog='The stored collection and account parameters '
                                              'are also unset by this command.')
-    subparser.add_argument('server_name', help="name of the server to delete from database",
+    subparser.add_argument('server_name', help='name of the server to delete from database',
                            nargs='?')
     subparser.set_defaults(func=cli_unset_server)
 

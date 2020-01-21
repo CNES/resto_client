@@ -18,8 +18,6 @@ from pathlib import Path
 from .cli_utils import build_resto_client_params, build_resto_server_persistable
 from .parser_common import credentials_parser, features_in_collection_parser, EPILOG_FEATURES
 
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
 
 EPILOG_DOWNLOAD_DIR = '''
 Download directory is used to download all the files. If no directory
@@ -41,6 +39,8 @@ def cli_download_files(args: argparse.Namespace) -> None:
                                                       Path(args.client_params.download_dir))
 
 
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 def add_download_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'download' subparser
@@ -70,7 +70,7 @@ def add_download_product_parser(sub_parsers_download: argparse._SubParsersAction
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
                                                 parents=[features_in_collection_parser(),
                                                          credentials_parser()])
-    subparser.add_argument("--directory", help="directory for download")
+    subparser.add_argument('--directory', help='directory for download')
     subparser.set_defaults(func=cli_download_files)
 
 
@@ -86,7 +86,7 @@ def add_download_quicklook_parser(sub_parsers_download: argparse._SubParsersActi
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
                                                 parents=[features_in_collection_parser(),
                                                          credentials_parser()])
-    subparser.add_argument("--directory", help="directory for download")
+    subparser.add_argument('--directory', help='directory for download')
     subparser.set_defaults(func=cli_download_files)
 
 
@@ -102,7 +102,7 @@ def add_download_thumbnail_parser(sub_parsers_download: argparse._SubParsersActi
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
                                                 parents=[features_in_collection_parser(),
                                                          credentials_parser()])
-    subparser.add_argument("--directory", help="directory for download")
+    subparser.add_argument('--directory', help='directory for download')
     subparser.set_defaults(func=cli_download_files)
 
 
@@ -117,5 +117,5 @@ def add_download_annexes_parser(sub_parsers_download: argparse._SubParsersAction
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
                                                 parents=[features_in_collection_parser(),
                                                          credentials_parser()])
-    subparser.add_argument("--directory", help="directory for download")
+    subparser.add_argument('--directory', help='directory for download')
     subparser.set_defaults(func=cli_download_files)

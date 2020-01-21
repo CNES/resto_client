@@ -80,7 +80,7 @@ def add_set_server_parser(sub_parsers_set: argparse._SubParsersAction) -> None:
     """
     subparser = sub_parsers_set.add_parser('server', help='Set the resto server to use',
                                            description='Set the resto server to use.')
-    subparser.add_argument("server_name", help="name of the resto server")
+    subparser.add_argument('server_name', help='name of the resto server')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -94,7 +94,7 @@ def add_set_collection_parser(sub_parsers_set: argparse._SubParsersAction) -> No
                                            epilog='If the collection does not exist in the current '
                                            'server, an error is issued and the previously stored '
                                            'collection is kept unmodified.')
-    subparser.add_argument("collection_name", help="name of the collection to be used")
+    subparser.add_argument('collection_name', help='name of the collection to be used')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -109,7 +109,7 @@ def add_set_account_parser(sub_parser_set: argparse._SubParsersAction) -> None:
                                           'immediately. If it is not allowed on '
                                           'the server an error will be issued by the first '
                                           'command which will try to use it.')
-    subparser.add_argument("username", help="server account to use for subsequent requests")
+    subparser.add_argument('username', help='server account to use for subsequent requests')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -121,7 +121,7 @@ def add_set_download_dir_parser(sub_parser_set: argparse._SubParsersAction) -> N
                                           description='Set the download directory to use in '
                                           'subsequent download.',
                                           epilog='The path need to exist to be operational.')
-    subparser.add_argument("download_dir", help="full path of the directory to use for download")
+    subparser.add_argument('download_dir', help='full path of the directory to use for download')
     subparser.set_defaults(func=cli_set_client_parameter)
 
 
