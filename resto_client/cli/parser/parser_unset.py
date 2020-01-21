@@ -14,8 +14,8 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_server_persistable
 from resto_client.cli.resto_client_parameters import RestoClientParameters
+from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
 
 def cli_unset_server(args: argparse.Namespace) -> None:
@@ -24,7 +24,7 @@ def cli_unset_server(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     args.resto_server.server_name = None
 
 
@@ -34,7 +34,7 @@ def cli_unset_collection(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     args.resto_server.current_collection = None
 
 
@@ -44,7 +44,7 @@ def cli_unset_account(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     args.resto_server.set_credentials(username=None)
 
 

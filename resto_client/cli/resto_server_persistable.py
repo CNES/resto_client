@@ -12,12 +12,18 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+import argparse
+from typing import Optional
+
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.cli.parser.parser_settings import (CLI_SERVER_NAME, CLI_USERNAME, CLI_PASSWORD,
+                                                     CLI_COLLEC_NAME)
 from resto_client.services.resto_server import RestoServer
 
+from .cli_utils import get_from_args
 from .persistence import PersistedAttributes
 from .resto_client_settings import (USERNAME_KEY, SERVER_KEY, TOKEN_KEY, COLLECTION_KEY,
-                                    PERSISTED_SERVER_PARAMETERS)
+                                    PERSISTED_SERVER_PARAMETERS, RESTO_CLIENT_SETTINGS)
 
 
 class RestoClientNoPersistedServer(RestoClientUserError):
@@ -54,3 +60,83 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
         # Build a new_server with these parameters
         return cls.new_server(server_name, current_collection=collection_name,
                               username=username, token=token)
+
+    @classmethod
+    def build_from_defaults(cls,
+                            default_params: dict,
+                            server_name: Optional[str] = None,
+                            collection_name: Optional[str] = None,
+                            username: Optional[str] = None,
+                            password: Optional[str] = None) -> 'RestoServerPersistable':
+        """
+        Build a RestoServer instance from default parameters and arguments.
+
+        :param default_params: a dictionary containing default server parameters
+        :param server_name: name of the server to build
+        :param collection_name: name of the collection to use
+        :param username: account to use on this server
+        :param password: account password on the server
+        :returns: RestoServer instance suitable for further processing in CLI context
+        :raises RestoClientNoPersistedServer: when no persisted server can be found
+        """
+        # Firstly discard the case where a server is persisted and is not the requested server
+        persisted_server_name = default_params.get(SERVER_KEY)
+        if server_name is not None and persisted_server_name is not None:
+            if server_name.lower() != persisted_server_name.lower():
+                # Persisted server does not fit requested server. Drop it.
+                raise RestoClientNoPersistedServer()
+
+        # build the server from the persisted parameters
+        try:
+            server = RestoServerPersistable.build_from_dict(default_params)
+        except KeyError:
+            raise RestoClientNoPersistedServer()
+
+        # update the server with parameters specified as arguments
+        if collection_name is not None:
+            server.current_collection = collection_name
+        if username is not None or password is not None:
+            server.set_credentials(username=username, password=password)
+        return server
+
+    @classmethod
+    def build_from_argparse(cls, args: Optional[argparse.Namespace] = None) \
+            -> 'RestoServerPersistable':
+        """
+        Build a RestoServerPersistable instance fromarguments provided by argparse and persisted
+        parameters, suitable for further processing in CLI context.
+
+        :param args: arguments as parsed by argparse
+        :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
+                                              and no server name defined.
+        :raises RestoClientUserError: when arguments are inconsistent with persisted parameters.
+        :returns: a RestoServer instance suitable for further processing in CLI context
+        """
+
+        server_name = get_from_args(CLI_SERVER_NAME, args)
+        username = get_from_args(CLI_USERNAME, args)
+        password = get_from_args(CLI_PASSWORD, args)
+        collec_name = get_from_args(CLI_COLLEC_NAME, args)
+        try:
+            server = RestoServerPersistable.build_from_defaults(RESTO_CLIENT_SETTINGS,
+                                                                server_name=server_name,
+                                                                collection_name=collec_name,
+                                                                username=username,
+                                                                password=password)
+
+        except RestoClientNoPersistedServer:
+            # No persisted server or persisted one does not fit requested server_name
+            if server_name is None:
+                msg = 'No server name specified and no server currently set in the parameters.'
+                raise RestoClientNoPersistedServer(msg)
+            server = RestoServerPersistable.new_server(server_name=server_name,
+                                                       current_collection=collec_name,
+                                                       username=username, password=password)
+
+        except RestoClientUserError:
+            raise
+
+        except Exception as excp:
+            print('other problem when dealing with persistence : {}'.format(str(excp)))
+
+        return server

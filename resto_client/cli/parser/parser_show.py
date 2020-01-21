@@ -14,9 +14,9 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_server_persistable
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser)
@@ -41,7 +41,7 @@ def cli_show_collection(args: argparse.Namespace) -> None:
     """
     args.client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     collection = args.resto_server.get_collection(collection=args.resto_server.current_collection)
     print(collection)
     if not args.nostats:
@@ -57,7 +57,7 @@ def cli_show_server(args: argparse.Namespace) -> None:
     """
     args.client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     server_description = args.resto_server.show_server(with_stats=args.stats)
     print(server_description)
 
@@ -70,7 +70,7 @@ def cli_show_features(args: argparse.Namespace) -> None:
     """
     args.client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     features = args.resto_server.get_features_from_ids(args.feature_id)
     for feature in features:
         print(feature)

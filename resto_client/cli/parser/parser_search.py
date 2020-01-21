@@ -21,9 +21,9 @@ from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.cli.cli_utils import build_resto_server_persistable
 from resto_client.cli.resto_client_parameters import RestoClientParameters
-from resto_client.cli.resto_server_persistable import RestoClientNoPersistedServer
+from resto_client.cli.resto_server_persistable import (RestoClientNoPersistedServer,
+                                                       RestoServerPersistable)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
@@ -42,7 +42,7 @@ def get_table_help_criteria() -> str:
     """
     # TODO: First part should go into resto_criteria
     try:
-        resto_server = build_resto_server_persistable()
+        resto_server = RestoServerPersistable.build_from_argparse()
         if resto_server.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         resto_protocol = resto_server.resto_service.service_access.protocol
@@ -142,7 +142,7 @@ def cli_search_collection(args: Namespace) -> None:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     args.client_params = RestoClientParameters.build_from_argparse(args)
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
     features_collection = search_current_collection(args.resto_server, args.client_params.region,
                                                     criteria_dict)
 

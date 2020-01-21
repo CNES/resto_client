@@ -21,6 +21,7 @@ from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 from resto_client.generic.user_dirs import user_download_dir
 
+from .cli_utils import get_from_args
 from .parser.parser_settings import (CLI_DIR_NAME, CLI_REGION_NAME, CLI_VERBOSITY)
 from .persistence import PersistedAttributes
 from .resto_client_settings import (RESTO_CLIENT_SETTINGS, PERSISTED_CLIENT_PARAMETERS,
@@ -118,9 +119,9 @@ class RestoClientParameters(PersistedAttributes):
         :param args: arguments as parsed by ArgParse
         :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
         """
-        download_dir = getattr(args, CLI_DIR_NAME) if hasattr(args, CLI_DIR_NAME) else None
-        region = getattr(args, CLI_REGION_NAME) if hasattr(args, CLI_REGION_NAME) else None
-        verbosity = getattr(args, CLI_VERBOSITY) if hasattr(args, CLI_VERBOSITY) else None
+        download_dir = get_from_args(CLI_DIR_NAME, args)
+        region = get_from_args(CLI_REGION_NAME, args)
+        verbosity = get_from_args(CLI_VERBOSITY, args)
 
         return cls(download_dir=download_dir, region=region, verbosity=verbosity)
 

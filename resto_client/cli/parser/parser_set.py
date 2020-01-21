@@ -14,9 +14,8 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_server_persistable
-from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY
-from resto_client.cli.resto_client_parameters import RestoClientParameters
+from resto_client.cli.resto_client_parameters import RestoClientParameters, ALLOWED_VERBOSITY
+from resto_client.cli.resto_server_persistable import RestoServerPersistable
 from resto_client.functions.aoi_utils import find_region_choice
 
 
@@ -30,7 +29,7 @@ def cli_set_server_parameter(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.resto_server = build_resto_server_persistable(args)
+    args.resto_server = RestoServerPersistable.build_from_argparse(args)
 
 
 def cli_set_client_parameter(args: argparse.Namespace) -> None:
