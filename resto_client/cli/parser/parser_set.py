@@ -14,10 +14,9 @@
 """
 import argparse
 
+from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY
 from resto_client.functions.aoi_utils import find_region_choice
-
-from .cli_utils import build_resto_client_params, build_resto_server_persistable
-from .resto_client_parameters import ALLOWED_VERBOSITY
 
 
 def cli_set_server_parameter(args: argparse.Namespace) -> None:

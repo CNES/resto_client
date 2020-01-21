@@ -15,7 +15,7 @@
 import argparse
 from pathlib import Path
 
-from .cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
 from .parser_common import credentials_parser, features_in_collection_parser, EPILOG_FEATURES
 
 

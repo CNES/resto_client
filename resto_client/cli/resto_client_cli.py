@@ -46,16 +46,17 @@ Expected commands (without options):
 
     TBD
 """
-from argparse import ArgumentParser
 import sys
 
 from colorama import Fore, Style, colorama_text
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.persistence import persist_settings
 from resto_client.cli.resto_client_parameters import RestoClientParameters
-from resto_client.cli.resto_client_parser import build_parser
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+
+
 from typing import Sequence, Optional  # @NoMove
 
 

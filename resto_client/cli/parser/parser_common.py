@@ -14,7 +14,7 @@
 """
 from argparse import ArgumentParser
 
-from .resto_client_parameters import ALLOWED_VERBOSITY
+from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY
 
 EPILOG_IDENTIFIERS = '''
 Identifiers can be expressed as digits only identifier or as UUID,

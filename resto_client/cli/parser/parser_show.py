@@ -14,10 +14,11 @@
 """
 import argparse
 
-from .cli_utils import build_resto_server_persistable, build_resto_client_params
+from resto_client.cli.cli_utils import build_resto_server_persistable, build_resto_client_params
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser)
-from .resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 def cli_show_settings(args: argparse.Namespace) -> None:

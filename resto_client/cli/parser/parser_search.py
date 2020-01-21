@@ -17,22 +17,23 @@ import argparse
 from copy import deepcopy
 from pathlib import Path
 
-from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
-
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.resto_server_persistable import RestoClientNoPersistedServer
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_current_collection
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
-from .cli_utils import build_resto_client_params, build_resto_server_persistable
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
-from .resto_server_persistable import RestoClientNoPersistedServer
+
+
+from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 
 def get_table_help_criteria() -> str:
