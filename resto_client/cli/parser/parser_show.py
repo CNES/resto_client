@@ -14,7 +14,8 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_server_persistable, build_resto_client_params
+from resto_client.cli.cli_utils import build_resto_server_persistable
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
@@ -38,7 +39,8 @@ def cli_show_collection(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     :raises RestoClientUserError: when the resto service is not initialized
     """
-    args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
+    args.client_params = RestoClientParameters.build_from_argparse(
+        args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
     collection = args.resto_server.get_collection(collection=args.resto_server.current_collection)
     print(collection)
@@ -53,7 +55,8 @@ def cli_show_server(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     :raises RestoClientUserError: when no current server defined.
     """
-    args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
+    args.client_params = RestoClientParameters.build_from_argparse(
+        args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
     server_description = args.resto_server.show_server(with_stats=args.stats)
     print(server_description)
@@ -65,7 +68,8 @@ def cli_show_features(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.client_params = build_resto_client_params(args)  # To retrieve verbosity level from CLI
+    args.client_params = RestoClientParameters.build_from_argparse(
+        args)  # To retrieve verbosity level from CLI
     args.resto_server = build_resto_server_persistable(args)
     features = args.resto_server.get_features_from_ids(args.feature_id)
     for feature in features:

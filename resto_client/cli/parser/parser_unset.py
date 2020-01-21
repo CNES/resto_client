@@ -14,7 +14,8 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.cli_utils import build_resto_server_persistable
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 
 
 def cli_unset_server(args: argparse.Namespace) -> None:
@@ -53,7 +54,7 @@ def cli_unset_download_dir(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.client_params = build_resto_client_params(args)
+    args.client_params = RestoClientParameters.build_from_argparse(args)
     args.client_params.download_dir = None  # type: ignore
 
 
@@ -63,7 +64,7 @@ def cli_unset_region(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.client_params = build_resto_client_params(args)
+    args.client_params = RestoClientParameters.build_from_argparse(args)
     args.client_params.region = None  # type: ignore
 
 
@@ -73,7 +74,7 @@ def cli_unset_verbosity(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.client_params = build_resto_client_params(args)
+    args.client_params = RestoClientParameters.build_from_argparse(args)
     args.client_params.verbosity = None  # type: ignore
 
 

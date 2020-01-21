@@ -14,8 +14,9 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.cli_utils import build_resto_server_persistable
 from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.functions.aoi_utils import find_region_choice
 
 
@@ -42,7 +43,7 @@ def cli_set_client_parameter(args: argparse.Namespace) -> None:
 
     :param args: arguments parsed by the CLI parser
     """
-    args.client_params = build_resto_client_params(args)
+    args.client_params = RestoClientParameters.build_from_argparse(args)
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

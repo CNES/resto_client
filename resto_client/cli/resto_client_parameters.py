@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+import argparse
 from pathlib import Path
 from typing import Optional
 
@@ -20,6 +21,7 @@ from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 from resto_client.generic.user_dirs import user_download_dir
 
+from .parser.parser_settings import (CLI_DIR_NAME, CLI_REGION_NAME, CLI_VERBOSITY)
 from .persistence import PersistedAttributes
 from .resto_client_settings import (RESTO_CLIENT_SETTINGS, PERSISTED_CLIENT_PARAMETERS,
                                     VERBOSITY_KEY)
@@ -106,6 +108,21 @@ class RestoClientParameters(PersistedAttributes):
         # attribute to handle the verbosity level
         if verbosity is not None:
             self.verbosity = verbosity  # type: ignore
+
+    @classmethod
+    def build_from_argparse(cls, args: argparse.Namespace) -> 'RestoClientParameters':
+        """
+        Build a RestoClientParameters instance from arguments parsed by argparse,
+        suitable for further processing in CLI context.
+
+        :param args: arguments as parsed by ArgParse
+        :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
+        """
+        download_dir = getattr(args, CLI_DIR_NAME) if hasattr(args, CLI_DIR_NAME) else None
+        region = getattr(args, CLI_REGION_NAME) if hasattr(args, CLI_REGION_NAME) else None
+        verbosity = getattr(args, CLI_VERBOSITY) if hasattr(args, CLI_VERBOSITY) else None
+
+        return cls(download_dir=download_dir, region=region, verbosity=verbosity)
 
     @property  # type: ignore
     @managed_getter()

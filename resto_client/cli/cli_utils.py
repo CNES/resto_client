@@ -18,9 +18,7 @@ from typing import Optional
 from resto_client.base_exceptions import RestoClientUserError
 
 from .parser.parser_settings import (CLI_SERVER_NAME, CLI_USERNAME, CLI_PASSWORD,
-                                     CLI_COLLEC_NAME, CLI_DIR_NAME, CLI_REGION_NAME,
-                                     CLI_VERBOSITY)
-from .resto_client_parameters import RestoClientParameters
+                                     CLI_COLLEC_NAME)
 from .resto_client_settings import RESTO_CLIENT_SETTINGS, SERVER_KEY
 from .resto_server_persistable import RestoServerPersistable, RestoClientNoPersistedServer
 
@@ -103,18 +101,3 @@ def build_persisted_server(server_name: Optional[str] = None,
     if username is not None or password is not None:
         server.set_credentials(username=username, password=password)
     return server
-
-
-def build_resto_client_params(args: argparse.Namespace) -> RestoClientParameters:
-    """
-    Build a RestoClientParameters instance from parsed arguments, suitable for further processing
-    in CLI context.
-
-    :param args: arguments as parsed by ArgParse
-    :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
-    """
-    download_dir = getattr(args, CLI_DIR_NAME) if hasattr(args, CLI_DIR_NAME) else None
-    region = getattr(args, CLI_REGION_NAME) if hasattr(args, CLI_REGION_NAME) else None
-    verbosity = getattr(args, CLI_VERBOSITY) if hasattr(args, CLI_VERBOSITY) else None
-
-    return RestoClientParameters(download_dir=download_dir, region=region, verbosity=verbosity)

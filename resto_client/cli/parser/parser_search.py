@@ -16,13 +16,13 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.cli_utils import build_resto_server_persistable
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persistable import RestoClientNoPersistedServer
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
@@ -32,6 +32,7 @@ from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA
 
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
+from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 
 def get_table_help_criteria() -> str:
@@ -140,7 +141,7 @@ def cli_search_collection(args: Namespace) -> None:
     """
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
-    args.client_params = build_resto_client_params(args)
+    args.client_params = RestoClientParameters.build_from_argparse(args)
     args.resto_server = build_resto_server_persistable(args)
     features_collection = search_current_collection(args.resto_server, args.client_params.region,
                                                     criteria_dict)

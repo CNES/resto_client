@@ -15,7 +15,8 @@
 import argparse
 from pathlib import Path
 
-from resto_client.cli.cli_utils import build_resto_client_params, build_resto_server_persistable
+from resto_client.cli.cli_utils import build_resto_server_persistable
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from .parser_common import credentials_parser, features_in_collection_parser, EPILOG_FEATURES
 
 
@@ -33,7 +34,7 @@ def cli_download_files(args: argparse.Namespace) -> None:
     :param args: arguments parsed by the CLI parser
     :type args: :class:`argparse.Namespace`
     """
-    args.client_params = build_resto_client_params(args)
+    args.client_params = RestoClientParameters.build_from_argparse(args)
     args.resto_server = build_resto_server_persistable(args)
     args.resto_server.download_features_file_from_ids(args.feature_id, args.download_type,
                                                       Path(args.client_params.download_dir))
