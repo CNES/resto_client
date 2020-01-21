@@ -18,8 +18,18 @@ from typing import Optional
 from resto_client.base_exceptions import RestoClientUserError
 
 from .resto_client_parameters import RestoClientParameters
-from .resto_client_settings import RESTO_CLIENT_SETTINGS
+from .resto_client_settings import (RESTO_CLIENT_SETTINGS,
+                                    DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY, SERVER_KEY,
+                                    USERNAME_KEY)
 from .resto_server_persistable import RestoServerPersistable, RestoClientNoPersistedServer
+
+CLI_SERVER_NAME = SERVER_KEY
+CLI_USERNAME = USERNAME_KEY
+CLI_PASSWORD = 'password'
+CLI_COLLEC_NAME = 'collection_name'
+CLI_DIR_NAME = DOWNLOAD_DIR_KEY
+CLI_REGION_NAME = REGION_KEY
+CLI_VERBOSITY = VERBOSITY_KEY
 
 
 def build_resto_server_persistable(args: Optional[argparse.Namespace] = None
@@ -40,10 +50,10 @@ def build_resto_server_persistable(args: Optional[argparse.Namespace] = None
         password = None
         collection_name = None
     else:
-        server_name = args.server_name if hasattr(args, 'server_name') else None
-        username = args.username if hasattr(args, 'username') else None
-        password = args.password if hasattr(args, 'password') else None
-        collection_name = args.collection_name if hasattr(args, 'collection_name') else None
+        server_name = getattr(args, CLI_SERVER_NAME) if hasattr(args, CLI_SERVER_NAME) else None
+        username = getattr(args, CLI_USERNAME) if hasattr(args, CLI_USERNAME) else None
+        password = getattr(args, CLI_PASSWORD) if hasattr(args, CLI_PASSWORD) else None
+        collection_name = getattr(args, CLI_COLLEC_NAME) if hasattr(args, CLI_COLLEC_NAME) else None
     try:
         server = build_persisted_server(server_name=server_name, collection_name=collection_name,
                                         username=username, password=password)
@@ -82,7 +92,7 @@ def build_persisted_server(server_name: Optional[str] = None,
     :raises RestoClientNoPersistedServer: when no persisted server can be found
     """
     # Firstly discard the case where a server is persisted and is not the requested server
-    persisted_server_name = RESTO_CLIENT_SETTINGS.get('server_name')
+    persisted_server_name = RESTO_CLIENT_SETTINGS.get(SERVER_KEY)
     if server_name is not None and persisted_server_name is not None:
         if server_name.lower() != persisted_server_name.lower():
             # Persisted server does not fit requested server. Drop it.
@@ -110,8 +120,8 @@ def build_resto_client_params(args: argparse.Namespace) -> RestoClientParameters
     :param args: arguments as parsed by ArgParse
     :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
     """
-    download_dir = args.download_dir if hasattr(args, 'download_dir') else None
-    region = args.region if hasattr(args, 'region') else None
-    verbosity = args.verbosity if hasattr(args, 'verbosity') else None
+    download_dir = getattr(args, CLI_DIR_NAME) if hasattr(args, CLI_DIR_NAME) else None
+    region = getattr(args, CLI_REGION_NAME) if hasattr(args, CLI_REGION_NAME) else None
+    verbosity = getattr(args, CLI_VERBOSITY) if hasattr(args, CLI_VERBOSITY) else None
 
     return RestoClientParameters(download_dir=download_dir, region=region, verbosity=verbosity)

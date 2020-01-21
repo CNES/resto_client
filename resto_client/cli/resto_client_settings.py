@@ -18,6 +18,18 @@ from resto_client.settings.resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
 RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json')
 
+# persisted attributes from different classes are listed here, as versions updating reminders.
+DOWNLOAD_DIR_KEY = 'download_dir'
+REGION_KEY = 'region'
+VERBOSITY_KEY = 'verbosity'
+PERSISTED_CLIENT_PARAMETERS = [DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY]
+
+COLLECTION_KEY = 'current_collection'
+SERVER_KEY = 'server_name'
+TOKEN_KEY = 'token'
+USERNAME_KEY = 'username'
+PERSISTED_SERVER_PARAMETERS = [COLLECTION_KEY, SERVER_KEY, TOKEN_KEY, USERNAME_KEY]
+
 # Process resto_client_settings versions
 
 # Settings written previously to setting version introduction

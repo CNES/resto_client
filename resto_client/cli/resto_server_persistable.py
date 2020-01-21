@@ -16,6 +16,7 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.services.resto_server import RestoServer
 
 from .persistence import PersistedAttributes
+from .resto_client_settings import PERSISTED_SERVER_PARAMETERS
 
 
 class RestoClientNoPersistedServer(RestoClientUserError):
@@ -27,4 +28,4 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
     A class for building a RestoServer whose parameters can be persisted
     """
 
-    persisted_attributes = ['server_name', 'current_collection', 'username', 'token']
+    persisted_attributes = PERSISTED_SERVER_PARAMETERS

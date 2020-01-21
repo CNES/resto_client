@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Optional, TypeVar, Type, List, Union
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.cli.resto_client_settings import (USERNAME_KEY, SERVER_KEY, TOKEN_KEY,
+                                                    COLLECTION_KEY)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
@@ -27,6 +29,8 @@ from .resto_service import RestoService
 
 
 RestoServerType = TypeVar('RestoServerType', bound='RestoServer')
+
+# TODO: check how verbosity is propagated
 
 
 class RestoServer():
@@ -42,7 +46,6 @@ class RestoServer():
         """
         self.authentication_service: Optional[AuthenticationService] = None
         self.resto_service: Optional[RestoService] = None
-
         self._server_name: Optional[str] = None
 
         # set server_name which triggers server creation from the database if not None.
@@ -81,15 +84,15 @@ class RestoServer():
         :returns: a RestoServer built from server parameters
         """
         # Retrieve the server name in the dictionary
-        server_name = server_parameters.get('server_name')
+        server_name = server_parameters.get(SERVER_KEY)
         if server_name is None:
             msg = 'No server name defined in the server parameters.'
             raise KeyError(msg)
 
         # Retrieve other server parameters in the dictionary
-        collection_name = server_parameters.get('current_collection')
-        username = server_parameters.get('username')
-        token = server_parameters.get('token')
+        collection_name = server_parameters.get(COLLECTION_KEY)
+        username = server_parameters.get(USERNAME_KEY)
+        token = server_parameters.get(TOKEN_KEY)
 
         # Build a new_server with these parameters
         return cls.new_server(server_name, current_collection=collection_name,

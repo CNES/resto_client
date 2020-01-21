@@ -21,7 +21,8 @@ from resto_client.generic.property_decoration import managed_getter, managed_set
 from resto_client.generic.user_dirs import user_download_dir
 
 from .persistence import PersistedAttributes
-from .resto_client_settings import RESTO_CLIENT_SETTINGS
+from .resto_client_settings import (RESTO_CLIENT_SETTINGS, PERSISTED_CLIENT_PARAMETERS,
+                                    VERBOSITY_KEY)
 
 
 def _check_download_dir(download_dir: str) -> str:
@@ -37,7 +38,6 @@ def _check_download_dir(download_dir: str) -> str:
     return download_dir
 
 
-VERBOSITY_KEY = 'verbosity'
 ALLOWED_VERBOSITY = ['NORMAL', 'DEBUG']
 
 
@@ -82,7 +82,7 @@ class RestoClientParameters(PersistedAttributes):
     Class implementing parameters used by resto client.
     """
     properties_storage = RESTO_CLIENT_SETTINGS
-    persisted_attributes = ['region', 'download_dir', 'verbosity']
+    persisted_attributes = PERSISTED_CLIENT_PARAMETERS
 
     def __init__(self,
                  region: Optional[str]=None,

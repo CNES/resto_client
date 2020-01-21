@@ -16,11 +16,10 @@ from pathlib import Path
 import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.cli.resto_client_settings import (RESTO_CLIENT_SETTINGS, USERNAME_KEY,
+                                                    DOWNLOAD_DIR_KEY, TOKEN_KEY, VERBOSITY_KEY,
+                                                    REGION_KEY, COLLECTION_KEY, SERVER_KEY)
 from resto_client.generic.user_dirs import user_download_dir
-from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
-from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY, TOKEN_KEY,
-                                                 VERBOSITY_KEY, REGION_KEY, COLLECTION_KEY)
 
 
 class UTestCliUnset(unittest.TestCase):
@@ -38,8 +37,8 @@ class UTestCliUnset(unittest.TestCase):
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        for key in WELL_KNOWN_SERVERS['kalideos']:
-            self.assertTrue(key not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
         # With server persisted and account persisted
@@ -47,8 +46,6 @@ class UTestCliUnset(unittest.TestCase):
         resto_client_run(arguments=['set', 'account', 'test_account'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        for key in WELL_KNOWN_SERVERS['kalideos']:
-            self.assertTrue(key not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
 
@@ -59,8 +56,10 @@ class UTestCliUnset(unittest.TestCase):
         RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['unset', 'server'])
         resto_client_run(arguments=['unset', 'server'])
-        for key in WELL_KNOWN_SERVERS['kalideos']:
-            self.assertTrue(key not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
 
     def test_n_unset_account(self) -> None:
         """
