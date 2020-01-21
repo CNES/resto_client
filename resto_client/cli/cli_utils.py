@@ -17,19 +17,12 @@ from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError
 
+from .parser.parser_settings import (CLI_SERVER_NAME, CLI_USERNAME, CLI_PASSWORD,
+                                     CLI_COLLEC_NAME, CLI_DIR_NAME, CLI_REGION_NAME,
+                                     CLI_VERBOSITY)
 from .resto_client_parameters import RestoClientParameters
-from .resto_client_settings import (RESTO_CLIENT_SETTINGS,
-                                    DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY, SERVER_KEY,
-                                    USERNAME_KEY)
+from .resto_client_settings import RESTO_CLIENT_SETTINGS, SERVER_KEY
 from .resto_server_persistable import RestoServerPersistable, RestoClientNoPersistedServer
-
-CLI_SERVER_NAME = SERVER_KEY
-CLI_USERNAME = USERNAME_KEY
-CLI_PASSWORD = 'password'
-CLI_COLLEC_NAME = 'collection_name'
-CLI_DIR_NAME = DOWNLOAD_DIR_KEY
-CLI_REGION_NAME = REGION_KEY
-CLI_VERBOSITY = VERBOSITY_KEY
 
 
 def build_resto_server_persistable(args: Optional[argparse.Namespace] = None

@@ -16,6 +16,7 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
 from pathlib import Path
+from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -31,9 +32,6 @@ from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA
 
 from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
                             credentials_parser)
-
-
-from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 
 def get_table_help_criteria() -> str:

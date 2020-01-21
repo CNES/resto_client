@@ -47,17 +47,16 @@ Expected commands (without options):
     TBD
 """
 import sys
+from typing import Sequence, Optional  # @NoMove
 
 from colorama import Fore, Style, colorama_text
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.cli.parser.parser_settings import RESTO_SERVER_ARGNAME, CLIENT_PARAMETERS_ARGNAME
 from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.persistence import persist_settings
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-
-
-from typing import Sequence, Optional  # @NoMove
 
 
 def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
@@ -81,11 +80,13 @@ def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
             with colorama_text():
                 print(Fore.RED + Style.BRIGHT + str(excp) + Style.RESET_ALL)
 
-    if hasattr(args, 'resto_server'):
-        args.resto_server.update_persisted(RESTO_CLIENT_SETTINGS)
+    if hasattr(args, RESTO_SERVER_ARGNAME):
+        resto_server = getattr(args, RESTO_SERVER_ARGNAME)
+        resto_server.update_persisted(RESTO_CLIENT_SETTINGS)
 
-    if hasattr(args, 'client_params'):
-        args.client_params.update_persisted(RESTO_CLIENT_SETTINGS)
+    if hasattr(args, CLIENT_PARAMETERS_ARGNAME):
+        client_params = getattr(args, CLIENT_PARAMETERS_ARGNAME)
+        client_params.update_persisted(RESTO_CLIENT_SETTINGS)
 
 
 def main(arguments: Optional[Sequence[str]]=None) -> None:
