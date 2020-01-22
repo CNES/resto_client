@@ -19,61 +19,70 @@ from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
-                            server_nickname_parser)
+                            server_nickname_parser, CliFunctionReturnType)
 
 
-def cli_show_settings(args: argparse.Namespace) -> None:
+def cli_show_settings(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to show settings function
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
     _ = args  # to avoid pylint warning
     print(RESTO_CLIENT_SETTINGS)
+    return None, None
 
 
-def cli_show_collection(args: argparse.Namespace) -> None:
+def cli_show_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to list_collection function
 
     :param args: arguments parsed by the CLI parser
     :raises RestoClientUserError: when the resto service is not initialized
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(
+    client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    collection = args.resto_server.get_collection(collection=args.resto_server.current_collection)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    # FIXME: is it necessary to pass this argument?
+    collection = resto_server.get_collection(collection=resto_server.current_collection)
     print(collection)
     if not args.nostats:
         print(collection.statistics)
+    return client_params, resto_server
 
 
-def cli_show_server(args: argparse.Namespace) -> None:
+def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to display server information: name, collections and statistics
 
     :param args: arguments parsed by the CLI parser
     :raises RestoClientUserError: when no current server defined.
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(
+    client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    server_description = args.resto_server.show_server(with_stats=args.stats)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    server_description = resto_server.show_server(with_stats=args.stats)
     print(server_description)
+    return client_params, resto_server
 
 
-def cli_show_features(args: argparse.Namespace) -> None:
+def cli_show_features(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to show feature
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(
+    client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    features = args.resto_server.get_features_from_ids(args.feature_id)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    features = resto_server.get_features_from_ids(args.feature_id)
     for feature in features:
         print(feature)
+    return client_params, resto_server
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

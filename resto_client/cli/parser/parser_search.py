@@ -31,7 +31,8 @@ from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_current_collection
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
-from .parser_common import (EPILOG_CREDENTIALS, collection_parser, credentials_parser)
+from .parser_common import (EPILOG_CREDENTIALS, collection_parser, credentials_parser,
+                            CliFunctionReturnType)
 
 
 def get_table_help_criteria() -> str:
@@ -133,17 +134,18 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
     return criteria_dict
 
 
-def cli_search_collection(args: Namespace) -> None:
+def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to search_current_collection function
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
-    args.client_params = RestoClientParameters.build_from_argparse(args)
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    features_collection = search_current_collection(args.resto_server, args.client_params.region,
+    client_params = RestoClientParameters.build_from_argparse(args)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    features_collection = search_current_collection(resto_server, client_params.region,
                                                     criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
@@ -171,8 +173,9 @@ def cli_search_collection(args: Namespace) -> None:
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:
-        args.resto_server.download_features_file_from_ids(search_feature_id, args.download,
-                                                          Path(args.client_params.download_dir))
+        resto_server.download_features_file_from_ids(search_feature_id, args.download,
+                                                     Path(client_params.download_dir))
+    return client_params, resto_server
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

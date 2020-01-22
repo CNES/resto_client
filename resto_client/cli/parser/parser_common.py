@@ -13,8 +13,13 @@
    limitations under the License.
 """
 from argparse import ArgumentParser
+from typing import Tuple, Optional
 
-from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY
+from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY, RestoClientParameters
+from resto_client.cli.resto_server_persistable import RestoServerPersistable
+
+# Return type of all functions activated by argparse for resto_client CLI.
+CliFunctionReturnType = Tuple[Optional[RestoClientParameters], Optional[RestoServerPersistable]]
 
 EPILOG_IDENTIFIERS = '''
 Identifiers can be expressed as digits only identifier or as UUID,

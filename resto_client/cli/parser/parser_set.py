@@ -18,8 +18,10 @@ from resto_client.cli.resto_client_parameters import RestoClientParameters, ALLO
 from resto_client.cli.resto_server_persistable import RestoServerPersistable
 from resto_client.functions.aoi_utils import find_region_choice
 
+from .parser_common import CliFunctionReturnType
 
-def cli_set_server_parameter(args: argparse.Namespace) -> None:
+
+def cli_set_server_parameter(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to set the persistent server parameters
 
@@ -28,11 +30,13 @@ def cli_set_server_parameter(args: argparse.Namespace) -> None:
     be absent or equal to None.
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    return None, resto_server
 
 
-def cli_set_client_parameter(args: argparse.Namespace) -> None:
+def cli_set_client_parameter(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to set the persistent client parameters
 
@@ -41,8 +45,10 @@ def cli_set_client_parameter(args: argparse.Namespace) -> None:
     be absent or equal to None.
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(args)
+    client_params = RestoClientParameters.build_from_argparse(args)
+    return client_params, None
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

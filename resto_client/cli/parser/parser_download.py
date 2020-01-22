@@ -18,7 +18,8 @@ from pathlib import Path
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
-from .parser_common import credentials_parser, features_in_collection_parser, EPILOG_FEATURES
+from .parser_common import (credentials_parser, features_in_collection_parser, EPILOG_FEATURES,
+                            CliFunctionReturnType)
 
 
 EPILOG_DOWNLOAD_DIR = '''
@@ -27,18 +28,20 @@ is specified a default one is used, whose location depends on your system.
 '''
 
 
-def cli_download_files(args: argparse.Namespace) -> None:
+def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to download_features_file_from_ids used by product, quicklook, thumbnail and annexes
     download sub-commands.
 
     :param args: arguments parsed by the CLI parser
     :type args: :class:`argparse.Namespace`
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(args)
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    args.resto_server.download_features_file_from_ids(args.feature_id, args.download_type,
-                                                      Path(args.client_params.download_dir))
+    client_params = RestoClientParameters.build_from_argparse(args)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server.download_features_file_from_ids(args.feature_id, args.download_type,
+                                                 Path(client_params.download_dir))
+    return client_params, resto_server
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

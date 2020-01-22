@@ -18,28 +18,34 @@ from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.services.service_access import (AuthenticationServiceAccess, RestoServiceAccess)
 from resto_client.settings.servers_database import DB_SERVERS
 
+from .parser_common import CliFunctionReturnType
 
-def cli_create_server(args: argparse.Namespace) -> None:
+
+def cli_create_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to create a server definition
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
     resto_access = RestoServiceAccess(args.resto_url, args.resto_protocol.lower())
     auth_access = AuthenticationServiceAccess(args.auth_url, args.auth_protocol.lower())
     DB_SERVERS.create_server(args.server_name, resto_access, auth_access)
+    return None, None
 
 
-def cli_delete_server(args: argparse.Namespace) -> None:
+def cli_delete_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to delete a server definition
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
     DB_SERVERS.delete(args.server_name)
+    return None, None
 
 
-def cli_edit_server(args: argparse.Namespace) -> None:
+def cli_edit_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to edit the server characteristics
 
@@ -49,14 +55,16 @@ def cli_edit_server(args: argparse.Namespace) -> None:
     raise RestoClientDesignError('Edit server unimplemented')
 
 
-def cli_show_servers(args: argparse.Namespace) -> None:
+def cli_show_servers(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to show the servers database
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
     _ = args  # to avoid pylint warning
     print(DB_SERVERS)
+    return None, None
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

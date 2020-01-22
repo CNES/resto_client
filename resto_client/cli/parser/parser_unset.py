@@ -17,65 +17,79 @@ import argparse
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
+from .parser_common import CliFunctionReturnType
 
-def cli_unset_server(args: argparse.Namespace) -> None:
+
+def cli_unset_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset the persistent server parameters
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    args.resto_server.server_name = None
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server.server_name = None
+    return None, resto_server
 
 
-def cli_unset_collection(args: argparse.Namespace) -> None:
+def cli_unset_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset the persistent default collection to be used
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    args.resto_server.current_collection = None
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server.current_collection = None
+    return None, resto_server
 
 
-def cli_unset_account(args: argparse.Namespace) -> None:
+def cli_unset_account(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset the default account to be used.
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.resto_server = RestoServerPersistable.build_from_argparse(args)
-    args.resto_server.set_credentials(username=None)
+    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server.set_credentials(username=None)
+    return None, resto_server
 
 
-def cli_unset_download_dir(args: argparse.Namespace) -> None:
+def cli_unset_download_dir(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset download directory to be used
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(args)
-    args.client_params.download_dir = None  # type: ignore
+    client_params = RestoClientParameters.build_from_argparse(args)
+    client_params.download_dir = None  # type: ignore
+    return client_params, None
 
 
-def cli_unset_region(args: argparse.Namespace) -> None:
+def cli_unset_region(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset region/AOI to be used
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(args)
-    args.client_params.region = None  # type: ignore
+    client_params = RestoClientParameters.build_from_argparse(args)
+    client_params.region = None  # type: ignore
+    return client_params, None
 
 
-def cli_unset_verbosity(args: argparse.Namespace) -> None:
+def cli_unset_verbosity(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset verbosity level
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    args.client_params = RestoClientParameters.build_from_argparse(args)
-    args.client_params.verbosity = None  # type: ignore
+    client_params = RestoClientParameters.build_from_argparse(args)
+    client_params.verbosity = None  # type: ignore
+    return client_params, None
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
