@@ -19,6 +19,7 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.parser.parser_settings import (CLI_SERVER_NAME, CLI_USERNAME, CLI_PASSWORD,
                                                      CLI_COLLEC_NAME)
 from resto_client.services.resto_server import RestoServer
+from resto_client.settings.servers_database import ServersDatabase
 
 from .cli_utils import get_from_args
 from .persistence import PersistedAttributes
@@ -37,6 +38,7 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
 
     persisted_attributes = PERSISTED_SERVER_PARAMETERS
 
+    # TODO: Move into RestoServer? With or without keys?
     @classmethod
     def build_from_dict(cls, server_parameters: dict) -> 'RestoServerPersistable':
         """
@@ -81,15 +83,15 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
         :returns: RestoServer instance suitable for further processing in CLI context
         :raises RestoClientNoPersistedServer: when no persisted server can be found
         """
-        # Firstly discard the case where a server is persisted and is not the requested server
-        default_server_name = default_params.get(SERVER_KEY)
+        server_name = ServersDatabase.get_canonical_name(server_name)
+        default_server_name = ServersDatabase.get_canonical_name(default_params.get(SERVER_KEY))
         if server_name is None and default_server_name is None:
             raise KeyError('Requested server name is None and no default server specified')
 
         server_parameters = {}
         if server_name is not None and default_server_name is not None:
             # Both server names are available. Choose to build one of them.
-            if server_name.lower() != default_server_name.lower():
+            if server_name != default_server_name:
                 # Requested server name is different from default.
                 # Build from requested server name without using any default.
                 server_parameters[SERVER_KEY] = server_name

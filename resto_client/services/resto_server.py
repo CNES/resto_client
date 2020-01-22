@@ -20,7 +20,7 @@ from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.resto_criteria import RestoCriteria
-from resto_client.settings.servers_database import DB_SERVERS
+from resto_client.settings.servers_database import DB_SERVERS, ServersDatabase
 
 from .authentication_service import AuthenticationService
 from .resto_service import RestoService
@@ -93,8 +93,8 @@ class RestoServer():
 
     @server_name.setter
     def server_name(self, server_name: Optional[str]) -> None:
+        server_name = ServersDatabase.get_canonical_name(server_name)
         if server_name is not None:
-            server_name = server_name.lower()
             if server_name != self.server_name:
                 self._init_from_db(server_name)
                 self.current_collection = None
