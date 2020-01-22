@@ -16,6 +16,7 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
 from pathlib import Path
+from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -30,9 +31,7 @@ from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_current_collection
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
 
-from .parser_common import (EPILOG_CREDENTIALS, collection_parser,
-                            credentials_parser)
-from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
+from .parser_common import (EPILOG_CREDENTIALS, collection_parser, credentials_parser)
 
 
 def get_table_help_criteria() -> str:
@@ -41,6 +40,7 @@ def get_table_help_criteria() -> str:
     :raises RestoClientUserError: when the resto service is not initialized
     """
     # TODO: First part should go into resto_criteria
+    # FIXME: this approach implies a server instanciation which is useless
     try:
         resto_server = RestoServerPersistable.build_from_argparse()
         if resto_server.resto_service is None:

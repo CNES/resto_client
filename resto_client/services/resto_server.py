@@ -67,8 +67,8 @@ class RestoServer():
         :returns: a new resto server built from arguments and servers database
         """
         server = cls(server_name)
-        server.set_credentials(username=username, password=password, token_value=token)
         server.current_collection = current_collection
+        server.set_credentials(username=username, password=password, token_value=token)
         return server
 
     def _init_from_db(self, server_name: str) -> None:
@@ -133,6 +133,8 @@ class RestoServer():
             self.authentication_service.set_credentials(username=username,
                                                         password=password,
                                                         token_value=token_value)
+
+# +++++++++++ read only properties +++++++++++
 
     @property
     def username(self) -> Optional[str]:
