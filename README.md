@@ -154,7 +154,7 @@ Obviously you can also download the product, provided that you have the right cr
 
 ```console
 $ resto_client download product 1926127184714545 --username=known_user
-Please enter your password:***********
+Please enter your password for kalideos server:***********
 ...
 ```
 
@@ -195,7 +195,7 @@ optional arguments:
   -h, --help            show this help message and exit
 
 subcommands:
-  For more help: resto_client show show <entity> -h
+  For more help: resto_client show <entity> -h
 
   {settings,server,collection,feature}
     settings            Show application settings
