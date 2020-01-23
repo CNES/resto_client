@@ -60,7 +60,6 @@ class RestoService(BaseService):
         :param parent_server: Name of the server which uses this service.
         """
         super(RestoService, self).__init__(resto_access, auth_service, parent_server)
-        self.parent_server = parent_server
         self.service_access.detected_protocol = None
         self._collections_mgr = RestoCollectionsManager()
         self._collections_mgr.collections_set = self.get_collections()
@@ -155,7 +154,7 @@ class RestoService(BaseService):
                             incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        criteria = RestoCriteria(self.parent_server, identifier=feature_id)
+        criteria = RestoCriteria(self.parent_server_name, identifier=feature_id)
 
         feature_collection = \
             SearchCollectionRequest(self, collection_name, criteria=criteria).run()
