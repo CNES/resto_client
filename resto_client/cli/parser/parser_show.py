@@ -18,9 +18,10 @@ from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
-from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
-                            server_nickname_parser, CliFunctionReturnType)
-from .parser_settings import SERVER_ARGNAME, COLLECTION_ARGNAME, FEATURES_IDS_ARGNAME
+from .parser_common import (features_ids_argument_parser, credentials_options_parser,
+                            EPILOG_FEATURES, server_option_parser, CliFunctionReturnType)
+from .parser_settings import (SERVER_ARGNAME, COLLECTION_ARGNAME, FEATURES_IDS_ARGNAME,
+                              WITH_STATS_ARGNAME, NO_STATS_ARGNAME)
 
 
 def cli_show_settings(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -46,10 +47,9 @@ def cli_show_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    # FIXME: is it necessary to pass this argument?
-    collection = resto_server.get_collection(collection=resto_server.current_collection)
+    collection = resto_server.get_collection()
     print(collection)
-    if not args.nostats:
+    if not getattr(args, NO_STATS_ARGNAME):
         print(collection.statistics)
     return client_params, resto_server
 
@@ -65,7 +65,7 @@ def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
     client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    server_description = resto_server.show_server(with_stats=args.stats)
+    server_description = resto_server.show_server(with_stats=getattr(args, WITH_STATS_ARGNAME))
     print(server_description)
     return client_params, resto_server
 
@@ -92,11 +92,10 @@ def add_show_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'show' subparser
     """
-    parser_show = sub_parsers.add_parser('show', help='show resto_client entities: '
-                                         'settings, server, collection, feature',
+    parser_show = sub_parsers.add_parser('show', help='show different server and client entities.',
                                          description='Show different resto_client entities.')
-    help_msg = 'For more help: {} <entity> -h'
-    sub_parsers_show = parser_show.add_subparsers(description=help_msg.format(parser_show.prog))
+    help_msg = 'For more help: {} <entity> -h'.format(parser_show.prog)
+    sub_parsers_show = parser_show.add_subparsers(description=help_msg)
 
     add_show_settings_parser(sub_parsers_show)
     add_show_server_parser(sub_parsers_show)
@@ -120,9 +119,10 @@ def add_show_collection_parser(sub_parsers_show: argparse._SubParsersAction) -> 
     subparser = sub_parsers_show.add_parser('collection', help='Show the details of a collection',
                                             description='Show the details of a collection including'
                                             ' statistics on its content.',
-                                            parents=[server_nickname_parser()])
-    subparser.add_argument(COLLECTION_ARGNAME, help='name of the collection to show', nargs='?')
-    subparser.add_argument('--nostats', action='store_true', help='disable statistics details')
+                                            parents=[server_option_parser()])
+    subparser.add_argument(COLLECTION_ARGNAME, nargs='?', help='name of the collection to show')
+    subparser.add_argument('--nostats', dest=NO_STATS_ARGNAME, action='store_true',
+                           help='disable statistics details')
     subparser.set_defaults(func=cli_show_collection)
 
 
@@ -135,8 +135,9 @@ def add_show_server_parser(sub_parsers_show: argparse._SubParsersAction) -> None
                                             'with its collections and optionally their statistics.'
                                             'If no server name is provided, the current server '
                                             'will be displayed.')
-    subparser.add_argument('--stats', action='store_true', help='show collections statistics')
-    subparser.add_argument(SERVER_ARGNAME, help='name of the server to explore', nargs='?')
+    subparser.add_argument('--stats', dest=WITH_STATS_ARGNAME, action='store_true',
+                           help='show collections statistics')
+    subparser.add_argument(SERVER_ARGNAME, nargs='?', help='name of the server to display')
     subparser.set_defaults(func=cli_show_server)
 
 
@@ -148,6 +149,6 @@ def add_show_feature_parser(sub_parsers_show: argparse._SubParsersAction) -> Non
                                             description='Show the details of one or several '
                                             'features specified by their identifiers.',
                                             epilog=EPILOG_FEATURES,
-                                            parents=[features_in_collection_parser(),
-                                                     credentials_parser()])
+                                            parents=[features_ids_argument_parser(),
+                                                     credentials_options_parser()])
     subparser.set_defaults(func=cli_show_features)

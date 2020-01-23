@@ -19,7 +19,7 @@ from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY, RestoCli
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
 from .parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME, PASSWORD_ARGNAME, COLLECTION_ARGNAME,
-                              VERBOSITY_ARGNAME, FEATURES_IDS_ARGNAME)
+                              VERBOSITY_ARGNAME, FEATURES_IDS_ARGNAME, DIRECTORY_ARGNAME)
 
 # Return type of all functions activated by argparse for resto_client CLI.
 CliFunctionReturnType = Tuple[Optional[RestoClientParameters], Optional[RestoServerPersisted]]
@@ -39,43 +39,60 @@ submitting a request, it will be interactively requested.
 EPILOG_FEATURES = EPILOG_IDENTIFIERS + EPILOG_CREDENTIALS
 
 
-def credentials_parser() -> ArgumentParser:
+# TODO: parameterize by displaying system dependent directory or persisted directory
+EPILOG_DOWNLOAD_DIR = '''
+Download directory is used to download all the files. If no directory
+is specified a default one is used, whose location depends on your system.
+'''
+
+
+def credentials_options_parser() -> ArgumentParser:
     """
     Creates a parser suitable to parse the credentials options for different subparsers
     """
     parser = ArgumentParser(add_help=False)
-    parser.add_argument('--username', help='registered resto account', dest=ACCOUNT_ARGNAME)
-    parser.add_argument('--password', help='account password', dest=PASSWORD_ARGNAME)
+    parser.add_argument('--username', dest=ACCOUNT_ARGNAME, help='registered resto account')
+    parser.add_argument('--password', dest=PASSWORD_ARGNAME, help='account password')
     return parser
 
 
-def server_nickname_parser() -> ArgumentParser:
+def server_option_parser() -> ArgumentParser:
     """
-    Creates a parser suitable to parse the server nickname option in different subparsers
+    Creates a parser suitable to parse the server name option in different subparsers
     """
-    parser = ArgumentParser(add_help=False, parents=[verbosity_option_parser()])
-    parser.add_argument('--server', help='name of the server to be used (default: current server)',
-                        dest=SERVER_ARGNAME)
+    parser = ArgumentParser(add_help=False)
+    parser.add_argument('--server', dest=SERVER_ARGNAME,
+                        help='name of the server to be used (default: current server)')
     return parser
 
 
-def collection_parser() -> ArgumentParser:
+def collection_option_parser() -> ArgumentParser:
     """
     Creates a parser suitable to parse the collection option in different subparsers
     """
-    parser = ArgumentParser(add_help=False, parents=[server_nickname_parser()])
-    parser.add_argument('--collection', help='name of the collection to use',
-                        dest=COLLECTION_ARGNAME)
+    parser = ArgumentParser(add_help=False, parents=[server_option_parser()])
+    parser.add_argument('--collection', dest=COLLECTION_ARGNAME,
+                        help='name of the collection to use')
     return parser
 
 
-def features_in_collection_parser() -> ArgumentParser:
+def download_dir_option_parser() -> ArgumentParser:
     """
-    Creates a parser suitable to parse the options describing features in different subparsers
+    Creates a parser suitable to parse the download_dir option in different subparsers
     """
-    parser = ArgumentParser(add_help=False, parents=[collection_parser()])
-    parser.add_argument(FEATURES_IDS_ARGNAME, help='features identifiers or features UUIDs',
-                        nargs='+')
+    parser = ArgumentParser(add_help=False)
+    parser.add_argument('--download_dir', dest=DIRECTORY_ARGNAME,
+                        help='path to the directory where to download results')
+    return parser
+
+
+def features_ids_argument_parser() -> ArgumentParser:
+    """
+    Creates a parser suitable to parse the argument describing features ids in different subparsers
+    """
+    parser = ArgumentParser(add_help=False, parents=[collection_option_parser()])
+    parser.add_argument(FEATURES_IDS_ARGNAME, nargs='+',
+                        help='features identifiers or features UUIDs')
     return parser
 
 
@@ -84,7 +101,7 @@ def verbosity_option_parser() -> ArgumentParser:
     Creates a parser suitable to parse the verbosity option in different subparsers
     """
     parser = ArgumentParser(add_help=False)
-    parser.add_argument('--verbosity',
-                        help='verbosity level to use for this command and subsequent ones.',
-                        choices=ALLOWED_VERBOSITY, type=str.upper, dest=VERBOSITY_ARGNAME)
+    parser.add_argument('--verbosity', dest=VERBOSITY_ARGNAME, type=str.upper,
+                        choices=ALLOWED_VERBOSITY,
+                        help='verbosity level to use for this command and subsequent ones.')
     return parser

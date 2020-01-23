@@ -20,7 +20,7 @@ from resto_client.services.resto_server import RestoServer
 from .resto_criteria import RestoCriteria
 
 
-def search_current_collection(resto_server: RestoServer, region: str,
+def search_current_collection(resto_server: RestoServer, region: Optional[str]=None,
                               criteria: Optional[Dict[str, Any]]=None) \
         -> RestoFeatureCollection:
     """

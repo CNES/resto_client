@@ -30,6 +30,7 @@ def cli_create_server(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
+    # TODO: Modify ServiceAcces such that lower is implemented in them
     resto_access = RestoServiceAccess(getattr(args, RESTO_URL_ARGNAME),
                                       getattr(args, RESTO_PROTOCOL_ARGNAME).lower())
     auth_access = AuthenticationServiceAccess(getattr(args, AUTH_URL_ARGNAME),
@@ -80,13 +81,12 @@ def add_configure_server_subparser(sub_parsers: argparse._SubParsersAction) -> N
     :param sub_parsers: argparse object used to add a parser for that subcommand.
     """
     parser_configure_server = sub_parsers.add_parser(
-        'configure_server', help='configure servers known by resto_client: create, edit, delete.',
+        'configure_server', help='configure servers known by resto_client.',
         description='Allows to create, modify or delete servers characteristics: url, type, etc.',
         epilog='Servers definition is stored in a configuration file and can be edited using this'
         ' command.')
-    help_msg = 'For more help: {} <parameter> -h'
-    sub_parsers_configure_server = parser_configure_server.add_subparsers(
-        description=help_msg.format(parser_configure_server.prog))
+    help_msg = 'For more help: {} <parameter> -h'.format(parser_configure_server.prog)
+    sub_parsers_configure_server = parser_configure_server.add_subparsers(description=help_msg)
 
     add_config_server_create_parser(sub_parsers_configure_server)
     add_config_server_delete_parser(sub_parsers_configure_server)
@@ -158,9 +158,11 @@ def _add_positional_args_parser(subparser: argparse.ArgumentParser) -> None:
     subparser.add_argument(SERVER_ARGNAME, help='name of the server')
     group_resto = subparser.add_argument_group('resto service')
     group_resto.add_argument(RESTO_URL_ARGNAME, help='URL of the resto server')
-    group_resto.add_argument(RESTO_PROTOCOL_ARGNAME, help='Protocol of the resto server',
-                             choices=RestoServiceAccess.supported_protocols())
+    group_resto.add_argument(RESTO_PROTOCOL_ARGNAME,
+                             choices=RestoServiceAccess.supported_protocols(),
+                             help='Protocol of the resto server')
     group_auth = subparser.add_argument_group('authentication service')
-    group_auth.add_argument(AUTH_URL_ARGNAME, help='URL of the authentication server', nargs='?')
-    group_auth.add_argument(AUTH_PROTOCOL_ARGNAME, help='Protocol of the authentication server',
-                            choices=AuthenticationServiceAccess.supported_protocols())
+    group_auth.add_argument(AUTH_URL_ARGNAME, nargs='?', help='URL of the authentication server')
+    group_auth.add_argument(AUTH_PROTOCOL_ARGNAME,
+                            choices=AuthenticationServiceAccess.supported_protocols(),
+                            help='Protocol of the authentication server')

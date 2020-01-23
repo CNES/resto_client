@@ -59,9 +59,7 @@ def add_set_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'set' subparser
     """
-    parser_set = sub_parsers.add_parser('set', help='set application parameters: '
-                                        'server, account, collection, download_dir, region, '
-                                        ' verbosity',
+    parser_set = sub_parsers.add_parser('set', help='set application parameters.',
                                         description='Set application parameters to be used by '
                                         ' subsequent commands.',
                                         epilog='Above parameters are stored in a configuration '
@@ -70,8 +68,8 @@ def add_set_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                         'changed by issuing another set command or '
                                         'by providing their new value through commands options. '
                                         'See the unset subcommand to restore their default values.')
-    help_msg = 'For more help: {} <parameter> -h'
-    sub_parsers_set = parser_set.add_subparsers(description=help_msg.format(parser_set.prog))
+    help_msg = 'For more help: {} <parameter> -h'.format(parser_set.prog)
+    sub_parsers_set = parser_set.add_subparsers(description=help_msg)
 
     add_set_server_parser(sub_parsers_set)
     add_set_account_parser(sub_parsers_set)
@@ -86,7 +84,8 @@ def add_set_server_parser(sub_parsers_set: argparse._SubParsersAction) -> None:
     Update the 'set' command subparser with options for 'set server'
     """
     subparser = sub_parsers_set.add_parser('server', help='Set the resto server to use',
-                                           description='Set the resto server to use.')
+                                           description='Set the resto server to use in subsequent'
+                                           ' commands.')
     subparser.add_argument(SERVER_ARGNAME, help='name of the resto server')
     subparser.set_defaults(func=cli_set_server_parameter)
 
@@ -101,7 +100,7 @@ def add_set_collection_parser(sub_parsers_set: argparse._SubParsersAction) -> No
                                            epilog='If the collection does not exist in the current '
                                            'server, an error is issued and the previously stored '
                                            'collection is kept unmodified.')
-    subparser.add_argument(COLLECTION_ARGNAME, help='name of the collection to be used')
+    subparser.add_argument(COLLECTION_ARGNAME, help='name of the collection to use')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -124,10 +123,11 @@ def add_set_download_dir_parser(sub_parser_set: argparse._SubParsersAction) -> N
     """
     Update the 'set' command subparser with options for 'set download_dir'
     """
-    subparser = sub_parser_set.add_parser('download_dir', help='Set download directory to use',
+    subparser = sub_parser_set.add_parser('download_dir', help='Set download directory',
                                           description='Set the download directory to use in '
-                                          'subsequent download.',
-                                          epilog='The path need to exist to be operational.')
+                                          'subsequent commands.',
+                                          epilog='This directory will not be created by '
+                                          'resto_client and must exist before being used.')
     subparser.add_argument(DIRECTORY_ARGNAME, help='full path of the directory to use for download')
     subparser.set_defaults(func=cli_set_client_parameter)
 
@@ -138,12 +138,12 @@ def add_set_region_parser(sub_parser_set: argparse._SubParsersAction) -> None:
     """
     subparser = sub_parser_set.add_parser('region', help='Set region/AOI for search',
                                           description='Set the region/area of interest to use in '
-                                          'subsequent search.',
-                                          epilog='Region s file .geojson must be present in zones '
-                                          'folder')
+                                          'subsequent search requests.',
+                                          epilog='Region can be one of the regions described by'
+                                          ' geojson files in the internal zones database.')
     region_choices = find_region_choice()
-    subparser.add_argument(REGION_ARGNAME, help='name of the region to use from the predefined '
-                           'regions database', choices=region_choices, type=str.lower)
+    subparser.add_argument(REGION_ARGNAME, choices=region_choices, type=str.lower,
+                           help='name of the region to use from the predefined zones database')
     subparser.set_defaults(func=cli_set_client_parameter)
 
 
@@ -152,8 +152,8 @@ def add_set_verbosity_parser(sub_parser_set: argparse._SubParsersAction) -> None
     Update the 'set' command subparser with options for 'set verbosity'
     """
     subparser = sub_parser_set.add_parser('verbosity', help='Set verbosity level for resto_client',
-                                          description='Set the verbosity level to use throughout '
-                                          'resto_client.')
-    subparser.add_argument(VERBOSITY_ARGNAME, help='the verbosity level', choices=ALLOWED_VERBOSITY,
-                           type=str.upper)
+                                          description='Set the verbosity level to use in '
+                                          'subsequent commands.')
+    subparser.add_argument(VERBOSITY_ARGNAME, type=str.upper, choices=ALLOWED_VERBOSITY,
+                           help='the verbosity level')
     subparser.set_defaults(func=cli_set_client_parameter)

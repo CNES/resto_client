@@ -98,13 +98,11 @@ def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'unset' subparser
     """
-    parser_unset = sub_parsers.add_parser('unset', help='unset application parameters: '
-                                          'server, account, collection, download_dir, region, '
-                                          'verbosity',
+    parser_unset = sub_parsers.add_parser('unset', help='unset application parameters.',
                                           description='Reset application parameters to their '
                                           ' default values.')
-    help_msg = 'For more help: {} <parameter> -h'
-    sub_parsers_unset = parser_unset.add_subparsers(description=help_msg.format(parser_unset.prog))
+    help_msg = 'For more help: {} <parameter> -h'.format(parser_unset.prog)
+    sub_parsers_unset = parser_unset.add_subparsers(description=help_msg)
 
     add_unset_server_parser(sub_parsers_unset)
     add_unset_account_parser(sub_parsers_unset)
