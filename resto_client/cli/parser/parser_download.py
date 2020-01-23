@@ -21,6 +21,8 @@ from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from .parser_common import (credentials_parser, features_in_collection_parser, EPILOG_FEATURES,
                             CliFunctionReturnType)
 
+from .parser_settings import FEATURES_IDS_ARGNAME
+
 
 EPILOG_DOWNLOAD_DIR = '''
 Download directory is used to download all the files. If no directory
@@ -39,7 +41,8 @@ def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    resto_server.download_features_file_from_ids(args.feature_id, args.download_type,
+    resto_server.download_features_file_from_ids(getattr(args, FEATURES_IDS_ARGNAME),
+                                                 args.download_type,
                                                  Path(client_params.download_dir))
     return client_params, resto_server
 

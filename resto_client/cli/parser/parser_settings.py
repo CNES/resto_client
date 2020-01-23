@@ -30,3 +30,6 @@ RESTO_URL_ARGNAME = 'resto_url'
 RESTO_PROTOCOL_ARGNAME = 'resto_protocol'
 AUTH_URL_ARGNAME = 'auth_url'
 AUTH_PROTOCOL_ARGNAME = 'auth_protocol'
+
+# Arguments for feature(s)
+FEATURES_IDS_ARGNAME = 'feature_id'

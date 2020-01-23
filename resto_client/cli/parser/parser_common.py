@@ -19,7 +19,7 @@ from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY, RestoCli
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
 from .parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME, PASSWORD_ARGNAME, COLLECTION_ARGNAME,
-                              VERBOSITY_ARGNAME)
+                              VERBOSITY_ARGNAME, FEATURES_IDS_ARGNAME)
 
 # Return type of all functions activated by argparse for resto_client CLI.
 CliFunctionReturnType = Tuple[Optional[RestoClientParameters], Optional[RestoServerPersisted]]
@@ -74,7 +74,8 @@ def features_in_collection_parser() -> ArgumentParser:
     Creates a parser suitable to parse the options describing features in different subparsers
     """
     parser = ArgumentParser(add_help=False, parents=[collection_parser()])
-    parser.add_argument('feature_id', help='features identifiers or features UUIDs', nargs='+')
+    parser.add_argument(FEATURES_IDS_ARGNAME, help='features identifiers or features UUIDs',
+                        nargs='+')
     return parser
 
 

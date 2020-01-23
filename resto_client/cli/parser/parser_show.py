@@ -20,7 +20,7 @@ from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser, CliFunctionReturnType)
-from .parser_settings import SERVER_ARGNAME, COLLECTION_ARGNAME
+from .parser_settings import SERVER_ARGNAME, COLLECTION_ARGNAME, FEATURES_IDS_ARGNAME
 
 
 def cli_show_settings(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -80,7 +80,7 @@ def cli_show_features(args: argparse.Namespace) -> CliFunctionReturnType:
     client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    features = resto_server.get_features_from_ids(args.feature_id)
+    features = resto_server.get_features_from_ids(getattr(args, FEATURES_IDS_ARGNAME))
     for feature in features:
         print(feature)
     return client_params, resto_server
