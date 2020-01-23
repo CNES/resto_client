@@ -147,11 +147,30 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     resto_server = RestoServerPersisted.build_from_argparse(args)
     features_collection = search_current_collection(resto_server, client_params.region,
                                                     criteria_dict)
+# 
+#     # FIXME: Why return results of different types ?
+#     if len(features_collection_0.all_id) == 1:
+#         features_collection = features_collection_0.features[0]
+#     elif not features_collection_0.all_id:
+#         features_collection = None
+#     else:
+#         features_collection = features_collection_0
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
         search_feature_id = None
-        if isinstance(features_collection, RestoFeatureCollection):
+        if len(features_collection.all_id) == 1:
+            msg_head = Fore.BLUE + 'One result found with id : ' + Style.BRIGHT
+            search_feature_id = features_collection.features[0].product_identifier
+            print(msg_head + search_feature_id)
+        elif not features_collection.all_id:
+            page_search = criteria_dict.get('page', 1)
+            if page_search > 1:
+                msg_search = msg_no_result + 'at page {}, try a lower page number'
+                print(msg_search.format(page_search))
+            else:
+                print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
+        else:
             search_feature_id = features_collection.all_id
             print(features_collection.all_id)
             msg_search = '{} results shown on a total of '
@@ -159,17 +178,6 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
             print(msg_search.format(len(features_collection.all_id),
                                     features_collection.total_results,
                                     features_collection.start_index))
-        elif isinstance(features_collection, RestoFeature):
-            msg_head = Fore.BLUE + 'One result found with id : ' + Style.BRIGHT
-            search_feature_id = features_collection.product_identifier
-            print(msg_head + features_collection.product_identifier)
-        else:
-            page_search = criteria_dict.get('page', 1)
-            if page_search > 1:
-                msg_search = msg_no_result + 'at page {}, try a lower page number'
-                print(msg_search.format(page_search))
-            else:
-                print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         print(Style.RESET_ALL)
 
     if args.download and search_feature_id is not None:

@@ -23,7 +23,7 @@ from .resto_criteria import RestoCriteria
 
 def search_current_collection(resto_server: RestoServer, region: str,
                               criteria: Optional[Dict[str, Any]]=None) \
-        -> Optional[RestoFeatureCollection]:
+        -> RestoFeatureCollection:
     """
     Search in the current collection using selection criteria
 
@@ -44,11 +44,4 @@ def search_current_collection(resto_server: RestoServer, region: str,
 
     search_feature_collection = resto_server.search_collection(search_criteria)
 
-    # FIXME: Why return results of different types ?
-    if len(search_feature_collection.all_id) == 1:
-        search_result = search_feature_collection.features[0]
-    elif not search_feature_collection.all_id:
-        search_result = None
-    else:
-        search_result = search_feature_collection
-    return search_result
+    return search_feature_collection
