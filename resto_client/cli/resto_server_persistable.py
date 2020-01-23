@@ -36,7 +36,7 @@ class RestoClientNoPersistedServer(RestoClientUserError):
     """ Exception raised when no persisted server found """
 
 
-class RestoServerPersistable(RestoServer, PersistedAttributes):
+class RestoServerPersisted(RestoServer, PersistedAttributes):
     """
     A class for building a RestoServer whose parameters can be persisted
     """
@@ -45,7 +45,7 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
 
     # TODO: Move into RestoServer? With or without keys?
     @classmethod
-    def build_from_dict(cls, server_parameters: dict) -> 'RestoServerPersistable':
+    def build_from_dict(cls, server_parameters: dict) -> 'RestoServerPersisted':
         """
         Build an instance from a set of parameters defined in a dictionary.
 
@@ -76,7 +76,7 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
                             server_name: Optional[str] = None,
                             current_collection: Optional[str] = None,
                             username: Optional[str] = None,
-                            password: Optional[str] = None) -> 'RestoServerPersistable':
+                            password: Optional[str] = None) -> 'RestoServerPersisted':
         """
         Build a RestoServer instance from default parameters and arguments.
 
@@ -117,7 +117,7 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
         if current_collection is not None:
             server_parameters[COLLECTION_KEY] = current_collection
         # Create server from parameters
-        server = RestoServerPersistable.build_from_dict(server_parameters)
+        server = RestoServerPersisted.build_from_dict(server_parameters)
         # Update credentials if specified
         if username is not None or password is not None:
             server.set_credentials(username=username, password=password)
@@ -126,9 +126,9 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
     # FIXME: Should we pass a RestoClientParameters for passing client parameters?
     @classmethod
     def build_from_argparse(cls, args: Optional[argparse.Namespace] = None) \
-            -> 'RestoServerPersistable':
+            -> 'RestoServerPersisted':
         """
-        Build a RestoServerPersistable instance fromarguments provided by argparse and persisted
+        Build a RestoServerPersisted instance from arguments provided by argparse and persisted
         parameters, suitable for further processing in CLI context.
 
         :param args: arguments as parsed by argparse
@@ -143,11 +143,11 @@ class RestoServerPersistable(RestoServer, PersistedAttributes):
         collection_name = get_from_args(COLLECTION_ARGNAME, args)
 
         try:
-            server = RestoServerPersistable.build_from_defaults(RESTO_CLIENT_SETTINGS,
-                                                                server_name=server_name,
-                                                                current_collection=collection_name,
-                                                                username=username,
-                                                                password=password)
+            server = RestoServerPersisted.build_from_defaults(RESTO_CLIENT_SETTINGS,
+                                                              server_name=server_name,
+                                                              current_collection=collection_name,
+                                                              username=username,
+                                                              password=password)
 
         except KeyError:
             # No persisted server or persisted one does not fit requested server_name

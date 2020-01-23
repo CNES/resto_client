@@ -24,7 +24,7 @@ from prettytable import PrettyTable
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persistable import (RestoClientNoPersistedServer,
-                                                       RestoServerPersistable)
+                                                       RestoServerPersisted)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
@@ -43,7 +43,7 @@ def get_table_help_criteria() -> str:
     # TODO: First part should go into resto_criteria
     # FIXME: this approach implies a server instanciation which is useless
     try:
-        resto_server = RestoServerPersistable.build_from_argparse()
+        resto_server = RestoServerPersisted.build_from_argparse()
         if resto_server.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         resto_protocol = resto_server.resto_service.service_access.protocol
@@ -144,7 +144,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     criteria_dict = criteria_args_fitter(args.criteria, args.maxrecords, args.page)
 
     client_params = RestoClientParameters.build_from_argparse(args)
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     features_collection = search_current_collection(resto_server, client_params.region,
                                                     criteria_dict)
 

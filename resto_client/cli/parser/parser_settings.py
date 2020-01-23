@@ -12,11 +12,15 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+# Names of the arguments as found in argparse.NameSpace after parsing
 
+# Arguments persisted by RestoClientParameters
+DIRECTORY_ARGNAME = 'download_dir'
+REGION_ARGNAME = 'region'
+VERBOSITY_ARGNAME = 'verbosity'
+
+# Arguments persisted by RestoServerPersisted
 SERVER_ARGNAME = 'server_name'
 ACCOUNT_ARGNAME = 'username'
 PASSWORD_ARGNAME = 'password'
 COLLECTION_ARGNAME = 'collection_name'
-DIRECTORY_ARGNAME = 'download_dir'
-REGION_ARGNAME = 'region'
-VERBOSITY_ARGNAME = 'verbosity'

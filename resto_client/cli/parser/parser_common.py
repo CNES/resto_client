@@ -16,12 +16,13 @@ from argparse import ArgumentParser
 from typing import Tuple, Optional
 
 from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY, RestoClientParameters
-from resto_client.cli.resto_server_persistable import RestoServerPersistable
+from resto_client.cli.resto_server_persistable import RestoServerPersisted
 
-from .parser_settings import SERVER_ARGNAME, ACCOUNT_ARGNAME, PASSWORD_ARGNAME, COLLECTION_ARGNAME
+from .parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME, PASSWORD_ARGNAME, COLLECTION_ARGNAME,
+                              VERBOSITY_ARGNAME)
 
 # Return type of all functions activated by argparse for resto_client CLI.
-CliFunctionReturnType = Tuple[Optional[RestoClientParameters], Optional[RestoServerPersistable]]
+CliFunctionReturnType = Tuple[Optional[RestoClientParameters], Optional[RestoServerPersisted]]
 
 EPILOG_IDENTIFIERS = '''
 Identifiers can be expressed as digits only identifier or as UUID,
@@ -84,6 +85,5 @@ def verbosity_option_parser() -> ArgumentParser:
     parser = ArgumentParser(add_help=False)
     parser.add_argument('--verbosity',
                         help='verbosity level to use for this command and subsequent ones.',
-                        choices=ALLOWED_VERBOSITY,
-                        type=str.upper)
+                        choices=ALLOWED_VERBOSITY, type=str.upper, dest=VERBOSITY_ARGNAME)
     return parser

@@ -15,7 +15,7 @@
 import argparse
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters, ALLOWED_VERBOSITY
-from resto_client.cli.resto_server_persistable import RestoServerPersistable
+from resto_client.cli.resto_server_persistable import RestoServerPersisted
 from resto_client.functions.aoi_utils import find_region_choice
 
 from .parser_common import CliFunctionReturnType
@@ -27,14 +27,14 @@ def cli_set_server_parameter(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to set the persistent server parameters
 
-    Parameters which can be set must belong to RestoServerPersistable.persisted_attributes list.
+    Parameters which can be set must belong to RestoServerPersisted.persisted_attributes list.
     They must appear with this exact name in the argparse.Namespace argument. However they can
     be absent or equal to None.
 
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     return None, resto_server
 
 

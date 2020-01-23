@@ -29,5 +29,5 @@ if SETTING_VERSION_KEY not in RESTO_CLIENT_SETTINGS:
 
 if RESTO_CLIENT_SETTINGS[SETTING_VERSION_KEY] != CURRENT_SETTINGS_VERSION:
     # Do some processing here to upgrade the settings to the current version
-    # Process sequentially RestoClientParameters and RestoServerPersistable parameters
+    # Process sequentially RestoClientParameters and RestoServerPersisted parameters
     pass

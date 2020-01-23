@@ -15,7 +15,7 @@
 import argparse
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters
-from resto_client.cli.resto_server_persistable import RestoServerPersistable
+from resto_client.cli.resto_server_persistable import RestoServerPersisted
 
 from .parser_common import CliFunctionReturnType
 
@@ -27,7 +27,7 @@ def cli_unset_server(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     resto_server.server_name = None
     return None, resto_server
 
@@ -39,7 +39,7 @@ def cli_unset_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     resto_server.current_collection = None
     return None, resto_server
 
@@ -51,7 +51,7 @@ def cli_unset_account(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     resto_server.set_credentials(username=None)
     return None, resto_server
 
@@ -114,7 +114,6 @@ def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     add_unset_verbosity(sub_parsers_unset)
 
 
-# FIXME: what is the difference with configure_server delete ?
 def add_unset_server_parser(sub_parsers_unset: argparse._SubParsersAction) -> None:
     """
     Update the 'unset' command subparser with options for 'unset server'
@@ -123,8 +122,6 @@ def add_unset_server_parser(sub_parsers_unset: argparse._SubParsersAction) -> No
                                              description='Unset the stored resto server.',
                                              epilog='The stored collection and account parameters '
                                              'are also unset by this command.')
-    subparser.add_argument('server_name', help='name of the server to delete from database',
-                           nargs='?')
     subparser.set_defaults(func=cli_unset_server)
 
 

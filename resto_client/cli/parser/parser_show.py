@@ -16,7 +16,7 @@ import argparse
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.cli.resto_server_persistable import RestoServerPersistable
+from resto_client.cli.resto_server_persistable import RestoServerPersisted
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser, CliFunctionReturnType)
@@ -45,7 +45,7 @@ def cli_show_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     # FIXME: is it necessary to pass this argument?
     collection = resto_server.get_collection(collection=resto_server.current_collection)
     print(collection)
@@ -64,7 +64,7 @@ def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     server_description = resto_server.show_server(with_stats=args.stats)
     print(server_description)
     return client_params, resto_server
@@ -79,7 +79,7 @@ def cli_show_features(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     client_params = RestoClientParameters.build_from_argparse(
         args)  # To retrieve verbosity level from CLI
-    resto_server = RestoServerPersistable.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(args)
     features = resto_server.get_features_from_ids(args.feature_id)
     for feature in features:
         print(feature)
