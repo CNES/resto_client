@@ -16,7 +16,7 @@ import argparse
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.cli.resto_server_persistable import RestoServerPersisted
+from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser, CliFunctionReturnType)

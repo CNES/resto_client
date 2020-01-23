@@ -15,7 +15,7 @@
 import argparse
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters, ALLOWED_VERBOSITY
-from resto_client.cli.resto_server_persistable import RestoServerPersisted
+from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from resto_client.functions.aoi_utils import find_region_choice
 
 from .parser_common import CliFunctionReturnType

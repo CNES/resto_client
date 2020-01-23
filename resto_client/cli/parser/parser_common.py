@@ -16,7 +16,7 @@ from argparse import ArgumentParser
 from typing import Tuple, Optional
 
 from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY, RestoClientParameters
-from resto_client.cli.resto_server_persistable import RestoServerPersisted
+from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
 from .parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME, PASSWORD_ARGNAME, COLLECTION_ARGNAME,
                               VERBOSITY_ARGNAME)

@@ -23,8 +23,8 @@ from prettytable import PrettyTable
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_parameters import RestoClientParameters
-from resto_client.cli.resto_server_persistable import (RestoClientNoPersistedServer,
-                                                       RestoServerPersisted)
+from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
+                                                     RestoServerPersisted)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice

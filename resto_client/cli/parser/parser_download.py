@@ -16,7 +16,7 @@ import argparse
 from pathlib import Path
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters
-from resto_client.cli.resto_server_persistable import RestoServerPersisted
+from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
 from .parser_common import (credentials_parser, features_in_collection_parser, EPILOG_FEATURES,
                             CliFunctionReturnType)
