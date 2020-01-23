@@ -42,6 +42,6 @@ def search_current_collection(resto_server: RestoServer, region: str,
         search_criteria.update(criteria)
     search_criteria.update({'region': region})
 
-    search_feature_collection = resto_server.search_collection(search_criteria)
+    search_feature_collection = resto_server.search_by_criteria(search_criteria)
 
     return search_feature_collection

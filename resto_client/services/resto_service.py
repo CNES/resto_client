@@ -125,9 +125,9 @@ class RestoService(BaseService):
         collection_name = self._collections_mgr.ensure_collection(collection)
         return GetCollectionRequest(self, collection=collection_name).run()
 
-    def search_collection(self,
-                          criteria: RestoCriteria,
-                          collection: Optional[str]=None) -> RestoFeatureCollection:
+    def search_by_criteria(self,
+                           criteria: RestoCriteria,
+                           collection: Optional[str]=None) -> RestoFeatureCollection:
         """
         Search a collection using criteria.
 

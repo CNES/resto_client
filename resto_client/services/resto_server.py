@@ -156,8 +156,8 @@ class RestoServer():
 
 # +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
 
-    def search_collection(self, criteria: RestoCriteria,
-                          collection_name: Optional[str] = None) -> RestoFeatureCollection:
+    def search_by_criteria(self, criteria: RestoCriteria,
+                           collection_name: Optional[str] = None) -> RestoFeatureCollection:
         """
         Search a collection using search criteria
 
@@ -169,7 +169,7 @@ class RestoServer():
         # TODO: change to pass a dict instead of a RestoCriteria and build RestoCriteria internally
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
-        return self.resto_service.search_collection(criteria, collection_name)
+        return self.resto_service.search_by_criteria(criteria, collection_name)
 
     def get_features_from_ids(self, features_ids: Union[str, List[str]],
                               collection_name: Optional[str] = None) -> List[RestoFeature]:
