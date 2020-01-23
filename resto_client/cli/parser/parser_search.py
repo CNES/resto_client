@@ -147,14 +147,6 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     resto_server = RestoServerPersisted.build_from_argparse(args)
     features_collection = search_current_collection(resto_server, client_params.region,
                                                     criteria_dict)
-# 
-#     # FIXME: Why return results of different types ?
-#     if len(features_collection_0.all_id) == 1:
-#         features_collection = features_collection_0.features[0]
-#     elif not features_collection_0.all_id:
-#         features_collection = None
-#     else:
-#         features_collection = features_collection_0
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
