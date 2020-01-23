@@ -11,40 +11,6 @@
    is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
-
-
-resto_client Command Line Interface (CLI)
-
-Implemented commands (without options):
-
-SET:
-    > resto_client set server <server_url> ...
-    > resto_client set account <account_id> ...
-    > resto_client set collection <collection> ...
-
-UNSET:
-    > resto_client unset server
-    > resto_client unset account
-    > resto_client unset collection
-
-SHOW:
-    > resto_client show collections ...
-    > resto_client show collection <collection> ...
-    > resto_client show feature <collection> <feature_id> ...
-
-DOWNLOAD:
-    > resto_client download product <collection> <feature_id> ...
-    > resto_client download quicklook <collection> <feature_id> ...
-    > resto_client download thumbnail <collection> <feature_id> ...
-    > resto_client download annexes <collection> <feature_id> ...
-
-SEARCH:
-    > resto_client search <collection> ...
-
-
-Expected commands (without options):
-
-    TBD
 """
 from argparse import ArgumentParser
 
