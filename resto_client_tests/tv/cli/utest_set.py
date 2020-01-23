@@ -19,9 +19,10 @@ import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.cli.resto_client_settings import (RESTO_CLIENT_SETTINGS, USERNAME_KEY,
-                                                    DOWNLOAD_DIR_KEY, TOKEN_KEY, VERBOSITY_KEY,
-                                                    REGION_KEY, COLLECTION_KEY, SERVER_KEY)
+from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.cli.resto_server_persistable import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
+                                                       TOKEN_KEY)
 from resto_client.cli.resto_server_persistable import RestoClientNoPersistedServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 

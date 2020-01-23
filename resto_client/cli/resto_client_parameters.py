@@ -22,10 +22,9 @@ from resto_client.generic.property_decoration import managed_getter, managed_set
 from resto_client.generic.user_dirs import user_download_dir
 
 from .cli_utils import get_from_args
-from .parser.parser_settings import (CLI_DIR_NAME, CLI_REGION_NAME, CLI_VERBOSITY)
+from .parser.parser_settings import (DIRECTORY_ARGNAME, REGION_ARGNAME, VERBOSITY_ARGNAME)
 from .persistence import PersistedAttributes
-from .resto_client_settings import (RESTO_CLIENT_SETTINGS, PERSISTED_CLIENT_PARAMETERS,
-                                    VERBOSITY_KEY)
+from .resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 def _check_download_dir(download_dir: str) -> str:
@@ -80,12 +79,17 @@ def _check_region(key_region: str) -> str:
     return key_region
 
 
+DOWNLOAD_DIR_KEY = 'download_dir'
+REGION_KEY = 'region'
+VERBOSITY_KEY = 'verbosity'
+
+
 class RestoClientParameters(PersistedAttributes):
     """
     Class implementing parameters used by resto client.
     """
     properties_storage = RESTO_CLIENT_SETTINGS
-    persisted_attributes = PERSISTED_CLIENT_PARAMETERS
+    persisted_attributes = [DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY]
 
     def __init__(self,
                  region: Optional[str]=None,
@@ -119,9 +123,9 @@ class RestoClientParameters(PersistedAttributes):
         :param args: arguments as parsed by ArgParse
         :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
         """
-        download_dir = get_from_args(CLI_DIR_NAME, args)
-        region = get_from_args(CLI_REGION_NAME, args)
-        verbosity = get_from_args(CLI_VERBOSITY, args)
+        download_dir = get_from_args(DIRECTORY_ARGNAME, args)
+        region = get_from_args(REGION_ARGNAME, args)
+        verbosity = get_from_args(VERBOSITY_ARGNAME, args)
 
         return cls(download_dir=download_dir, region=region, verbosity=verbosity)
 

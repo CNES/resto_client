@@ -18,6 +18,8 @@ from typing import Tuple, Optional
 from resto_client.cli.resto_client_parameters import ALLOWED_VERBOSITY, RestoClientParameters
 from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
+from .parser_settings import SERVER_ARGNAME, ACCOUNT_ARGNAME, PASSWORD_ARGNAME, COLLECTION_ARGNAME
+
 # Return type of all functions activated by argparse for resto_client CLI.
 CliFunctionReturnType = Tuple[Optional[RestoClientParameters], Optional[RestoServerPersistable]]
 
@@ -41,8 +43,8 @@ def credentials_parser() -> ArgumentParser:
     Creates a parser suitable to parse the credentials options for different subparsers
     """
     parser = ArgumentParser(add_help=False)
-    parser.add_argument('--username', help='registered resto account')
-    parser.add_argument('--password', help='account password')
+    parser.add_argument('--username', help='registered resto account', dest=ACCOUNT_ARGNAME)
+    parser.add_argument('--password', help='account password', dest=PASSWORD_ARGNAME)
     return parser
 
 
@@ -52,7 +54,7 @@ def server_nickname_parser() -> ArgumentParser:
     """
     parser = ArgumentParser(add_help=False, parents=[verbosity_option_parser()])
     parser.add_argument('--server', help='name of the server to be used (default: current server)',
-                        dest='server_name')
+                        dest=SERVER_ARGNAME)
     return parser
 
 
@@ -62,7 +64,7 @@ def collection_parser() -> ArgumentParser:
     """
     parser = ArgumentParser(add_help=False, parents=[server_nickname_parser()])
     parser.add_argument('--collection', help='name of the collection to use',
-                        dest='collection_name')
+                        dest=COLLECTION_ARGNAME)
     return parser
 
 
@@ -73,8 +75,6 @@ def features_in_collection_parser() -> ArgumentParser:
     parser = ArgumentParser(add_help=False, parents=[collection_parser()])
     parser.add_argument('feature_id', help='features identifiers or features UUIDs', nargs='+')
     return parser
-
-# TODO: Use in parser_set
 
 
 def verbosity_option_parser() -> ArgumentParser:

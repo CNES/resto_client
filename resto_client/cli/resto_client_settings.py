@@ -18,32 +18,16 @@ from resto_client.settings.resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
 RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json')
 
-# persisted attributes from different classes are listed here, as versions updating reminders.
-DOWNLOAD_DIR_KEY = 'download_dir'
-REGION_KEY = 'region'
-VERBOSITY_KEY = 'verbosity'
-PERSISTED_CLIENT_PARAMETERS = [DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY]
-
-COLLECTION_KEY = 'current_collection'
-SERVER_KEY = 'server_name'
-TOKEN_KEY = 'token'
-USERNAME_KEY = 'username'
-PERSISTED_SERVER_PARAMETERS = [COLLECTION_KEY, SERVER_KEY, TOKEN_KEY, USERNAME_KEY]
-
 # Process resto_client_settings versions
 
-# Settings written previously to setting version introduction
-if 'settings_version' not in RESTO_CLIENT_SETTINGS:
-    RESTO_CLIENT_SETTINGS['settings_version'] = 'V0'
+CURRENT_SETTINGS_VERSION = 'V1'
+SETTING_VERSION_KEY = 'settings_version'
+if SETTING_VERSION_KEY not in RESTO_CLIENT_SETTINGS:
+    # Settings written previously to setting version introduction: delete all of them
+    RESTO_CLIENT_SETTINGS.clear()
+    RESTO_CLIENT_SETTINGS[SETTING_VERSION_KEY] = CURRENT_SETTINGS_VERSION
 
-if RESTO_CLIENT_SETTINGS['settings_version'] == 'V0':
-    if 'auth_base_url' in RESTO_CLIENT_SETTINGS:
-        del RESTO_CLIENT_SETTINGS['auth_base_url']
-    if 'auth_protocol' in RESTO_CLIENT_SETTINGS:
-        del RESTO_CLIENT_SETTINGS['auth_protocol']
-    if 'resto_base_url' in RESTO_CLIENT_SETTINGS:
-        del RESTO_CLIENT_SETTINGS['resto_base_url']
-    if 'resto_protocol' in RESTO_CLIENT_SETTINGS:
-        del RESTO_CLIENT_SETTINGS['resto_protocol']
-    RESTO_CLIENT_SETTINGS['settings_version'] = 'V1'
-# TODO: FInish V0->V1 upgrade
+if RESTO_CLIENT_SETTINGS[SETTING_VERSION_KEY] != CURRENT_SETTINGS_VERSION:
+    # Do some processing here to upgrade the settings to the current version
+    # Process sequentially RestoClientParameters and RestoServerPersistable parameters
+    pass

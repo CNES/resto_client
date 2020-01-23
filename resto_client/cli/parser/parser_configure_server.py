@@ -19,6 +19,7 @@ from resto_client.services.service_access import (AuthenticationServiceAccess, R
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .parser_common import CliFunctionReturnType
+from .parser_settings import SERVER_ARGNAME
 
 
 def cli_create_server(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -100,7 +101,7 @@ def add_config_server_create_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'create', help='create a new server',
         description='Create a new server in the servers configuration database.')
-    subparser.add_argument('server_name', help='name of the server to create.')
+    subparser.add_argument(SERVER_ARGNAME, help='name of the server to create.')
     group_resto = subparser.add_argument_group('resto service')
     group_resto.add_argument('resto_url', help='URL of the resto server.')
     group_resto.add_argument('resto_protocol', help='Protocol of the resto server.',
@@ -122,7 +123,7 @@ def add_config_server_delete_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'delete', help='delete an existing server',
         description='Delete a server from the configuration database.')
-    subparser.add_argument('server_name', help='name of the server to delete')
+    subparser.add_argument(SERVER_ARGNAME, help='name of the server to delete')
     subparser.set_defaults(func=cli_delete_server)
 
 
@@ -136,7 +137,7 @@ def add_config_server_edit_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'edit', help='edit server characteristics',
         description='Edit the characteristics of a server existing in the configuration database.')
-    subparser.add_argument('server_name', help='name of the server to edit')
+    subparser.add_argument(SERVER_ARGNAME, help='name of the server to edit')
     group_resto = subparser.add_argument_group('resto service')
     group_resto.add_argument('resto_url', help='URL of the resto server')
     group_resto.add_argument('resto_protocol', help='Protocol of the resto server',

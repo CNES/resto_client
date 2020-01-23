@@ -43,6 +43,8 @@ def search_current_collection(resto_server: RestoServer, region: str,
     search_criteria.update({'region': region})
 
     search_feature_collection = resto_server.search_collection(search_criteria)
+
+    # FIXME: Why return results of different types ?
     if len(search_feature_collection.all_id) == 1:
         search_result = search_feature_collection.features[0]
     elif not search_feature_collection.all_id:

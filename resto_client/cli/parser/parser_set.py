@@ -19,6 +19,8 @@ from resto_client.cli.resto_server_persistable import RestoServerPersistable
 from resto_client.functions.aoi_utils import find_region_choice
 
 from .parser_common import CliFunctionReturnType
+from .parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME, COLLECTION_ARGNAME,
+                              DIRECTORY_ARGNAME, REGION_ARGNAME, VERBOSITY_ARGNAME)
 
 
 def cli_set_server_parameter(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -85,7 +87,7 @@ def add_set_server_parser(sub_parsers_set: argparse._SubParsersAction) -> None:
     """
     subparser = sub_parsers_set.add_parser('server', help='Set the resto server to use',
                                            description='Set the resto server to use.')
-    subparser.add_argument('server_name', help='name of the resto server')
+    subparser.add_argument(SERVER_ARGNAME, help='name of the resto server')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -99,7 +101,7 @@ def add_set_collection_parser(sub_parsers_set: argparse._SubParsersAction) -> No
                                            epilog='If the collection does not exist in the current '
                                            'server, an error is issued and the previously stored '
                                            'collection is kept unmodified.')
-    subparser.add_argument('collection_name', help='name of the collection to be used')
+    subparser.add_argument(COLLECTION_ARGNAME, help='name of the collection to be used')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -114,7 +116,7 @@ def add_set_account_parser(sub_parser_set: argparse._SubParsersAction) -> None:
                                           'immediately. If it is not allowed on '
                                           'the server an error will be issued by the first '
                                           'command which will try to use it.')
-    subparser.add_argument('username', help='server account to use for subsequent requests')
+    subparser.add_argument(ACCOUNT_ARGNAME, help='server account to use for subsequent requests')
     subparser.set_defaults(func=cli_set_server_parameter)
 
 
@@ -126,7 +128,7 @@ def add_set_download_dir_parser(sub_parser_set: argparse._SubParsersAction) -> N
                                           description='Set the download directory to use in '
                                           'subsequent download.',
                                           epilog='The path need to exist to be operational.')
-    subparser.add_argument('download_dir', help='full path of the directory to use for download')
+    subparser.add_argument(DIRECTORY_ARGNAME, help='full path of the directory to use for download')
     subparser.set_defaults(func=cli_set_client_parameter)
 
 
@@ -140,8 +142,8 @@ def add_set_region_parser(sub_parser_set: argparse._SubParsersAction) -> None:
                                           epilog='Region s file .geojson must be present in zones '
                                           'folder')
     region_choices = find_region_choice()
-    subparser.add_argument('region', help='the chosen key-word will search for the corresponding '
-                           'file in the appropriate folder', choices=region_choices, type=str.lower)
+    subparser.add_argument(REGION_ARGNAME, help='name of the region to use from the predefined '
+                           'regions database', choices=region_choices, type=str.lower)
     subparser.set_defaults(func=cli_set_client_parameter)
 
 
@@ -152,6 +154,6 @@ def add_set_verbosity_parser(sub_parser_set: argparse._SubParsersAction) -> None
     subparser = sub_parser_set.add_parser('verbosity', help='Set verbosity level for resto_client',
                                           description='Set the verbosity level to use throughout '
                                           'resto_client.')
-    subparser.add_argument('verbosity', help='the verbosity level', choices=ALLOWED_VERBOSITY,
+    subparser.add_argument(VERBOSITY_ARGNAME, help='the verbosity level', choices=ALLOWED_VERBOSITY,
                            type=str.upper)
     subparser.set_defaults(func=cli_set_client_parameter)

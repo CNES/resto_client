@@ -12,13 +12,11 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from resto_client.cli.resto_client_settings import (DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY,
-                                                    SERVER_KEY, USERNAME_KEY)
 
-CLI_SERVER_NAME = SERVER_KEY
-CLI_USERNAME = USERNAME_KEY
-CLI_PASSWORD = 'password'
-CLI_COLLEC_NAME = 'collection_name'
-CLI_DIR_NAME = DOWNLOAD_DIR_KEY
-CLI_REGION_NAME = REGION_KEY
-CLI_VERBOSITY = VERBOSITY_KEY
+SERVER_ARGNAME = 'server_name'
+ACCOUNT_ARGNAME = 'username'
+PASSWORD_ARGNAME = 'password'
+COLLECTION_ARGNAME = 'collection_name'
+DIRECTORY_ARGNAME = 'download_dir'
+REGION_ARGNAME = 'region'
+VERBOSITY_ARGNAME = 'verbosity'

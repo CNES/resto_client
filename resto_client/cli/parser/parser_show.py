@@ -20,6 +20,7 @@ from resto_client.cli.resto_server_persistable import RestoServerPersistable
 
 from .parser_common import (features_in_collection_parser, credentials_parser, EPILOG_FEATURES,
                             server_nickname_parser, CliFunctionReturnType)
+from .parser_settings import SERVER_ARGNAME, COLLECTION_ARGNAME
 
 
 def cli_show_settings(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -120,7 +121,7 @@ def add_show_collection_parser(sub_parsers_show: argparse._SubParsersAction) -> 
                                             description='Show the details of a collection including'
                                             ' statistics on its content.',
                                             parents=[server_nickname_parser()])
-    subparser.add_argument('collection_name', help='name of the collection to show', nargs='?')
+    subparser.add_argument(COLLECTION_ARGNAME, help='name of the collection to show', nargs='?')
     subparser.add_argument('--nostats', action='store_true', help='disable statistics details')
     subparser.set_defaults(func=cli_show_collection)
 
@@ -135,7 +136,7 @@ def add_show_server_parser(sub_parsers_show: argparse._SubParsersAction) -> None
                                             'If no server name is provided, the current server '
                                             'will be displayed.')
     subparser.add_argument('--stats', action='store_true', help='show collections statistics')
-    subparser.add_argument('server_name', help='name of the server to explore', nargs='?')
+    subparser.add_argument(SERVER_ARGNAME, help='name of the server to explore', nargs='?')
     subparser.set_defaults(func=cli_show_server)
 
 
