@@ -21,6 +21,7 @@ from resto_client.base_exceptions import RestoClientUserError, RestoClientDesign
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
 from resto_client.generic.basic_types import (SquareInterval, DateYMD, GeometryWKT, AscOrDesc,
                                               Polarisation, DateYMDInterval)
+from resto_client.settings.servers_database import DB_SERVERS
 
 CriteriaDictType = Dict[str, dict]
 COVER_TEXT = ' expressed as a percentage and using brackets. e.g. [n1,n2[ '
@@ -240,22 +241,23 @@ class RestoCriteria(dict):
     A class to hold criteria in a dictionary which can be read and written by the API.
     """
 
-    def __init__(self, resto_protocol: str, **kwargs: str) -> None:
-        # TODO: pass a RestoService instead of a resto_protocol ?
+    def __init__(self, server_name: str, **kwargs: str) -> None:
         """
         Constructor
 
-        :param resto_protocol : associated resto service protocol
+        :param server_name : associated server_name
         :param dict kwargs : dictonary in keyword=value form
         :raises IndexError: if no service protocol given
-        :raises RestoClientUserError: if a criterion is not in criteria key list
+        :raises RestoClientUserError: if a criterion is not in criteria key list or
+        resto_server has not resto_service
         """
+        resto_protocol = DB_SERVERS.get_protocol_from_name(server_name)
         self.criteria_keys: CriteriaDictType = {}
         self.criteria_keys.update(COMMON_CRITERIA_KEYS)
 
         if resto_protocol not in SPECIFIC_CRITERIA_KEYS:
-            msg = 'specific criteria type of "{}" protocol not supported by resto_client'
-            raise RestoClientUserError(msg.format(resto_protocol))
+            msg = 'specific criteria type for "{}" not supported by resto_client'
+            raise RestoClientUserError(msg.format(server_name))
         self.criteria_keys.update(SPECIFIC_CRITERIA_KEYS[resto_protocol])
 
         super(RestoCriteria, self).__init__()

@@ -189,6 +189,19 @@ class ServersDatabase():
             server_name = server_name.lower()
         return server_name
 
+    def get_protocol_from_name(self, server_name: str) -> Optional[str]:
+        """
+        Returns the assciated resto_protocol from the nickname
+
+        :param server_name: name of the server
+        :returns: the resto protocol of the server or None if server_name does nt exist.
+        """
+        try:
+            resto_protocol = self.db_servers[server_name]['resto_protocol']
+        except KeyError:
+            resto_protocol = None
+        return resto_protocol
+
     def delete(self, server_name: str) -> None:
         """
         Delete a server definition corresponding to the specified name.

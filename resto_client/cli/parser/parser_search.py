@@ -25,8 +25,6 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
                                                      RestoServerPersisted)
-from resto_client.entities.resto_feature import RestoFeature
-from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_current_collection
 from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
@@ -44,13 +42,11 @@ def get_table_help_criteria() -> str:
     # FIXME: this approach implies a server instanciation which is useless
     try:
         resto_server = RestoServerPersisted.build_from_argparse()
-        if resto_server.resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
-        resto_protocol = resto_server.resto_service.service_access.protocol
-        resto_criteria = RestoCriteria(resto_protocol)
-        # TODO: print server name instead of server protocol
+        if resto_server.server_name is None:
+            raise RestoClientUserError('No resto server currently defined.')
+        resto_criteria = RestoCriteria(resto_server.server_name)
         title_help = 'Current {} server supports the following criteria (defined in the Resto API):'
-        title_help = title_help.format(resto_protocol)
+        title_help = title_help.format(resto_server.server_name)
         dict_to_print = resto_criteria.criteria_keys
     except RestoClientNoPersistedServer:
         title_help = 'Criteria supported by all servers (more available when a server is selected):'
