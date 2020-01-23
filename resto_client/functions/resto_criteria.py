@@ -21,7 +21,7 @@ from resto_client.base_exceptions import RestoClientUserError, RestoClientDesign
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
 from resto_client.generic.basic_types import (SquareInterval, DateYMD, GeometryWKT, AscOrDesc,
                                               Polarisation, DateYMDInterval)
-from resto_client.settings.servers_database import DB_SERVERS
+from resto_client.settings.servers_database import DB_SERVERS, RestoClientUnexistingServer
 
 CriteriaDictType = Dict[str, dict]
 COVER_TEXT = ' expressed as a percentage and using brackets. e.g. [n1,n2[ '
@@ -251,11 +251,12 @@ class RestoCriteria(dict):
         :raises RestoClientUserError: if a criterion is not in criteria key list or
         resto_server has not resto_service
         """
-        resto_protocol = DB_SERVERS.get_protocol_from_name(server_name)
         self.criteria_keys: CriteriaDictType = {}
         self.criteria_keys.update(COMMON_CRITERIA_KEYS)
 
-        if resto_protocol not in SPECIFIC_CRITERIA_KEYS:
+        try:
+            resto_protocol = DB_SERVERS.get_resto_service_protocol(server_name)
+        except RestoClientUnexistingServer:
             msg = 'specific criteria type for "{}" not supported by resto_client'
             raise RestoClientUserError(msg.format(server_name))
         self.criteria_keys.update(SPECIFIC_CRITERIA_KEYS[resto_protocol])
