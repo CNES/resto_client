@@ -33,3 +33,16 @@ AUTH_PROTOCOL_ARGNAME = 'auth_protocol'
 
 # Arguments for feature(s)
 FEATURES_IDS_ARGNAME = 'feature_id'
+
+# Argument for show
+WITH_STATS_ARGNAME = 'stats'
+NO_STATS_ARGNAME = 'nostats'
+
+# Arguments for search
+CRITERIA_ARGNAME = 'criteria'
+MAXRECORDS_ARGNAME = 'maxrecords'
+PAGE_ARGNAME = 'page'
+DOWNLOAD_ARGNAME = 'download'
+
+# Arguments for download
+DOWNLOAD_TYPE_ARGNAME = 'download_type'

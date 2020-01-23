@@ -18,16 +18,11 @@ from pathlib import Path
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
-from .parser_common import (credentials_parser, features_in_collection_parser, EPILOG_FEATURES,
-                            CliFunctionReturnType)
+from .parser_common import (credentials_options_parser, features_ids_argument_parser,
+                            download_dir_option_parser, CliFunctionReturnType,
+                            EPILOG_DOWNLOAD_DIR, EPILOG_FEATURES)
 
-from .parser_settings import FEATURES_IDS_ARGNAME
-
-
-EPILOG_DOWNLOAD_DIR = '''
-Download directory is used to download all the files. If no directory
-is specified a default one is used, whose location depends on your system.
-'''
+from .parser_settings import FEATURES_IDS_ARGNAME, DOWNLOAD_TYPE_ARGNAME
 
 
 def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -42,7 +37,7 @@ def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(args)
     resto_server.download_features_file_from_ids(getattr(args, FEATURES_IDS_ARGNAME),
-                                                 args.download_type,
+                                                 getattr(args, DOWNLOAD_TYPE_ARGNAME),
                                                  Path(client_params.download_dir))
     return client_params, resto_server
 
@@ -53,12 +48,11 @@ def add_download_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'download' subparser
     """
-    parser_download = sub_parsers.add_parser('download', help='download features files: '
-                                             'product, quicklook, thumbnail or annexes',
+    parser_download = sub_parsers.add_parser('download', help='download features files.',
                                              description='Download feature files from the server.')
-    help_msg = 'For more help: {} <file-type> -h'
-    sub_parsers_download = parser_download.add_subparsers(
-        description=help_msg.format(parser_download.prog), dest='download_type')
+    help_msg = 'For more help: {} <file-type> -h'.format(parser_download.prog)
+    sub_parsers_download = parser_download.add_subparsers(description=help_msg,
+                                                          dest=DOWNLOAD_TYPE_ARGNAME)
 
     add_download_product_parser(sub_parsers_download)
     add_download_quicklook_parser(sub_parsers_download)
@@ -76,9 +70,9 @@ def add_download_product_parser(sub_parsers_download: argparse._SubParsersAction
                                                 'corresponding to one or several features '
                                                 'specified by their identifiers.',
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
-                                                parents=[features_in_collection_parser(),
-                                                         credentials_parser()])
-    subparser.add_argument('--directory', help='directory for download')
+                                                parents=[features_ids_argument_parser(),
+                                                         credentials_options_parser(),
+                                                         download_dir_option_parser()])
     subparser.set_defaults(func=cli_download_files)
 
 
@@ -92,9 +86,9 @@ def add_download_quicklook_parser(sub_parsers_download: argparse._SubParsersActi
                                                 'corresponding to one or several features '
                                                 'specified by their identifiers.',
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
-                                                parents=[features_in_collection_parser(),
-                                                         credentials_parser()])
-    subparser.add_argument('--directory', help='directory for download')
+                                                parents=[features_ids_argument_parser(),
+                                                         credentials_options_parser(),
+                                                         download_dir_option_parser()])
     subparser.set_defaults(func=cli_download_files)
 
 
@@ -108,9 +102,9 @@ def add_download_thumbnail_parser(sub_parsers_download: argparse._SubParsersActi
                                                 'corresponding to one or several features '
                                                 'specified by their identifiers.',
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
-                                                parents=[features_in_collection_parser(),
-                                                         credentials_parser()])
-    subparser.add_argument('--directory', help='directory for download')
+                                                parents=[features_ids_argument_parser(),
+                                                         credentials_options_parser(),
+                                                         download_dir_option_parser()])
     subparser.set_defaults(func=cli_download_files)
 
 
@@ -123,7 +117,7 @@ def add_download_annexes_parser(sub_parsers_download: argparse._SubParsersAction
                                                 'corresponding to one or several features '
                                                 'specified by their identifiers.',
                                                 epilog=EPILOG_FEATURES + EPILOG_DOWNLOAD_DIR,
-                                                parents=[features_in_collection_parser(),
-                                                         credentials_parser()])
-    subparser.add_argument('--directory', help='directory for download')
+                                                parents=[features_ids_argument_parser(),
+                                                         credentials_options_parser(),
+                                                         download_dir_option_parser()])
     subparser.set_defaults(func=cli_download_files)

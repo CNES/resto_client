@@ -29,9 +29,10 @@ def build_parser() -> ArgumentParser:
     """
     parser = ArgumentParser(description='A commmand line client to interact with resto servers.')
 
-    help_msg = 'For more help: {} <sub_command> -h'
-    sub_parsers = parser.add_subparsers(description=help_msg.format(parser.prog))
+    help_msg = 'For more help: {} <sub_command> -h'.format(parser.prog)
+    sub_parsers = parser.add_subparsers(description=help_msg)
 
+    # TODO:Thnik about changing set to 'seet server|client [--option1=xxx] [--option2=yyy]
     add_set_subparser(sub_parsers)
     add_unset_subparser(sub_parsers)
     add_show_subparser(sub_parsers)

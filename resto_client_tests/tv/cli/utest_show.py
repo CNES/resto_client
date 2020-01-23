@@ -52,13 +52,37 @@ class UTestCliShow(unittest.TestCase):
                        'STATISTICS for all collections'])
         self.assertEqual(out_string_io.getvalue().splitlines()[7:10], expect_out)  # type: ignore
 
-    def test_n_show_collections(self) -> None:
+    def test_n_show_collection(self) -> None:
         """
-        Unit test of show collections in nominal cases
+        Unit test of show collection in nominal cases: nothing persisted
         """
         RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'collection', 'KALHAITI', '--server=kalideos'])
+        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
+        self.assertEqual(second_line[1:-1].strip(), "Collection's Characteristics")
+
+    def test_n_show_current_collection(self) -> None:
+        """
+        Unit test of show collection in nominal cases : current collection
+        """
+        RESTO_CLIENT_SETTINGS.clear()
+        resto_client_run(arguments=['set', 'server', 'kalideos'])
+        resto_client_run(arguments=['set', 'collection', 'KALCNES'])
+        with redirect_stdout(io.StringIO()) as out_string_io:
+            resto_client_run(arguments=['show', 'collection'])
+        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
+        self.assertEqual(second_line[1:-1].strip(), "Collection's Characteristics")
+
+    def test_n_show_other_collection(self) -> None:
+        """
+        Unit test of show collection in nominal cases : another collection on the current server
+        """
+        RESTO_CLIENT_SETTINGS.clear()
+        resto_client_run(arguments=['set', 'server', 'kalideos'])
+        resto_client_run(arguments=['set', 'collection', 'KALCNES'])
+        with redirect_stdout(io.StringIO()) as out_string_io:
+            resto_client_run(arguments=['show', 'collection', 'KALHAITI'])
         second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
         self.assertEqual(second_line[1:-1].strip(), "Collection's Characteristics")
 
