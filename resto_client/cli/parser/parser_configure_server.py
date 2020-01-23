@@ -19,7 +19,8 @@ from resto_client.services.service_access import (AuthenticationServiceAccess, R
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .parser_common import CliFunctionReturnType
-from .parser_settings import SERVER_ARGNAME
+from .parser_settings import (SERVER_ARGNAME, RESTO_URL_ARGNAME, RESTO_PROTOCOL_ARGNAME,
+                              AUTH_URL_ARGNAME, AUTH_PROTOCOL_ARGNAME)
 
 
 def cli_create_server(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -29,9 +30,11 @@ def cli_create_server(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_access = RestoServiceAccess(args.resto_url, args.resto_protocol.lower())
-    auth_access = AuthenticationServiceAccess(args.auth_url, args.auth_protocol.lower())
-    DB_SERVERS.create_server(args.server_name, resto_access, auth_access)
+    resto_access = RestoServiceAccess(getattr(args, RESTO_URL_ARGNAME),
+                                      getattr(args, RESTO_PROTOCOL_ARGNAME).lower())
+    auth_access = AuthenticationServiceAccess(getattr(args, AUTH_URL_ARGNAME),
+                                              getattr(args, AUTH_PROTOCOL_ARGNAME).lower())
+    DB_SERVERS.create_server(getattr(args, SERVER_ARGNAME), resto_access, auth_access)
     return None, None
 
 
@@ -42,7 +45,7 @@ def cli_delete_server(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    DB_SERVERS.delete(args.server_name)
+    DB_SERVERS.delete(getattr(args, SERVER_ARGNAME))
     return None, None
 
 
@@ -101,15 +104,7 @@ def add_config_server_create_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'create', help='create a new server',
         description='Create a new server in the servers configuration database.')
-    subparser.add_argument(SERVER_ARGNAME, help='name of the server to create.')
-    group_resto = subparser.add_argument_group('resto service')
-    group_resto.add_argument('resto_url', help='URL of the resto server.')
-    group_resto.add_argument('resto_protocol', help='Protocol of the resto server.',
-                             choices=RestoServiceAccess.supported_protocols())
-    group_auth = subparser.add_argument_group('authentication service')
-    group_auth.add_argument('auth_url', help='URL of the authentication server.', nargs='?')
-    group_auth.add_argument('auth_protocol', help='Protocol of the authentication server',
-                            choices=AuthenticationServiceAccess.supported_protocols())
+    _add_positional_args_parser(subparser)
     subparser.set_defaults(func=cli_create_server)
 
 
@@ -137,15 +132,7 @@ def add_config_server_edit_parser(
     subparser = sub_parsers_configure_server.add_parser(
         'edit', help='edit server characteristics',
         description='Edit the characteristics of a server existing in the configuration database.')
-    subparser.add_argument(SERVER_ARGNAME, help='name of the server to edit')
-    group_resto = subparser.add_argument_group('resto service')
-    group_resto.add_argument('resto_url', help='URL of the resto server')
-    group_resto.add_argument('resto_protocol', help='Protocol of the resto server',
-                             choices=RestoServiceAccess.supported_protocols())
-    group_auth = subparser.add_argument_group('authentication service')
-    group_auth.add_argument('auth_url', help='URL of the authentication server', nargs='?')
-    group_auth.add_argument('auth_protocol', help='Protocol of the authentication server',
-                            choices=AuthenticationServiceAccess.supported_protocols())
+    _add_positional_args_parser(subparser)
     subparser.set_defaults(func=cli_edit_server)
 
 
@@ -160,3 +147,20 @@ def add_config_server_show_parser(
         'show', help='show servers database',
         description='Show all the servers defined in the database with their configuration.')
     subparser.set_defaults(func=cli_show_servers)
+
+
+def _add_positional_args_parser(subparser: argparse.ArgumentParser) -> None:
+    """
+    Add the positional arguments parsing rules for configure_server subcommands
+
+    :param subparser: parser to be supplemented with positional arguments.
+    """
+    subparser.add_argument(SERVER_ARGNAME, help='name of the server')
+    group_resto = subparser.add_argument_group('resto service')
+    group_resto.add_argument(RESTO_URL_ARGNAME, help='URL of the resto server')
+    group_resto.add_argument(RESTO_PROTOCOL_ARGNAME, help='Protocol of the resto server',
+                             choices=RestoServiceAccess.supported_protocols())
+    group_auth = subparser.add_argument_group('authentication service')
+    group_auth.add_argument(AUTH_URL_ARGNAME, help='URL of the authentication server', nargs='?')
+    group_auth.add_argument(AUTH_PROTOCOL_ARGNAME, help='Protocol of the authentication server',
+                            choices=AuthenticationServiceAccess.supported_protocols())

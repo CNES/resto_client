@@ -24,3 +24,9 @@ SERVER_ARGNAME = 'server_name'
 ACCOUNT_ARGNAME = 'username'
 PASSWORD_ARGNAME = 'password'
 COLLECTION_ARGNAME = 'collection_name'
+
+# Arguments for configure_server
+RESTO_URL_ARGNAME = 'resto_url'
+RESTO_PROTOCOL_ARGNAME = 'resto_protocol'
+AUTH_URL_ARGNAME = 'auth_url'
+AUTH_PROTOCOL_ARGNAME = 'auth_protocol'
