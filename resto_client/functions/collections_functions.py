@@ -20,7 +20,7 @@ from resto_client.services.resto_server import RestoServer
 from .resto_criteria import RestoCriteria
 
 
-def search_current_collection(resto_server: RestoServer, region: Optional[str]=None,
+def search_current_collection(resto_server: RestoServer,
                               criteria: Optional[Dict[str, Any]]=None) \
         -> RestoFeatureCollection:
     """
@@ -36,7 +36,6 @@ def search_current_collection(resto_server: RestoServer, region: Optional[str]=N
     search_criteria = RestoCriteria(resto_server.resto_service)
     if criteria is not None:
         search_criteria.update(criteria)
-    search_criteria.update({'region': region})
 
     search_feature_collection = resto_server.search_by_criteria(search_criteria)
 

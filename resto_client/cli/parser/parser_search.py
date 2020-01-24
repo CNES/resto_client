@@ -141,12 +141,10 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
                                          get_from_args(MAXRECORDS_ARGNAME, args),
                                          get_from_args(PAGE_ARGNAME, args))
-
+    criteria_dict.update({'region': get_from_args(REGION_ARGNAME, args)})
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    features_collection = search_current_collection(resto_server,
-                                                    get_from_args(REGION_ARGNAME, args),
-                                                    criteria_dict)
+    features_collection = search_current_collection(resto_server, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
