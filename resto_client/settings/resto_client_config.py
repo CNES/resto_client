@@ -14,4 +14,7 @@
 """
 from resto_client.generic.user_dirs import user_config_dir
 
-RESTO_CLIENT_CONFIG_DIR = user_config_dir(app_author='CNES', app_name='resto_client')
+RESTO_CLIENT_APP_NAME = 'resto_client'
+RESTO_CLIENT_APP_AUTHOR = 'CNES'
+RESTO_CLIENT_CONFIG_DIR = user_config_dir(app_author=RESTO_CLIENT_APP_AUTHOR,
+                                          app_name=RESTO_CLIENT_APP_NAME)
