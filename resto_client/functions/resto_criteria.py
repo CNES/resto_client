@@ -13,8 +13,8 @@
    limitations under the License.
 """
 # TODO: Refactor in order to move into entities subpackage
-from typing import (Type, Optional, Dict, Tuple, Sequence, Any,
-                    TYPE_CHECKING)  # @NoMove @UnusedImport
+from typing import (Type, Optional, Dict, Tuple, Sequence, Any,  # @UnusedImport
+                    TYPE_CHECKING)  # @NoMove
 
 from shapely.errors import WKTReadingError
 
@@ -25,7 +25,7 @@ from resto_client.generic.basic_types import (SquareInterval, DateYMD, GeometryW
 
 
 if TYPE_CHECKING:
-    from resto_client.services.resto_service import RestoService
+    from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 CriteriaDictType = Dict[str, dict]
 COVER_TEXT = ' expressed as a percentage and using brackets. e.g. [n1,n2[ '
