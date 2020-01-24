@@ -22,13 +22,14 @@ from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.services.resto_server import RestoServer
 from resto_client.cli.cli_utils import get_from_args
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
                                                      RestoServerPersisted)
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.functions.collections_functions import search_current_collection
-from resto_client.functions.resto_criteria import RestoCriteria, COMMON_CRITERIA_KEYS
+from resto_client.functions.resto_criteria import RestoCriteria
 
 from .parser_common import (EPILOG_CREDENTIALS, CliFunctionReturnType, credentials_options_parser,
                             collection_option_parser, download_dir_option_parser)
@@ -41,19 +42,16 @@ def get_table_help_criteria() -> str:
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
     :raises RestoClientUserError: when the resto service is not initialized
     """
-    # TODO: First part should go into resto_criteria
     # FIXME: this approach implies a server instanciation which is useless
+    resto_server: Union[RestoServerPersisted, RestoServer]
     try:
         resto_server = RestoServerPersisted.build_from_argparse()
-        if resto_server.server_name is None:
-            raise RestoClientUserError('No resto server currently defined.')
-        resto_criteria = RestoCriteria(resto_server.resto_service)
-        title_help = 'Current {} server supports the following criteria (defined in the Resto API):'
-        title_help = title_help.format(resto_server.server_name)
-        dict_to_print = resto_criteria.criteria_keys
     except RestoClientNoPersistedServer:
-        title_help = 'Criteria supported by all servers (more available when a server is selected):'
-        dict_to_print = COMMON_CRITERIA_KEYS
+        resto_server = RestoServer()
+    resto_criteria = RestoCriteria(resto_server.resto_service)
+    title_help = 'Current {} server supports the following criteria (defined in the Resto API):'
+    title_help = title_help.format(resto_server.server_name)
+    dict_to_print = resto_criteria.criteria_keys
 
     criteria_table = PrettyTable()
     criteria_table.title = title_help
