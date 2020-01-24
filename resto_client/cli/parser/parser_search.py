@@ -47,7 +47,7 @@ def get_table_help_criteria() -> str:
         resto_server = RestoServerPersisted.build_from_argparse()
         if resto_server.server_name is None:
             raise RestoClientUserError('No resto server currently defined.')
-        resto_criteria = RestoCriteria(resto_server.server_name)
+        resto_criteria = RestoCriteria(resto_server.resto_service)
         title_help = 'Current {} server supports the following criteria (defined in the Resto API):'
         title_help = title_help.format(resto_server.server_name)
         dict_to_print = resto_criteria.criteria_keys

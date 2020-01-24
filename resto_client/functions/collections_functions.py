@@ -33,7 +33,7 @@ def search_current_collection(resto_server: RestoServer, region: Optional[str]=N
     :raises RestoClientUserError: when the resto service is not initialized
     """
     # FIXME: remove when RestoCriteria is built by RestoServer
-    search_criteria = RestoCriteria(resto_server.server_name)
+    search_criteria = RestoCriteria(resto_server.resto_service)
     if criteria is not None:
         search_criteria.update(criteria)
     search_criteria.update({'region': region})

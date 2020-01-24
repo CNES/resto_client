@@ -154,7 +154,7 @@ class RestoService(BaseService):
                             incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        criteria = RestoCriteria(self.parent_server_name, identifier=feature_id)
+        criteria = RestoCriteria(self, identifier=feature_id)
 
         feature_collection = \
             SearchCollectionRequest(self, collection_name, criteria=criteria).run()
