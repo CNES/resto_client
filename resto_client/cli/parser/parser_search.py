@@ -197,8 +197,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                            parents=[collection_option_parser(),
                                                     credentials_options_parser(),
                                                     download_dir_option_parser()])
-    # FIXME: is it possible that no criteria is provided if --criteria is specified? => '+' ?
-    parser_search.add_argument('--criteria', dest=CRITERIA_ARGNAME, nargs='*',
+    parser_search.add_argument('--criteria', dest=CRITERIA_ARGNAME, nargs='+',
                                help='search criteria (format --criteria=key:value)')
 
     region_choices = find_region_choice()
