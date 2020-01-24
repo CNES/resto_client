@@ -105,25 +105,31 @@ def user_dir(directory_type: str) -> Path:
     if directory_type not in KNOWN_USER_DIRS:
         msg = 'User directory type "{}" is unknown. Please choose one from {}'
         raise IndexError(msg.format(directory_type, list(KNOWN_USER_DIRS.keys())))
+
+    # Windows case
     if MSWINDOWS:
-        windows_guid = KNOWN_USER_DIRS[directory_type][1]
-        if windows_guid is None:
-            msg = 'User directory type "{}" is unknown as a Windows Known Directory'
-            raise NotADirectoryError(msg.format(directory_type))
-        with OpenKey(HKEY_CURRENT_USER, REGISTRY_USER_DIRS_KEY) as key:
-            registry_user_dir = QueryValueEx(key, windows_guid)[0]
-        return Path(registry_user_dir)
+        return _user_dir_windows(directory_type)
 
     # LINUX case
+    cfg_dirs_path = Path.home() / '.config' / 'user-dirs.dirs'
+    return _user_dir_linux_xdg(directory_type, cfg_dirs_path)
+
+
+def _user_dir_windows(directory_type: str) -> Path:
+    windows_guid = KNOWN_USER_DIRS[directory_type][1]
+    if windows_guid is None:
+        msg = 'User directory type "{}" is unknown as a Windows Known Directory'
+        raise NotADirectoryError(msg.format(directory_type))
+    with OpenKey(HKEY_CURRENT_USER, REGISTRY_USER_DIRS_KEY) as key:
+        registry_user_dir = QueryValueEx(key, windows_guid)[0]
+    return Path(registry_user_dir)
+
+
+def _user_dir_linux_xdg(directory_type: str, cfg_dirs_path: Path) -> Path:
 
     cfg_parser = ConfigParser()
-    cfg_dirs_path = Path.home() / '.config' / 'user-dirs.dirs'
     with open(cfg_dirs_path) as file_desc:
         cfg_parser.read_string("[XDG_DIRS]\n" + file_desc.read())
-    linux_id = KNOWN_USER_DIRS[directory_type][0]
-    if linux_id is None:
-        msg = 'User directory type "{}" is undefined for Linux XDG standard'
-        raise NotADirectoryError(msg.format(directory_type))
     download_dir = cfg_parser['XDG_DIRS'][linux_id].strip('"')
     return Path(os.path.expandvars(download_dir))
 
