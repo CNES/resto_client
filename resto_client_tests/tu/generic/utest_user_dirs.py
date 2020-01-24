@@ -18,6 +18,7 @@ import unittest
 
 from resto_client.generic.user_dirs import (user_config_dir, user_download_dir, user_dir,
                                             MSWINDOWS, USER_DIRS_XDG, USER_DIRS_WINDOWS)
+from resto_client.settings.resto_client_config import RESTO_CLIENT_APP_NAME
 
 
 class UTestUserConfigDir(unittest.TestCase):
@@ -77,7 +78,7 @@ class UTestUserDir(unittest.TestCase):
         Unit test of user_download_dir() in nominal cases
         """
         # Directory is set by the system and must exist
-        download_path = user_download_dir()
+        download_path = user_download_dir(RESTO_CLIENT_APP_NAME)
         self.assertTrue(download_path.is_dir())
         # Verify that it is inside the user name space (is it really mandatory ?)
         self.assertTrue(Path.home() in download_path.parents)
@@ -92,7 +93,7 @@ class UTestUserDir(unittest.TestCase):
                             'RoamingTiles', 'SavedGames', 'SavedSearches']
             for dir_key in USER_DIRS_WINDOWS:
                 if dir_key in defined_dirs:
-                    user_dir_path = user_dir(dir_key)
+                    user_dir_path = user_dir(dir_key, RESTO_CLIENT_APP_NAME)
                     self.assertTrue(user_dir_path.is_dir())
                 else:
                     self.assertRaises(FileNotFoundError)
@@ -103,7 +104,7 @@ class UTestUserDir(unittest.TestCase):
                             'PublicShare', 'Templates', 'Videos']
             for dir_key in USER_DIRS_XDG:
                 if dir_key in defined_dirs:
-                    user_dir_path = user_dir(dir_key)
+                    user_dir_path = user_dir(dir_key, RESTO_CLIENT_APP_NAME)
                     self.assertTrue(user_dir_path.is_dir())
                 else:
                     self.assertRaises(FileNotFoundError)
@@ -113,5 +114,5 @@ class UTestUserDir(unittest.TestCase):
         Unit test of user_dir() in degraded cases
         """
         # Unexisting directory key, on any system
-        with self.assertRaises(IndexError):
-            _ = user_dir('fake')
+        with self.assertRaises(KeyError):
+            _ = user_dir('fake', RESTO_CLIENT_APP_NAME)
