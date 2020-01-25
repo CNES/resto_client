@@ -110,7 +110,7 @@ class AuthenticationService(BaseService):
         try:
             new_token = GetTokenRequest(self).run()
         except AccesDeniedError as excp:
-            self._credentials.set()  # reset credentials
+            self._credentials.reset()
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, credentials were reset.'
             raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp

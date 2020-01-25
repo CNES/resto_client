@@ -72,6 +72,14 @@ class AuthenticationCredentials():
         self._password = password
         self._authentication_token.token_value = token_value
 
+    def reset(self) -> None:
+        """
+        Reset the credentials unconditionaly.
+        """
+        self._username = None
+        self._password = None
+        self._authentication_token.token_value = None
+
     @property
     def token(self) -> Optional[str]:
         """
@@ -113,10 +121,10 @@ class AuthenticationCredentials():
         server_name = self.parent_service.parent_server_name
         if self.username is None:
             msg = "Please enter your username for {} server: ".format(server_name)
-            self.set(AuthenticationCredentials.asking_input['shown'](msg))
+            self.set(username=AuthenticationCredentials.asking_input['shown'](msg))
         if self.password is None:
             msg = "Please enter your password for {} server: ".format(server_name)
-            self.set(self.username, AuthenticationCredentials.asking_input['hidden'](msg))
+            self.set(password=AuthenticationCredentials.asking_input['hidden'](msg))
 
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:
