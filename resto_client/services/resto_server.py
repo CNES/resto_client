@@ -98,7 +98,7 @@ class RestoServer():
             if server_name != self.server_name:
                 self._init_from_db(server_name)
                 self.current_collection = None
-                self.set_credentials(username=None)
+                self.reset_credentials()
         else:
             self.authentication_service = None
             self.resto_service = None
@@ -133,6 +133,13 @@ class RestoServer():
             self.authentication_service.set_credentials(username=username,
                                                         password=password,
                                                         token_value=token_value)
+
+    def reset_credentials(self) -> None:
+        """
+        Reset the credentials used by the authentication service.
+        """
+        if self.authentication_service is not None:
+            self.authentication_service.reset_credentials()
 
 # +++++++++++ read only properties +++++++++++
 
