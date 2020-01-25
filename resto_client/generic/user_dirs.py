@@ -16,7 +16,8 @@ from configparser import ConfigParser
 import os
 from pathlib import Path
 import platform
-from typing import List, Optional
+from tempfile import mkdtemp
+from typing import Optional
 
 from appdirs import user_data_dir
 
@@ -105,6 +106,23 @@ USER_DIRS_HOME = {'Documents': 'documents',
 USER_DIRS_TMP = USER_DIRS_HOME
 
 
+def _user_dir_get_symbol(directory_type: str, directories_table: dict, unexisting_msg: str) -> str:
+    """
+    Check that the requested directory type is defined in the selected user directories table
+    and return the directory symbol corresponding to this type.
+
+    :param directory_type: the code of some user directory
+    :param directories_table: for each directory type, provides its associated symbol
+    :param unexisting_msg: part of the exception message raised when directory type is not found
+    :raises KeyError: when the directory type is unsupported in the selected configuration
+    :returns: the directory symbol to use for this directory type
+    """
+    if directory_type not in directories_table:
+        msg = 'User directory type "{}" is {}. Please choose one from {}.'
+        raise KeyError(msg.format(directory_type, unexisting_msg, directories_table))
+    return directories_table[directory_type]
+
+
 def user_config_dir(app_author: str ='unknown_author', app_name: str ='unknwon_app') -> Path:
     """
     Return the user configuration directory to be used by an application and create it if needed.
@@ -119,27 +137,17 @@ def user_config_dir(app_author: str ='unknown_author', app_name: str ='unknwon_a
     return config_dir
 
 
-def user_download_dir(app_name: str) -> Path:
+def user_download_dir(app_name: Optional[str] = None, ensure_exists: bool=False) -> Path:
     """
 
     :param app_name: name of the application, used when directories cannot be defined by the OS.
+    :param ensure_exists: If True, check that the user directory exists before returning its path.
     :returns: the user download directory depending on the system (linux or windows)
     """
-    return user_dir('Downloads', app_name)
+    return user_dir('Downloads', app_name, ensure_exists)
 
 
-def user_dirs_codes() -> List[str]:
-    """
-
-    :returns: the list of user directories symbolic names on the current operating system
-    """
-    if MSWINDOWS:
-        return list(USER_DIRS_WINDOWS.keys())
-
-    return list(USER_DIRS_XDG.keys())
-
-
-def user_dir(directory_type: str, app_name: str) -> Path:
+def user_dir(directory_type: str, app_name: Optional[str]=None, ensure_exists: bool=False) -> Path:
     """
     Returns the well known user directory of some type (download, desktop, documents, ...),
     depending on the Operating System.
@@ -152,59 +160,92 @@ def user_dir(directory_type: str, app_name: str) -> Path:
     - otherwise we use the HOME directory if it exists or TMP otherwise to build a path to a
       limited set of user directories.
 
-    :param directory_type: the code of some user directory (refer to user_dirs_codes() to get
-                             a list of the available codes)
+    :param directory_type: the code of some user directory (the list of available codes is system
+                           dependent)
     :param app_name: name of the application, used when directories cannot be defined by the OS.
+    :param ensure_exists: If True, check that the user directory exists before returning its path.
     :returns: the path to the directory in the user environment
-    :raises ValueError: when the system is unsupported by user_dirs.
     """
 
     # Windows case
     if MSWINDOWS:
-        return _user_dir_windows(directory_type)
+        user_dir_path = _user_dir_windows(directory_type, app_name)
+    else:
+        # LINUX case
+        user_dir_path = _user_dir_linux(directory_type, app_name)
 
-    # LINUX case
-    # FIXME: Does Path.home() return None or raises an exception when no home available?
-    # When the answer is known, remove either the try/except or the test is None.
-    user_home_path: Optional[Path]
-    try:
-        user_home_path = Path.home()
-    except Exception:
-        user_home_path = None
-    if user_home_path is None:
-        # No user home directory available. Use directories in /tmp.
-        return _user_dir_home(directory_type, app_name)
-
-    # User home directory is available
-    # Firstly, try to use XDG if available
-    cfg_dirs_path = user_home_path / '.config' / 'user-dirs.dirs'
-    if cfg_dirs_path.exists():
-        return _user_dir_linux_xdg(directory_type, cfg_dirs_path)
-
-    # Nothing has been found. Create user directories into tmp
-    return _user_dir_home(directory_type, app_name)
+    if ensure_exists:
+        user_dir_path.mkdir(parents=True, exist_ok=True)
+    return user_dir_path
 
 
-def _user_dir_windows(directory_type: str) -> Path:
+def _user_dir_windows(directory_type: str, app_name: Optional[str]=None) -> Path:
     """
     Returns the path to the requested user directory type on Windows
 
     :param directory_type: the code of some user directory
+    :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Windows user environment
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_WINDOWS, 'unknown on Windows')
 
     with OpenKey(HKEY_CURRENT_USER, REGISTRY_USER_DIRS_KEY) as key:
-        registry_user_dir = QueryValueEx(key, directory_id)[0]
-    return Path(registry_user_dir)
+        user_dir_registry = QueryValueEx(key, directory_id)[0]
+
+    user_dir_path = Path(user_dir_registry)
+    if app_name is not None:
+        user_dir_path = user_dir_path / app_name
+    return user_dir_path
 
 
-def _user_dir_linux_xdg(directory_type: str, cfg_dirs_path: Path) -> Path:
+def _user_dir_linux(directory_type: str, app_name: Optional[str]=None) -> Path:
     """
-    Returns the path to the requested user directory type on Linux, when XDG is available
+    Returns the well known user directory of some type (download, desktop, documents, ...),
+    on Linux systems. Two situations can be found:
+
+    - if a windowing system is installed, we rely on the XDG standard to return these directories,
+    - otherwise we use the HOME directory if it exists or TMP otherwise to build a path to a
+      limited set of user directories.
+
+    :param directory_type: the code of some user directory (the list of available codes is system
+                           dependent)
+    :param app_name: name of the application, used when directories cannot be defined by the OS.
+    :returns: the path to the directory in the user environment
+    """
+    # Determine if a valid Home is available or not.
+    user_home_path = None
+    try:
+        user_home_path = Path.home()
+        if str(user_home_path) == '/':
+            # Case where no home dir defined in passward database
+            user_home_path = None
+    except RuntimeError:
+        # Case where pwd is unable to find a home directory
+        user_home_path = None
+
+    if user_home_path is None:
+        # No user home directory available. Use directories in /tmp.
+        return _user_dir_linux_tmp(directory_type, app_name)
+
+    # User home directory is available
+    cfg_dirs_path = user_home_path / '.config' / 'user-dirs.dirs'
+    if cfg_dirs_path.exists():
+        # XDG available. Try to use it.
+        return _user_dir_linux_xdg(directory_type, cfg_dirs_path)
+
+    # HOME available but XDG unavailable. Use HOME to create the directory
+    return _user_dir_linux_home(directory_type, app_name)
+
+
+def _user_dir_linux_xdg(directory_type: str,
+                        cfg_dirs_path: Path,
+                        app_name: Optional[str]=None) -> Path:
+    """
+    Returns the path to the requested user directory type on Linux, using XDG.
 
     :param directory_type: the code of some user directory
     :param cfg_dirs_path: path to the file containing the XDG configuration
+    :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_XDG, 'undefined by XDG standard')
@@ -213,51 +254,42 @@ def _user_dir_linux_xdg(directory_type: str, cfg_dirs_path: Path) -> Path:
     with open(cfg_dirs_path) as file_desc:
         cfg_parser.read_string("[XDG_DIRS]\n" + file_desc.read())
     user_directory = cfg_parser['XDG_DIRS'][directory_id].strip('"')
-    return Path(os.path.expandvars(user_directory))
+    user_dir_xdg = os.path.expandvars(user_directory)
+
+    user_dir_path = Path(user_dir_xdg)
+    if app_name is not None:
+        user_dir_path = user_dir_path / app_name
+    return user_dir_path
 
 
-def _user_dir_home(directory_type: str, app_name: str) -> Path:
+def _user_dir_linux_home(directory_type: str, app_name: Optional[str]=None) -> Path:
     """
-    Returns the path to the requested user directory type on Linux, when HOME directory must be used
+    Returns the path to the requested user directory type on Linux, inside HOME directory.
 
     :param directory_type: the code of some user directory
-    :param app_name: name of the application, used as an intermediary level into HOME.
+    :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_HOME, 'forbidden in HOME')
 
-    user_dir_typed = Path.home() / app_name / directory_id
-    user_dir_typed.mkdir(parents=True, exist_ok=True)
-    return user_dir_typed
+    if app_name is not None:
+        user_dir_path = Path.home() / app_name / directory_id
+    else:
+        user_dir_path = Path.home() / directory_id
+    return user_dir_path
 
 
-def _user_dir_tmp(directory_type: str, app_name: str) -> Path:
+def _user_dir_linux_tmp(directory_type: str, app_name: Optional[str]=None) -> Path:
     """
-    Returns the path to the requested user directory type on Linux, when HOME is unavailable
+    Returns the path to the requested user directory type on Linux, inside tmp direectory.
 
     :param directory_type: the code of some user directory
-    :param app_name: name of the application, used as an intermediary level into HOME.
+    :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_TMP, 'forbidden in TMP')
-
-    user_dir_typed = Path.home() / app_name / directory_id
-    user_dir_typed.mkdir(parents=True, exist_ok=True)
-    return user_dir_typed
-
-
-def _user_dir_get_symbol(directory_type: str, directories_table: dict, unexisting_msg: str) -> str:
-    """
-    Check that the requested directory type is defined in the selected user directories table
-    and return the direcory symbol corresponding to this type.
-
-    :param directory_type: the code of some user directory
-    :param directories_table: for each directory type, provides its associated symbol
-    :param unexisting_msg: part of the exception message raised when directory type is not found
-    :raises KeyError: when the directory type is unsupported in the selected configuration
-    :returns: the directory symbol to use for this directory type
-    """
-    if directory_type not in directories_table:
-        msg = 'User directory type "{}" is {}. Please choose one from {}.'
-        raise KeyError(msg.format(directory_type, unexisting_msg, directories_table))
-    return directories_table[directory_type]
+    if app_name is not None:
+        user_dir_prefix = '{}_{}_'.format(app_name, directory_id)
+    else:
+        user_dir_prefix = '{}_'.format(directory_id)
+    return Path(mkdtemp(prefix=user_dir_prefix))
