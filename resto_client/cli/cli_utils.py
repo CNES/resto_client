@@ -17,6 +17,14 @@ from typing import Optional, Any
 
 
 def get_from_args(arg_name: str, args: Optional[argparse.Namespace] = None) -> Optional[Any]:
+    """
+    Returns the content of an argument in an argparse Namespace, or None if the argument is not
+    found or the Namespace is None.
+
+    :param arg_name: name of an argument to retrieve in the Namespace
+    :param args: CLI arguments as parsed by argparse
+    :returns: the content of the selected argument or None if not found.
+    """
     if args is None:
         return None
     return getattr(args, arg_name) if hasattr(args, arg_name) else None
