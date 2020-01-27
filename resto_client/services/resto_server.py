@@ -13,13 +13,12 @@
    limitations under the License.
 """
 from pathlib import Path
-from typing import Optional, TypeVar, Type, List, Union
+from typing import Optional, TypeVar, Type, List, Union, Dict, Any
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.resto_criteria import RestoCriteria
 from resto_client.settings.servers_database import DB_SERVERS, ServersDatabase
 
 from .authentication_service import AuthenticationService
@@ -163,7 +162,7 @@ class RestoServer():
 
 # +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
 
-    def search_by_criteria(self, criteria: RestoCriteria,
+    def search_by_criteria(self, criteria: Dict[str, Any],
                            collection_name: Optional[str] = None) -> RestoFeatureCollection:
         """
         Search a collection using search criteria
@@ -173,7 +172,6 @@ class RestoServer():
         :returns: a collection of resto features
         :raises RestoClientUserError: when the resto service is not initialized
         """
-        # TODO: change to pass a dict instead of a RestoCriteria and build RestoCriteria internally
         if self.resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         return self.resto_service.search_by_criteria(criteria, collection_name)

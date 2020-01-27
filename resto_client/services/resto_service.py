@@ -14,7 +14,7 @@
 """
 from pathlib import Path
 import time
-from typing import Optional, Dict, Type
+from typing import Optional, Dict, Type, Any
 from warnings import warn
 
 from colorama import Fore, Style, colorama_text
@@ -126,7 +126,7 @@ class RestoService(BaseService):
         return GetCollectionRequest(self, collection=collection_name).run()
 
     def search_by_criteria(self,
-                           criteria: RestoCriteria,
+                           criteria: Dict[str, Any],
                            collection: Optional[str]=None) -> RestoFeatureCollection:
         """
         Search a collection using criteria.
@@ -137,7 +137,8 @@ class RestoService(BaseService):
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        return SearchCollectionRequest(self, collection_name, criteria=criteria).run()
+        resto_criteria = RestoCriteria(self, **criteria)
+        return SearchCollectionRequest(self, collection_name, criteria=resto_criteria).run()
 
     def get_feature_by_id(self,
                           feature_id: str,
