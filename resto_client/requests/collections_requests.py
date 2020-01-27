@@ -16,8 +16,8 @@ from typing import TYPE_CHECKING, cast, Optional
 
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.entities.resto_criteria import RestoCriteria
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.resto_criteria import RestoCriteria
 from resto_client.responses.collection_description import CollectionDescription
 from resto_client.responses.collections_description import CollectionsDescription
 from resto_client.responses.feature_collection_response import FeatureCollectionResponse
@@ -25,6 +25,7 @@ from resto_client.responses.resto_response_error import RestoResponseError
 
 from .anonymous_request import AnonymousRequest
 from .authentication_optional_request import AuthenticationOptionalRequest
+
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport

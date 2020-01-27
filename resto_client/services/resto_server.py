@@ -17,9 +17,9 @@ from typing import Optional, TypeVar, Type, List, Union, Dict, Any
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.entities.resto_collection import RestoCollection
+from resto_client.entities.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.settings.servers_database import DB_SERVERS, ServersDatabase
 
 from .authentication_service import AuthenticationService

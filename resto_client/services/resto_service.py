@@ -22,9 +22,9 @@ from colorama import Fore, Style, colorama_text
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.entities.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.requests.collections_requests import (GetCollectionsRequest, GetCollectionRequest,
                                                         SearchCollectionRequest)
 from resto_client.requests.features_requests import (DownloadAnnexesRequest,
