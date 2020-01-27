@@ -255,12 +255,12 @@ class RestoCriteria(dict):
         :raises RestoClientUserError: if a criterion is not in criteria key list or
         resto_server has not resto_service
         """
-        self.criteria_keys: CriteriaDictType = {}
-        self.criteria_keys.update(COMMON_CRITERIA_KEYS)
+        self.supported_criteria: CriteriaDictType = {}
+        self.supported_criteria.update(COMMON_CRITERIA_KEYS)
 
         if resto_service is not None:
             resto_protocol = resto_service.service_access.protocol
-            self.criteria_keys.update(SPECIFIC_CRITERIA_KEYS[resto_protocol])
+            self.supported_criteria.update(SPECIFIC_CRITERIA_KEYS[resto_protocol])
 
         super(RestoCriteria, self).__init__()
         self.update(kwargs)
@@ -276,7 +276,7 @@ class RestoCriteria(dict):
         """
         key = self._retrieve_criterion(key)
 
-        auth_key_type = self.criteria_keys[key]['type']
+        auth_key_type = self.supported_criteria[key]['type']
 
         # if key is has direct recording type (no list or group)
         if isinstance(auth_key_type, type):
@@ -284,7 +284,7 @@ class RestoCriteria(dict):
             super(RestoCriteria, self).__setitem__(key, value)
             self._manage_geometry()
         elif auth_key_type == 'list':
-            auth_key_type = self.criteria_keys[key]['sub_type']
+            auth_key_type = self.supported_criteria[key]['sub_type']
             # if can be list but is single
             if not isinstance(value, list):
                 test_criterion(key, value, auth_key_type)
@@ -301,7 +301,7 @@ class RestoCriteria(dict):
             for criterion, value_item in value.items():
                 # Test the key in group item
                 try:
-                    auth_key_type = self.criteria_keys[key][criterion]["type"]
+                    auth_key_type = self.supported_criteria[key][criterion]["type"]
                 except KeyError:
                     msg = 'Criterion {} in {} not supported by this resto server'
                     raise RestoClientUserError(msg.format(criterion, key))
@@ -346,12 +346,12 @@ class RestoCriteria(dict):
         :raises RestoClientUserError: when key is unknown
         :returns: key suitable for the current server
         """
-        if key not in self.criteria_keys:
-            for key_to_test in self.criteria_keys:
+        if key not in self.supported_criteria:
+            for key_to_test in self.supported_criteria:
                 if key.lower() == key_to_test.lower():
                     return key_to_test
             # if not found raise criterion error
             msg = 'Criterion {} not supported by this resto server'.format(key)
-            msg += ', choose from the following list: {}'.format(self.criteria_keys)
+            msg += ', choose from the following list: {}'.format(self.supported_criteria)
             raise RestoClientUserError(msg)
         return key

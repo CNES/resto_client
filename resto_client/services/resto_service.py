@@ -24,7 +24,7 @@ from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.resto_criteria import RestoCriteria
+from resto_client.functions.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.requests.collections_requests import (GetCollectionsRequest, GetCollectionRequest,
                                                         SearchCollectionRequest)
 from resto_client.requests.features_requests import (DownloadAnnexesRequest,
@@ -99,6 +99,12 @@ class RestoService(BaseService):
         if with_stats:
             out_str += self._collections_mgr.str_statistics()
         return out_str
+
+    def get_supported_criteria(self) -> CriteriaDictType:
+        """
+        :returns: the supported criteria definition
+        """
+        return RestoCriteria(self).supported_criteria
 
 # ++++++++ From here we have the requests supported by the service ++++++++++++
 

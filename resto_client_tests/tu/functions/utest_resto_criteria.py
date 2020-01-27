@@ -64,7 +64,6 @@ class UTestRestoCriteria(unittest.TestCase):
         """
         resto_server = RestoServer('kalideos')
         resto_criteria = RestoCriteria(resto_server.resto_service, identifier='2010')
-        self.assertTrue(hasattr(resto_criteria, 'criteria_keys'))
         self.assertDictEqual(resto_criteria, {'identifier': '2010'})
 
     def test_n_setitem_standard(self) -> None:

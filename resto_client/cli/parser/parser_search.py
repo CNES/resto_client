@@ -27,7 +27,6 @@ from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
                                                      RestoServerPersisted)
 from resto_client.functions.aoi_utils import find_region_choice
-from resto_client.functions.resto_criteria import RestoCriteria
 from resto_client.services.resto_server import RestoServer
 
 from .parser_common import (EPILOG_CREDENTIALS, CliFunctionReturnType, credentials_options_parser,
@@ -47,10 +46,13 @@ def get_table_help_criteria() -> str:
         resto_server = RestoServerPersisted.build_from_argparse()
     except RestoClientNoPersistedServer:
         resto_server = RestoServer()
-    resto_criteria = RestoCriteria(resto_server.resto_service)
-    title_help = 'Current {} server supports the following criteria (defined in the Resto API):'
-    title_help = title_help.format(resto_server.server_name)
-    dict_to_print = resto_criteria.criteria_keys
+    dict_to_print = resto_server.get_supported_criteria()
+
+    if resto_server.server_name is not None:
+        msg = 'Current {} server supports the following criteria (defined in the Resto API):'
+        title_help = msg.format(resto_server.server_name)
+    else:
+        title_help = 'Following criteria are supported by all resto servers:'
 
     criteria_table = PrettyTable()
     criteria_table.title = title_help
