@@ -50,7 +50,7 @@ class AuthenticationCredentials():
             password: Optional[str]=None,
             token_value: Optional[str]=None) -> None:
         """
-        Set or reset the username or password or both.
+        Set or reset the username, the password and the token.
 
         If username is not None, it is set to the provided value if it is different from the
         already stored one and the password is stored whatever its value.
@@ -60,17 +60,38 @@ class AuthenticationCredentials():
         :param username: the username to register
         :param password: the account password
         :param token_value: a token associated to these credentials
+        :raises RestoClientDesignError: when an unconsistent set of arguments is provided
         """
-        if username is not None:
-            # resto server imposes lowercase account
-            username = username.lower()
+        if username is None and password is None and token_value is None:
+            return
+
+        if password is not None and token_value is not None:
+            msg = 'Cannot define or change simultaneously password and token'
+            raise RestoClientDesignError(msg)
+
+        if username is None:
+            if self._username is None:
+                msg = 'Cannot set/reset password or token when username is undefined.'
+                raise RestoClientDesignError(msg)
+
+            # We already have a username and want to set/change password or token.
+            if password is not None:
+                self._password = password
+            self._authentication_token.token_value = token_value
+
         else:
-            # ignore other parameters
-            password = None
-            token_value = None
-        self._username = username
-        self._password = password
-        self._authentication_token.token_value = token_value
+            # Take the new username definition, either with a password or with a token
+            self._username = username.lower()  # resto server imposes lowercase account
+            self._password = password
+            self._authentication_token.token_value = token_value
+
+    def reset(self) -> None:
+        """
+        Reset the credentials unconditionaly.
+        """
+        self._username = None
+        self._password = None
+        self._authentication_token.token_value = None
 
     @property
     def token(self) -> Optional[str]:
@@ -113,10 +134,10 @@ class AuthenticationCredentials():
         server_name = self.parent_service.parent_server_name
         if self.username is None:
             msg = "Please enter your username for {} server: ".format(server_name)
-            self.set(AuthenticationCredentials.asking_input['shown'](msg))
+            self.set(username=AuthenticationCredentials.asking_input['shown'](msg))
         if self.password is None:
             msg = "Please enter your password for {} server: ".format(server_name)
-            self.set(self.username, AuthenticationCredentials.asking_input['hidden'](msg))
+            self.set(password=AuthenticationCredentials.asking_input['hidden'](msg))
 
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:

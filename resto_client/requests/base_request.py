@@ -55,6 +55,8 @@ class BaseRequest(ABC):
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
         :raises TypeError: if the service argument is not derived from :class:`BaseService`.
         """
+        # FIXME: Could it be better to check that the route is supported at creation time?
+        # Problem: routes for DOnwloadRequests are not parameterized, but come from json response
         self.headers: Dict[str, str] = {}
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
@@ -68,11 +70,26 @@ class BaseRequest(ABC):
                                                           self.service_access.base_url)
                 print(Fore.CYAN + msg + Style.RESET_ALL)
 
+    def get_route(self) -> Optional[str]:
+        """
+        :returns: True if this request type is supported by the service, False otherwise.
+        """
+        return self.service_access.get_route_pattern(self)
+
+    def supported_by_service(self) -> bool:
+        """
+        :returns: True if this request type is supported by the service, False otherwise.
+        """
+        return self.get_route() is not None
+
     def get_url(self) -> str:
-        """ create url with service url and extension """
-        url_extension = self.service_access.get_route_pattern(self)
+        """
+        :returns: full url for this request
+        :raises RestoClientDesignError: when the request is unsupported by the service
+        """
+        url_extension = self.get_route()
         if url_extension is None:
-            msg_fmt = 'Trying to a build an URL for a route declared as None for {}'
+            msg_fmt = 'Trying to build an URL for {} request, unsupported by the service.'
             raise RestoClientDesignError(msg_fmt.format(type(self).__name__))
         return urljoin(self.service_access.base_url,
                        url_extension.format(**self._url_kwargs))

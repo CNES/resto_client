@@ -91,29 +91,6 @@ class RestoClientParameters(PersistedAttributes):
     properties_storage = RESTO_CLIENT_SETTINGS
     persisted_attributes = [DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY]
 
-    def __init__(self,
-                 region: Optional[str]=None,
-                 download_dir: Optional[str]=None,
-                 verbosity: Optional[str]=None) -> None:
-        """
-        Constructor
-
-        :param region: region of search
-        :param download_dir: directory for downloading files
-        :param verbosity: verbosity level to use
-        """
-        # Attribute holding the download directory
-        if download_dir is not None:
-            self.download_dir = download_dir  # type: ignore
-
-        # attribute to handle the region criterion with search
-        if region is not None:
-            self.region = region  # type: ignore
-
-        # attribute to handle the verbosity level
-        if verbosity is not None:
-            self.verbosity = verbosity  # type: ignore
-
     @classmethod
     def build_from_argparse(cls, args: argparse.Namespace) -> 'RestoClientParameters':
         """
@@ -123,11 +100,24 @@ class RestoClientParameters(PersistedAttributes):
         :param args: arguments as parsed by ArgParse
         :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
         """
-        download_dir = get_from_args(DIRECTORY_ARGNAME, args)
-        region = get_from_args(REGION_ARGNAME, args)
-        verbosity = get_from_args(VERBOSITY_ARGNAME, args)
+        instance = cls()
 
-        return cls(download_dir=download_dir, region=region, verbosity=verbosity)
+        # Attribute holding the download directory
+        download_dir = get_from_args(DIRECTORY_ARGNAME, args)
+        if download_dir is not None:
+            instance.download_dir = download_dir  # type: ignore
+
+        # attribute to handle the region criterion with search
+        region = get_from_args(REGION_ARGNAME, args)
+        if region is not None:
+            instance.region = region  # type: ignore
+
+        # attribute to handle the verbosity level
+        verbosity = get_from_args(VERBOSITY_ARGNAME, args)
+        if verbosity is not None:
+            instance.verbosity = verbosity  # type: ignore
+
+        return instance
 
     @property  # type: ignore
     @managed_getter()

@@ -13,9 +13,11 @@
    limitations under the License.
 """
 from typing import cast, TYPE_CHECKING  # @NoMove
+import warnings
 
 import requests
 
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
 from .anonymous_request import AnonymousRequest
@@ -87,7 +89,11 @@ class CheckTokenRequest(AnonymousRequest):
         """
         :returns: True if the token is still valid
         """
-        if self.service_access.protocol in ['sso_theia', 'sso_dotcloud']:
+        if not self.supported_by_service():
+            # CheckTokenRequest not supported by the service
+            if RestoClientParameters.is_debug():
+                msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
+                warnings.warn(msg.format(self.auth_service.parent_server_name))
             response_json = {'status': 'error', 'message': 'user not connected'}
         else:
             self.set_headers()

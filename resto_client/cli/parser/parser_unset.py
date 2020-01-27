@@ -52,7 +52,7 @@ def cli_unset_account(args: argparse.Namespace) -> CliFunctionReturnType:
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    resto_server.set_credentials(username=None)
+    resto_server.reset_credentials()
     return None, resto_server
 
 
