@@ -76,10 +76,9 @@ class RestoServer():
         if self.server_name is None:
             raise RestoClientDesignError('Tring to initialize a server from DB without its name')
         server_description = DB_SERVERS.get_server(self.server_name)
-        self.authentication_service = AuthenticationService(server_description.auth_access,
-                                                            self.server_name)
+        self.authentication_service = AuthenticationService(server_description.auth_access, self)
         self.resto_service = RestoService(server_description.resto_access,
-                                          self.authentication_service, self.server_name)
+                                          self.authentication_service, self)
 
 # +++++++++++++++++++++++ server properties section ++++++++++++++++++++++++++++++++++++
     @property

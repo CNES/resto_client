@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, Dict  # @NoMove
+from typing import Optional, Dict, TYPE_CHECKING  # @NoMove
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -25,18 +25,22 @@ from .authentication_credentials import AuthenticationCredentials
 from .base_service import BaseService
 from .service_access import AuthenticationServiceAccess
 
+if TYPE_CHECKING:
+    from .resto_server import RestoServer  # @UnusedImport
+
 
 class AuthenticationService(BaseService):
     """
         An authentication Service able to provide tokens, given credentials.
     """
 
-    def __init__(self, auth_access: AuthenticationServiceAccess, parent_server: str) -> None:
+    def __init__(self, auth_access: AuthenticationServiceAccess,
+                 parent_server: 'RestoServer') -> None:
         """
         Constructor
 
         :param auth_access: access to the authentication server.
-        :param parent_server: Name of the server which uses this service.
+        :param parent_server: Server which uses this service.
         """
         super(AuthenticationService, self).__init__(auth_access, self, parent_server)
         self._credentials = AuthenticationCredentials(authentication_service=self)
