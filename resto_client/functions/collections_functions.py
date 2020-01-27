@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.services.resto_server import RestoServer
@@ -20,8 +20,7 @@ from resto_client.services.resto_server import RestoServer
 from .resto_criteria import RestoCriteria
 
 
-def search_by_criteria(resto_server: RestoServer,
-                       criteria: Optional[Dict[str, Any]]=None) \
+def search_by_criteria(resto_server: RestoServer, criteria: Dict[str, Any]) \
         -> RestoFeatureCollection:
     """
     Search in the current collection using selection criteria
@@ -32,10 +31,6 @@ def search_by_criteria(resto_server: RestoServer,
     :raises RestoClientUserError: when the resto service is not initialized
     """
     # FIXME: remove when RestoCriteria is built by RestoServer
-    search_criteria = RestoCriteria(resto_server.resto_service)
-    if criteria is not None:
-        search_criteria.update(criteria)
-
+    search_criteria = RestoCriteria(resto_server.resto_service, **criteria)
     search_feature_collection = resto_server.search_by_criteria(search_criteria)
-
     return search_feature_collection
