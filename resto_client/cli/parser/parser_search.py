@@ -28,7 +28,7 @@ from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
                                                      RestoServerPersisted)
 from resto_client.functions.aoi_utils import find_region_choice
-from resto_client.functions.collections_functions import search_current_collection
+from resto_client.functions.collections_functions import search_by_criteria
 from resto_client.functions.resto_criteria import RestoCriteria
 
 from .parser_common import (EPILOG_CREDENTIALS, CliFunctionReturnType, credentials_options_parser,
@@ -133,7 +133,7 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
 
 def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     """
-    CLI adapter to search_current_collection function
+    CLI adapter to search_by_criteria function
 
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
@@ -141,10 +141,10 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
                                          get_from_args(MAXRECORDS_ARGNAME, args),
                                          get_from_args(PAGE_ARGNAME, args))
-    criteria_dict.update({'region': get_from_args(REGION_ARGNAME, args)})
+    criteria_dict.update({REGION_ARGNAME: get_from_args(REGION_ARGNAME, args)})
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(args)
-    features_collection = search_current_collection(resto_server, criteria_dict)
+    features_collection = search_by_criteria(resto_server, criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():

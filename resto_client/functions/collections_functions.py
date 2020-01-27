@@ -20,14 +20,13 @@ from resto_client.services.resto_server import RestoServer
 from .resto_criteria import RestoCriteria
 
 
-def search_current_collection(resto_server: RestoServer,
-                              criteria: Optional[Dict[str, Any]]=None) \
+def search_by_criteria(resto_server: RestoServer,
+                       criteria: Optional[Dict[str, Any]]=None) \
         -> RestoFeatureCollection:
     """
     Search in the current collection using selection criteria
 
     :param resto_server: the resto server to query
-    :param region: the name of the region to use
     :param criteria: set of searching criteria
     :returns: the collection of retrieved features
     :raises RestoClientUserError: when the resto service is not initialized
