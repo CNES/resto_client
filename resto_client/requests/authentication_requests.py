@@ -17,7 +17,6 @@ import warnings
 
 import requests
 
-from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
 from .anonymous_request import AnonymousRequest
@@ -91,7 +90,7 @@ class CheckTokenRequest(AnonymousRequest):
         """
         if not self.supported_by_service():
             # CheckTokenRequest not supported by the service
-            if RestoClientParameters.is_debug():
+            if self.parent_service.parent_server.debug_server:
                 msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
                 warnings.warn(msg.format(self.auth_service.parent_server.server_name))
             response_json = {'status': 'error', 'message': 'user not connected'}

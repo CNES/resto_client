@@ -43,13 +43,15 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
 
     persisted_attributes = [COLLECTION_KEY, SERVER_KEY, TOKEN_KEY, USERNAME_KEY]
 
-    # TODO: Move into RestoServer? With or without keys?
+    # TODO: Move into RestoServer? With or without keys? Or remove it when server_nmae must be str ?
     @classmethod
-    def build_from_dict(cls, server_parameters: dict) -> 'RestoServerPersisted':
+    def build_from_dict(cls, server_parameters: dict,
+                        debug_server: bool=False) -> 'RestoServerPersisted':
         """
         Build an instance from a set of parameters defined in a dictionary.
 
         :param server_parameters: the set of parameters needed for building the server
+        :param debug_server: When True debugging information on server and requests is printed out.
         :raises KeyError: when no server name is found in the parameters
         :returns: a RestoServer built from server parameters
         """
@@ -65,9 +67,10 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         token = server_parameters.get(TOKEN_KEY)
         password = server_parameters.get(PASSWORD_KEY)
 
-        # Build a new_server with these parameters
+        # Build a new server with these parameters
         server = cls.new_server(server_name, current_collection=collection_name,
-                                username=username, password=password, token=token)
+                                username=username, password=password, token=token,
+                                debug_server=debug_server)
         return server
 
     @classmethod
@@ -76,7 +79,8 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
                             server_name: Optional[str] = None,
                             current_collection: Optional[str] = None,
                             username: Optional[str] = None,
-                            password: Optional[str] = None) -> 'RestoServerPersisted':
+                            password: Optional[str] = None,
+                            debug_server: bool=False) -> 'RestoServerPersisted':
         """
         Build a RestoServer instance from default parameters and arguments.
 
@@ -85,6 +89,7 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         :param current_collection: name of the collection to use
         :param username: account to use on this server
         :param password: account password on the server
+        :param debug_server: When True debugging information on server and requests is printed out.
         :returns: RestoServer instance suitable for further processing in CLI context
         :raises KeyError: when no server name can be found in the defaults or the arguments
         """
@@ -117,16 +122,15 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         if current_collection is not None:
             server_parameters[COLLECTION_KEY] = current_collection
         # Create server from parameters
-        server = RestoServerPersisted.build_from_dict(server_parameters)
+        server = RestoServerPersisted.build_from_dict(server_parameters, debug_server=debug_server)
         # Update credentials if specified
         if username is not None or password is not None:
             server.set_credentials(username=username, password=password)
         return server
 
-    # FIXME: Should we pass a RestoClientParameters for passing client parameters?
     @classmethod
-    def build_from_argparse(cls, args: Optional[argparse.Namespace] = None) \
-            -> 'RestoServerPersisted':
+    def build_from_argparse(cls, args: Optional[argparse.Namespace] = None,
+                            debug_server: bool=False) -> 'RestoServerPersisted':
         """
         Build a RestoServerPersisted instance from arguments provided by argparse and persisted
         parameters, suitable for further processing in CLI context.
@@ -135,6 +139,7 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
                                               and no server name defined.
         :raises RestoClientUserError: when arguments are inconsistent with persisted parameters.
+        :param debug_server: When True debugging information on server and requests is printed out.
         :returns: a RestoServer instance suitable for further processing in CLI context
         """
         server_name = get_from_args(SERVER_ARGNAME, args)
@@ -147,7 +152,8 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
                                                               server_name=server_name,
                                                               current_collection=collection_name,
                                                               username=username,
-                                                              password=password)
+                                                              password=password,
+                                                              debug_server=debug_server)
 
         except KeyError:
             # No persisted server or persisted one does not fit requested server_name

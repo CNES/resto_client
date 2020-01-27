@@ -35,7 +35,8 @@ def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     client_params = RestoClientParameters.build_from_argparse(args)
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     resto_server.download_features_file_from_ids(getattr(args, FEATURES_IDS_ARGNAME),
                                                  getattr(args, DOWNLOAD_TYPE_ARGNAME),
                                                  Path(client_params.download_dir))
