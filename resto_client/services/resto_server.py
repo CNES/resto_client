@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import Optional, TypeVar, Type, List, Union, Dict, Any
 
-from resto_client.base_exceptions import RestoClientUserError
+from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.entities.resto_feature import RestoFeature
@@ -27,8 +27,6 @@ from .resto_service import RestoService
 
 
 RestoServerType = TypeVar('RestoServerType', bound='RestoServer')
-
-# TODO: check how verbosity is propagated
 
 
 class RestoServer():
@@ -71,17 +69,17 @@ class RestoServer():
         server.set_credentials(username=username, password=password, token_value=token)
         return server
 
-    def _init_from_db(self, server_name: str) -> None:
+    def _init_from_db(self) -> None:
         """
         Initialize or reinitialize the server from the servers database
-
-        :param server_name: the name of the server to use in the database
-       """
-        server_description = DB_SERVERS.get_server(server_name)
+        """
+        if self.server_name is None:
+            raise RestoClientDesignError('Tring to initialize a server from DB without its name')
+        server_description = DB_SERVERS.get_server(self.server_name)
         self.authentication_service = AuthenticationService(server_description.auth_access,
-                                                            server_name)
+                                                            self.server_name)
         self.resto_service = RestoService(server_description.resto_access,
-                                          self.authentication_service, server_name)
+                                          self.authentication_service, self.server_name)
 
 # +++++++++++++++++++++++ server properties section ++++++++++++++++++++++++++++++++++++
     @property
@@ -96,13 +94,14 @@ class RestoServer():
         server_name = ServersDatabase.get_canonical_name(server_name)
         if server_name is not None:
             if server_name != self.server_name:
-                self._init_from_db(server_name)
+                self._server_name = server_name
+                self._init_from_db()
                 self.current_collection = None
                 self.reset_credentials()
         else:
+            self._server_name = None
             self.authentication_service = None
             self.resto_service = None
-        self._server_name = server_name
 
     @property
     def current_collection(self) -> Optional[str]:
