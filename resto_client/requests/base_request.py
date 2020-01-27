@@ -23,7 +23,6 @@ from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError, SSLError
 
 from resto_client.base_exceptions import RestoClientDesignError
-from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.services.base_service import BaseService
@@ -61,10 +60,11 @@ class BaseRequest(ABC):
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
-        self.service_access = service.service_access
-        self.auth_service = service.auth_service
+        self.parent_service = service
+        self.service_access = self.parent_service.service_access
+        self.auth_service = self.parent_service.auth_service
         self._url_kwargs = url_kwargs
-        if RestoClientParameters.is_debug():
+        if self.parent_service.parent_server.debug_server:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
                                                           self.service_access.base_url)

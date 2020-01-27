@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Optional, TypeVar, Type, List, Union, Dict, Any
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
+from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.entities.resto_feature import RestoFeature
@@ -43,6 +44,7 @@ class RestoServer():
         self.authentication_service: Optional[AuthenticationService] = None
         self.resto_service: Optional[RestoService] = None
         self._server_name: Optional[str] = None
+        self.debug_server = RestoClientParameters.is_debug()
 
         # set server_name which triggers server creation from the database if not None.
         self.server_name = server_name
