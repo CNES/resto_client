@@ -131,7 +131,7 @@ class AuthenticationCredentials():
         Verify that both username and password are defined, and request their values if it
         is not the case
         """
-        server_name = self.parent_service.parent_server_name
+        server_name = self.parent_service.parent_server.server_name
         if self.username is None:
             msg = "Please enter your username for {} server: ".format(server_name)
             self.set(username=AuthenticationCredentials.asking_input['shown'](msg))

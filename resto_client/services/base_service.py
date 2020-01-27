@@ -15,8 +15,6 @@
 from abc import ABC
 from typing import TYPE_CHECKING, Optional  # @UnusedImport
 
-from resto_client.cli.resto_client_parameters import RestoClientParameters
-
 from .service_access import ServiceAccess
 
 
@@ -45,7 +43,6 @@ class BaseService(ABC):
         self.service_access = service_access
         self._auth_service = auth_service
         self.parent_server = parent_server
-        self.parent_server_name: Optional[str] = parent_server.server_name
 
     @property
     def auth_service(self) -> 'AuthenticationService':

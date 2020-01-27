@@ -93,7 +93,7 @@ class CheckTokenRequest(AnonymousRequest):
             # CheckTokenRequest not supported by the service
             if RestoClientParameters.is_debug():
                 msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
-                warnings.warn(msg.format(self.auth_service.parent_server_name))
+                warnings.warn(msg.format(self.auth_service.parent_server.server_name))
             response_json = {'status': 'error', 'message': 'user not connected'}
         else:
             self.set_headers()
