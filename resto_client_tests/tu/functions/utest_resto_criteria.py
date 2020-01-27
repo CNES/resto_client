@@ -15,7 +15,8 @@
 import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.entities.resto_criteria import RestoCriteria, test_criterion
+from resto_client.entities.resto_criteria import RestoCriteria
+from resto_client.entities.resto_criteria_definition import test_criterion
 from resto_client.generic.basic_types import GeometryWKT
 from resto_client.services.resto_server import RestoServer
 
