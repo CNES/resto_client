@@ -16,7 +16,6 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -26,6 +25,7 @@ from resto_client.cli.cli_utils import get_from_args
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
                                                      RestoServerPersisted)
+from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.services.resto_server import RestoServer
 
@@ -33,6 +33,7 @@ from .parser_common import (EPILOG_CREDENTIALS, CliFunctionReturnType, credentia
                             collection_option_parser, download_dir_option_parser)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME)
+from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 
 
 def get_table_help_criteria() -> str:
@@ -42,11 +43,15 @@ def get_table_help_criteria() -> str:
     """
     # FIXME: this approach implies a server instanciation which is useless
     resto_server: RestoServer
+    protocol_name = None
     try:
         resto_server = RestoServerPersisted.build_from_argparse()
+        if resto_server.resto_service is not None:
+            protocol_name = resto_server.resto_service.service_access.protocol
     except RestoClientNoPersistedServer:
-        resto_server = RestoServer()
-    dict_to_print = resto_server.get_supported_criteria()
+        protocol_name = None
+
+    dict_to_print = get_criteria_for_protocol(protocol_name)
 
     if resto_server.server_name is not None:
         msg = 'Current {} server supports the following criteria (defined in the Resto API):'
