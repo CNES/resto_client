@@ -16,7 +16,7 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Dict, Union, Any  # @UnusedImport @NoMove
+from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -41,7 +41,7 @@ def get_table_help_criteria() -> str:
     :raises RestoClientUserError: when the resto service is not initialized
     """
     # FIXME: this approach implies a server instanciation which is useless
-    resto_server: Union[RestoServerPersisted, RestoServer]
+    resto_server: RestoServer
     try:
         resto_server = RestoServerPersisted.build_from_argparse()
     except RestoClientNoPersistedServer:
@@ -127,7 +127,8 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
                                          get_from_args(PAGE_ARGNAME, args))
     criteria_dict.update({REGION_ARGNAME: get_from_args(REGION_ARGNAME, args)})
     client_params = RestoClientParameters.build_from_argparse(args)
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     features_collection = resto_server.search_by_criteria(criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '

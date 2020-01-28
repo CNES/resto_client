@@ -22,7 +22,6 @@ from resto_client.generic.basic_types import URLType
 
 
 if TYPE_CHECKING:
-    from resto_client.services.base_service import BaseService  # @UnusedImport
     from resto_client.requests.base_request import BaseRequest  # @UnusedImport
 
 SA = TypeVar('SA', bound='ServiceAccess')

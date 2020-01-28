@@ -44,14 +44,13 @@ def cli_show_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     :raises RestoClientUserError: when the resto service is not initialized
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    client_params = RestoClientParameters.build_from_argparse(
-        args)  # To retrieve verbosity level from CLI
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     collection = resto_server.get_collection()
     print(collection)
     if not getattr(args, NO_STATS_ARGNAME):
         print(collection.statistics)
-    return client_params, resto_server
+    return None, resto_server
 
 
 def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -62,12 +61,11 @@ def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
     :raises RestoClientUserError: when no current server defined.
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    client_params = RestoClientParameters.build_from_argparse(
-        args)  # To retrieve verbosity level from CLI
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     server_description = resto_server.show_server(with_stats=getattr(args, WITH_STATS_ARGNAME))
     print(server_description)
-    return client_params, resto_server
+    return None, resto_server
 
 
 def cli_show_features(args: argparse.Namespace) -> CliFunctionReturnType:
@@ -77,13 +75,12 @@ def cli_show_features(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    client_params = RestoClientParameters.build_from_argparse(
-        args)  # To retrieve verbosity level from CLI
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     features = resto_server.get_features_from_ids(getattr(args, FEATURES_IDS_ARGNAME))
     for feature in features:
         print(feature)
-    return client_params, resto_server
+    return None, resto_server
 
 
 # We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.

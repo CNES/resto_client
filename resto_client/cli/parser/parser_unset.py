@@ -27,7 +27,8 @@ def cli_unset_server(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     resto_server.server_name = None
     return None, resto_server
 
@@ -39,7 +40,8 @@ def cli_unset_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     resto_server.current_collection = None
     return None, resto_server
 
@@ -51,7 +53,8 @@ def cli_unset_account(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     resto_server.reset_credentials()
     return None, resto_server
 

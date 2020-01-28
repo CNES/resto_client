@@ -34,7 +34,8 @@ def cli_set_server_parameter(args: argparse.Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    resto_server = RestoServerPersisted.build_from_argparse(args)
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
     return None, resto_server
 
 

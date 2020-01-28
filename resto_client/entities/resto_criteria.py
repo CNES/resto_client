@@ -12,8 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import (Type, Optional, Dict, Tuple, Sequence, Any,  # @UnusedImport
-                    TYPE_CHECKING)  # @NoMove
+from typing import (Optional, Dict, Any, TYPE_CHECKING)  # @NoMove @UnusedImport
 
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
@@ -33,6 +32,7 @@ class RestoCriteria(dict):
     A class to hold criteria in a dictionary which can be read and written by the API.
     """
 
+    # FIXME: replace resto_service by a resto_protocol : Optional[str]
     def __init__(self, resto_service: Optional['RestoService'], **kwargs: str) -> None:
         """
         Constructor

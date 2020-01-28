@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import Optional, TypeVar, Type, List, Union, Dict, Any
 
-from resto_client.base_exceptions import RestoClientUserError
+from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_criteria import RestoCriteria, CriteriaDictType
 from resto_client.entities.resto_feature import RestoFeature
@@ -28,20 +28,21 @@ from .resto_service import RestoService
 
 RestoServerType = TypeVar('RestoServerType', bound='RestoServer')
 
-# TODO: check how verbosity is propagated
-
 
 class RestoServer():
     """
         A Resto Server, i.e. a valid resto accessible server
     """
 
-    def __init__(self, server_name: Optional[str] = None) -> None:
+    # FIXME: Remove optionality on server_nam, when parser_search will not need it anymore.
+    def __init__(self, server_name: Optional[str] = None, debug_server: bool = False) -> None:
         """
         Constructor
 
         :param server_name: the name of the server to use in the database
+        :param debug_server: When True debugging information on server and requests is printed out.
         """
+        self.debug_server = debug_server
         self.authentication_service: Optional[AuthenticationService] = None
         self.resto_service: Optional[RestoService] = None
         self._server_name: Optional[str] = None
@@ -49,13 +50,15 @@ class RestoServer():
         # set server_name which triggers server creation from the database if not None.
         self.server_name = server_name
 
+    # TODO: rename this class method
     @classmethod
     def new_server(cls: Type[RestoServerType],
                    server_name: str,
                    current_collection: Optional[str] = None,
                    username: Optional[str] = None,
                    password: Optional[str] = None,
-                   token: Optional[str] = None) -> 'RestoServerType':
+                   token: Optional[str] = None,
+                   debug_server: bool = False) -> 'RestoServerType':
         """
         Build a new RestoServer instance from arguments.
 
@@ -64,24 +67,24 @@ class RestoServer():
         :param username: account to use on this server
         :param password: account password on the server
         :param token: an existing token associated to this account (will be checked prior its use)
+        :param debug_server: When True debugging information on server and requests is printed out.
         :returns: a new resto server built from arguments and servers database
         """
-        server = cls(server_name)
+        server = cls(server_name, debug_server)
         server.current_collection = current_collection
         server.set_credentials(username=username, password=password, token_value=token)
         return server
 
-    def _init_from_db(self, server_name: str) -> None:
+    def _init_from_db(self) -> None:
         """
         Initialize or reinitialize the server from the servers database
-
-        :param server_name: the name of the server to use in the database
-       """
-        server_description = DB_SERVERS.get_server(server_name)
-        self.authentication_service = AuthenticationService(server_description.auth_access,
-                                                            server_name)
+        """
+        if self.server_name is None:
+            raise RestoClientDesignError('Tring to initialize a server from DB without its name')
+        server_description = DB_SERVERS.get_server(self.server_name)
+        self.authentication_service = AuthenticationService(server_description.auth_access, self)
         self.resto_service = RestoService(server_description.resto_access,
-                                          self.authentication_service, server_name)
+                                          self.authentication_service, self)
 
 # +++++++++++++++++++++++ server properties section ++++++++++++++++++++++++++++++++++++
     @property
@@ -96,13 +99,14 @@ class RestoServer():
         server_name = ServersDatabase.get_canonical_name(server_name)
         if server_name is not None:
             if server_name != self.server_name:
-                self._init_from_db(server_name)
+                self._server_name = server_name
+                self._init_from_db()
                 self.current_collection = None
                 self.reset_credentials()
         else:
+            self._server_name = None
             self.authentication_service = None
             self.resto_service = None
-        self._server_name = server_name
 
     @property
     def current_collection(self) -> Optional[str]:

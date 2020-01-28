@@ -14,7 +14,7 @@
 """
 from pathlib import Path
 import time
-from typing import Optional, Dict, Type, Any
+from typing import Optional, Dict, Type, Any, TYPE_CHECKING
 from warnings import warn
 
 from colorama import Fore, Style, colorama_text
@@ -42,6 +42,9 @@ from .base_service import BaseService
 from .resto_collections_manager import RestoCollectionsManager
 from .service_access import RestoServiceAccess
 
+if TYPE_CHECKING:
+    from .resto_server import RestoServer  # @UnusedImport
+
 
 class RestoService(BaseService):
     """
@@ -51,13 +54,13 @@ class RestoService(BaseService):
     def __init__(self,
                  resto_access: RestoServiceAccess,
                  auth_service: AuthenticationService,
-                 parent_server: str) -> None:
+                 parent_server: 'RestoServer') -> None:
         """
         Constructor
 
         :param resto_access: access to resto service.
         :param auth_service: Authentication service associated to this resto service.
-        :param parent_server: Name of the server which uses this service.
+        :param parent_server: Server which uses this service.
         """
         super(RestoService, self).__init__(resto_access, auth_service, parent_server)
         self.service_access.detected_protocol = None

@@ -13,13 +13,14 @@
    limitations under the License.
 """
 from abc import ABC
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional  # @UnusedImport
 
 from .service_access import ServiceAccess
 
 
 if TYPE_CHECKING:
     from .authentication_service import AuthenticationService  # @UnusedImport
+    from .resto_server import RestoServer  # @UnusedImport
 
 
 class BaseService(ABC):
@@ -30,18 +31,18 @@ class BaseService(ABC):
     def __init__(self,
                  service_access: ServiceAccess,
                  auth_service: 'AuthenticationService',
-                 parent_server: str) -> None:
+                 parent_server: 'RestoServer') -> None:
         """
         Constructor
 
         :param service_access: Service access.
         :param auth_service: Authentication service associated to this service.
-        :param parent_server: Name of the server which uses this service.
+        :param parent_server: The server which uses this service.
         :raises RestoClientDesignError: when service_access is not of the right type
         """
         self.service_access = service_access
         self._auth_service = auth_service
-        self.parent_server_name = parent_server
+        self.parent_server = parent_server
 
     @property
     def auth_service(self) -> 'AuthenticationService':
