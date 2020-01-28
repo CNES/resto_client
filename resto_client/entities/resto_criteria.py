@@ -33,8 +33,7 @@ class RestoCriteria(dict):
         :param resto_protocol : name of the resto protocol or None for common criteria.
         :param dict kwargs : dictionary in keyword=value form
         :raises IndexError: if no service protocol given
-        :raises RestoClientUserError: if a criterion is not in criteria key list or
-        resto_server has not resto_service
+        :raises RestoClientUserError: if a criterion is not in criteria key list
         """
         self.supported_criteria = get_criteria_for_protocol(resto_protocol)
 

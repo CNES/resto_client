@@ -19,7 +19,7 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.parser.parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME,
                                                      PASSWORD_ARGNAME, COLLECTION_ARGNAME)
 from resto_client.services.resto_server import RestoServer
-from resto_client.settings.servers_database import ServersDatabase
+from resto_client.settings.servers_database import DB_SERVERS
 
 from .cli_utils import get_from_args
 from .persistence import PersistedAttributes
@@ -68,9 +68,9 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         password = server_parameters.get(PASSWORD_KEY)
 
         # Build a new server with these parameters
-        server = cls.new_server(server_name, current_collection=collection_name,
-                                username=username, password=password, token=token,
-                                debug_server=debug_server)
+        server = cls(server_name, current_collection=collection_name,
+                     username=username, password=password, token=token,
+                     debug_server=debug_server)
         return server
 
     @classmethod
@@ -93,8 +93,11 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         :returns: RestoServer instance suitable for further processing in CLI context
         :raises KeyError: when no server name can be found in the defaults or the arguments
         """
-        server_name = ServersDatabase.get_canonical_name(server_name)
-        default_server_name = ServersDatabase.get_canonical_name(default_params.get(SERVER_KEY))
+        if server_name is not None:
+            server_name = DB_SERVERS.check_server_name(server_name)
+        default_server_name = default_params.get(SERVER_KEY)
+        if default_server_name is not None:
+            default_server_name = DB_SERVERS.check_server_name(default_server_name)
         if server_name is None and default_server_name is None:
             raise KeyError('Requested server name is None and no default server specified')
 
