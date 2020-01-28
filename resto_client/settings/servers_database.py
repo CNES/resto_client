@@ -171,9 +171,7 @@ class ServersDatabase():
         :returns: the canonical name of the server or None if it does not exist in the database.
         """
         canonical_server_name: Optional[str] = server_name.lower()
-        try:
-            _ = self.db_servers[canonical_server_name]
-        except KeyError:
+        if canonical_server_name not in self.db_servers:
             canonical_server_name = None
         return canonical_server_name
 

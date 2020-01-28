@@ -13,7 +13,7 @@
    limitations under the License.
 """
 import argparse
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.parser.parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME,
@@ -43,36 +43,6 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
 
     persisted_attributes = [COLLECTION_KEY, SERVER_KEY, TOKEN_KEY, USERNAME_KEY]
 
-    # TODO: Move into RestoServer? With or without keys? Or remove it when server_nmae must be str ?
-    @classmethod
-    def build_from_dict(cls, server_parameters: dict,
-                        debug_server: bool=False) -> 'RestoServerPersisted':
-        """
-        Build an instance from a set of parameters defined in a dictionary.
-
-        :param server_parameters: the set of parameters needed for building the server
-        :param debug_server: When True debugging information on server and requests is printed out.
-        :raises KeyError: when no server name is found in the parameters
-        :returns: a RestoServer built from server parameters
-        """
-        # Retrieve the server name in the dictionary
-        server_name = server_parameters.get(SERVER_KEY)
-        if server_name is None:
-            msg = 'No server name defined in the server parameters.'
-            raise KeyError(msg)
-
-        # Retrieve other server parameters in the dictionary
-        collection_name = server_parameters.get(COLLECTION_KEY)
-        username = server_parameters.get(USERNAME_KEY)
-        token = server_parameters.get(TOKEN_KEY)
-        password = server_parameters.get(PASSWORD_KEY)
-
-        # Build a new server with these parameters
-        server = cls(server_name, current_collection=collection_name,
-                     username=username, password=password, token=token,
-                     debug_server=debug_server)
-        return server
-
     @classmethod
     def build_from_defaults(cls,
                             default_params: dict,
@@ -101,7 +71,7 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         if server_name is None and default_server_name is None:
             raise KeyError('Requested server name is None and no default server specified')
 
-        server_parameters = {}
+        server_parameters: Dict[str, Any] = {'debug_server': debug_server}
         if server_name is not None and default_server_name is not None:
             # Both server names are available. Choose to build one of them.
             if server_name != default_server_name:
@@ -125,7 +95,7 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         if current_collection is not None:
             server_parameters[COLLECTION_KEY] = current_collection
         # Create server from parameters
-        server = RestoServerPersisted.build_from_dict(server_parameters, debug_server=debug_server)
+        server = RestoServerPersisted(**server_parameters)
         # Update credentials if specified
         if username is not None or password is not None:
             server.set_credentials(username=username, password=password)
@@ -150,13 +120,16 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         password = get_from_args(PASSWORD_ARGNAME, args)
         collection_name = get_from_args(COLLECTION_ARGNAME, args)
 
+        persisted_server_args = dict((key, RESTO_CLIENT_SETTINGS[key])
+                                     for key in cls.persisted_attributes
+                                     if key in RESTO_CLIENT_SETTINGS)
         try:
-            server = RestoServerPersisted.build_from_defaults(RESTO_CLIENT_SETTINGS,
-                                                              server_name=server_name,
-                                                              current_collection=collection_name,
-                                                              username=username,
-                                                              password=password,
-                                                              debug_server=debug_server)
+            server = cls.build_from_defaults(persisted_server_args,
+                                             server_name=server_name,
+                                             current_collection=collection_name,
+                                             username=username,
+                                             password=password,
+                                             debug_server=debug_server)
 
         except KeyError:
             # No persisted server or persisted one does not fit requested server_name
