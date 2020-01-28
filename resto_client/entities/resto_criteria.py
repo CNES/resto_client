@@ -106,7 +106,25 @@ class RestoCriteria(dict):
         """
         Update this dictionary such that __setitem__ is called
         """
-        for key, value in dict(*args, **kwargs).items():
+        criteria_dict = dict(*args, **kwargs)
+        if 'lat' in criteria_dict or 'lon' in criteria_dict:
+            try:
+                criteria_dict['geomPoint'] = {'lat': criteria_dict['lat'],
+                                              'lon': criteria_dict['lon']}
+                del criteria_dict['lat']
+                del criteria_dict['lon']
+            except KeyError:
+                raise RestoClientUserError('lat AND lon must be present simultaneously')
+
+        if 'radius' in criteria_dict:
+            if 'geomPoint' not in criteria_dict:
+                raise RestoClientUserError('With radius, latitude AND longitude must be present')
+            criteria_dict['geomSurface'] = {'radius': criteria_dict['radius']}
+            criteria_dict['geomSurface'].update(criteria_dict['geomPoint'])
+            del criteria_dict['geomPoint']
+            del criteria_dict['radius']
+
+        for key, value in criteria_dict.items():
             self[key] = value
 
     def _manage_geometry(self, region: Optional[str]=None) -> None:

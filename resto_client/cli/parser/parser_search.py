@@ -112,23 +112,6 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
     if page is not None:
         criteria_dict['page'] = page
 
-    if 'lat' in criteria_dict or 'lon' in criteria_dict:
-        try:
-            criteria_dict['geomPoint'] = {'lat': criteria_dict['lat'],
-                                          'lon': criteria_dict['lon']}
-            del criteria_dict['lat']
-            del criteria_dict['lon']
-        except KeyError:
-            raise RestoClientUserError('lat AND lon must be present simultaneously')
-
-    if 'radius' in criteria_dict:
-        if 'geomPoint' not in criteria_dict:
-            raise RestoClientUserError('With radius, latitude AND longitude must be present')
-        criteria_dict['geomSurface'] = {'radius': criteria_dict['radius']}
-        criteria_dict['geomSurface'].update(criteria_dict['geomPoint'])
-        del criteria_dict['geomPoint']
-        del criteria_dict['radius']
-
     return criteria_dict
 
 
