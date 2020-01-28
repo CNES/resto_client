@@ -12,18 +12,13 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import (Optional, Dict, Any, TYPE_CHECKING)  # @NoMove @UnusedImport
+from typing import (Optional, Any)  # @NoMove @UnusedImport
 
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_criteria_definition import (test_criterion,
                                                              get_criteria_for_protocol)
-from resto_client.entities.resto_criteria_definition import CriteriaDictType   # @UnusedImport
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
-
-
-if TYPE_CHECKING:
-    from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
 class RestoCriteria(dict):
@@ -31,19 +26,17 @@ class RestoCriteria(dict):
     A class to hold criteria in a dictionary which can be read and written by the API.
     """
 
-    # FIXME: replace resto_service by a resto_protocol : Optional[str]
-    def __init__(self, resto_service: Optional['RestoService'], **kwargs: str) -> None:
+    def __init__(self, resto_protocol: Optional[str], **kwargs: str) -> None:
         """
         Constructor
 
-        :param resto_service : associated resto_service
-        :param dict kwargs : dictonary in keyword=value form
+        :param resto_protocol : name of the resto protocol or None for common criteria.
+        :param dict kwargs : dictionary in keyword=value form
         :raises IndexError: if no service protocol given
         :raises RestoClientUserError: if a criterion is not in criteria key list or
         resto_server has not resto_service
         """
-        protocol_name = None if resto_service is None else resto_service.service_access.protocol
-        self.supported_criteria = get_criteria_for_protocol(protocol_name)
+        self.supported_criteria = get_criteria_for_protocol(resto_protocol)
 
         super(RestoCriteria, self).__init__()
         self.update(kwargs)
