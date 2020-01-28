@@ -17,8 +17,7 @@ from typing import (Optional, Dict, Any, TYPE_CHECKING)  # @NoMove @UnusedImport
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_criteria_definition import (test_criterion,
-                                                             COMMON_CRITERIA_KEYS,
-                                                             SPECIFIC_CRITERIA_KEYS)
+                                                             get_criteria_for_protocol)
 from resto_client.entities.resto_criteria_definition import CriteriaDictType   # @UnusedImport
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
 
@@ -43,12 +42,8 @@ class RestoCriteria(dict):
         :raises RestoClientUserError: if a criterion is not in criteria key list or
         resto_server has not resto_service
         """
-        self.supported_criteria: CriteriaDictType = {}
-        self.supported_criteria.update(COMMON_CRITERIA_KEYS)
-
-        if resto_service is not None:
-            resto_protocol = resto_service.service_access.protocol
-            self.supported_criteria.update(SPECIFIC_CRITERIA_KEYS[resto_protocol])
+        protocol_name = None if resto_service is None else resto_service.service_access.protocol
+        self.supported_criteria = get_criteria_for_protocol(protocol_name)
 
         super(RestoCriteria, self).__init__()
         self.update(kwargs)

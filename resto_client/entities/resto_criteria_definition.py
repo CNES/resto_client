@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Type, Dict  # @NoMove
+from typing import Type, Dict, Optional  # @NoMove
 
 from shapely.errors import WKTReadingError
 
@@ -215,6 +215,21 @@ SPECIFIC_CRITERIA_KEYS = {'dotcloud': DOTCLOUD_KEYS,
                           'theia_version': THEIA_VERSION_KEYS,
                           'creodias_version': CREODIAS_VERSION_KEYS
                           }
+
+
+def get_criteria_for_protocol(protocol_name: Optional[str]) -> CriteriaDictType:
+    """
+
+    :param protocol_name: the protocol name or None if only common criteria are requested.
+    :returns: the criteria definition associated to a resto protocol, or the common criteria only
+              if the resto protocol name is None.
+    """
+    protocol_criteria: CriteriaDictType = {}
+    protocol_criteria.update(COMMON_CRITERIA_KEYS)
+
+    if protocol_name is not None:
+        protocol_criteria.update(SPECIFIC_CRITERIA_KEYS[protocol_name])
+    return protocol_criteria
 
 
 def test_criterion(key: str, value: object, auth_key_type: Type) -> None:
