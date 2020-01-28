@@ -161,3 +161,11 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
             raise RestoClientNoPersistedServer(msg)
 
         return server
+
+    @classmethod
+    def get_persisted_server_name(cls) -> Optional[str]:
+        """
+
+        :returns: the name of the persisted server or None if no persisted server
+        """
+        return RESTO_CLIENT_SETTINGS.get(SERVER_KEY)
