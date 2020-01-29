@@ -13,7 +13,8 @@
    limitations under the License.
 """
 import argparse
-from typing import Optional, Dict, Any
+from typing import Dict, Any  # @UnusedImport
+from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.parser.parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME,
@@ -24,6 +25,7 @@ from resto_client.settings.servers_database import DB_SERVERS
 from .cli_utils import get_from_args
 from .persistence import PersistedAttributes
 from .resto_client_settings import RESTO_CLIENT_SETTINGS
+
 
 COLLECTION_KEY = 'current_collection'
 SERVER_KEY = 'server_name'
