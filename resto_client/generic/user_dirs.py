@@ -269,6 +269,7 @@ def _user_dir_linux_home(directory_type: str, app_name: Optional[str]=None) -> P
     :param directory_type: the code of some user directory
     :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
+    :raises ValueError: when arguments do not define at least one level of directory in home
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_HOME, 'forbidden in HOME')
 
@@ -293,6 +294,7 @@ def _user_dir_linux_tmp(directory_type: str, app_name: Optional[str]=None) -> Pa
     :param directory_type: the code of some user directory
     :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
+    :raises ValueError: when arguments do not define at least one level of directory in tmp
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_TMP, 'forbidden in TMP')
 

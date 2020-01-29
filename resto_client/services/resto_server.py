@@ -211,7 +211,7 @@ class RestoServer():
         if self._resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
         return self._resto_service.download_feature_file(
-            feature, file_type, self.ensure_server_directory(download_dir))
+            feature, file_type, self._ensure_server_directory(download_dir))
 
     def download_features_file_from_ids(self,
                                         features_ids: Union[str, List[str]],
@@ -236,7 +236,15 @@ class RestoServer():
                 downloaded_filenames.append(downloaded_filename)
         return downloaded_filenames
 
-    def ensure_server_directory(self, data_dir: Path) -> Path:
+    def _ensure_server_directory(self, data_dir: Path) -> Path:
+        """
+        Build the server data directory path by appending the server name to the provided argument.
+        Creates also that directory if it does not exist yet.
+
+        :param data_dir: the directory where the data directory for this server must be located.
+        :returns: the path to the server data directory
+        :raises RestoClientDesignError: when called while this server parameters are undefined.
+        """
         if self.server_name is None:
             raise RestoClientDesignError('cannot ensure data_dir when RestoServer is undefined')
         real_data_dir = data_dir / self.server_name
