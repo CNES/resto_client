@@ -25,7 +25,7 @@ from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
-class TestRestoClient(unittest.TestCase):
+class TestRestoClientCli(unittest.TestCase):
     """
     Basic Tests Class for resto_client Unit Test
     """
@@ -40,7 +40,6 @@ def catch_output_from_run(test_args: dict) -> str:
     :param  test_args: dictionnary with cli verb, targeted collection, server name and product id
     :returns: output of a run
     """
-    RESTO_CLIENT_SETTINGS.clear()
     try:
         arguments = test_args.pop('mandatory')
     except KeyError:

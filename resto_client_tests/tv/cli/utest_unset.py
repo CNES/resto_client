@@ -20,10 +20,10 @@ from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
                                                      TOKEN_KEY)
 from resto_client.generic.user_dirs import user_download_dir
-from resto_client_tests.resto_client_cli_test import TestRestoClient
+from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliUnset(TestRestoClient):
+class UTestCliUnset(TestRestoClientCli):
     """
     Unit Tests of the cli unset module
     server, account, collection, download_dir, region, verbosity

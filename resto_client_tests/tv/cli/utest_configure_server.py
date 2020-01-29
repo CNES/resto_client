@@ -20,10 +20,10 @@ from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.settings.servers_database import (DB_SERVERS,
                                                     RESTO_URL_KEY, RESTO_PROTOCOL_KEY,
                                                     AUTH_URL_KEY, AUTH_PROTOCOL_KEY)
-from resto_client_tests.resto_client_cli_test import TestRestoClient
+from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliConfigureServer(TestRestoClient):
+class UTestCliConfigureServer(TestRestoClientCli):
     """
     Unit Tests of the cli configure_server module
     create,delete,show, edit (not implemented)

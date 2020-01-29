@@ -16,10 +16,10 @@ from contextlib import redirect_stdout
 import io
 
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client_tests.resto_client_cli_test import TestRestoClient
+from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliShow(TestRestoClient):
+class UTestCliShow(TestRestoClientCli):
     """
     Unit Tests of the cli show module
     """

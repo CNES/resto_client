@@ -24,10 +24,10 @@ from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, C
                                                      TOKEN_KEY)
 from resto_client.cli.resto_server_persisted import RestoClientNoPersistedServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
-from resto_client_tests.resto_client_cli_test import TestRestoClient
+from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliSet(TestRestoClient):
+class UTestCliSet(TestRestoClientCli):
     """
     Unit Tests of the cli set module
     server, account, collection, download_dir, region, verbosity
