@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import Optional, TypeVar, List, Union, Dict, Any
 
-from resto_client.base_exceptions import RestoClientUserError
+from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_criteria import RestoCriteria
 from resto_client.entities.resto_criteria_definition import CriteriaDictType
@@ -210,7 +210,8 @@ class RestoServer():
         """
         if self._resto_service is None:
             raise RestoClientUserError('No resto service currently defined.')
-        return self._resto_service.download_feature_file(feature, file_type, download_dir)
+        return self._resto_service.download_feature_file(
+            feature, file_type, self.ensure_server_directory(download_dir))
 
     def download_features_file_from_ids(self,
                                         features_ids: Union[str, List[str]],
@@ -234,6 +235,13 @@ class RestoServer():
             if downloaded_filename is not None:
                 downloaded_filenames.append(downloaded_filename)
         return downloaded_filenames
+
+    def ensure_server_directory(self, data_dir: Path) -> Path:
+        if self.server_name is None:
+            raise RestoClientDesignError('cannot ensure data_dir when RestoServer is undefined')
+        real_data_dir = data_dir / self.server_name
+        real_data_dir.mkdir(parents=True, exist_ok=True)
+        return real_data_dir
 
     def show_server(self, with_stats: bool=True) -> str:
         """
