@@ -101,7 +101,7 @@ USER_DIRS_XDG = {'Desktop': 'XDG_DESKTOP_DIR',
 
 
 USER_DIRS_HOME = {'Documents': 'documents',
-                  'Downloads': 'downloads',
+                  'Downloads': None,
                   }
 USER_DIRS_TMP = USER_DIRS_HOME
 
@@ -272,8 +272,15 @@ def _user_dir_linux_home(directory_type: str, app_name: Optional[str]=None) -> P
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_HOME, 'forbidden in HOME')
 
+    if app_name is None and directory_id is None:
+        msg = 'Cannot create user dir {} with path None in home without specifying app_name'
+        raise ValueError(msg.format(directory_type))
+
     if app_name is not None:
-        user_dir_path = Path.home() / app_name / directory_id
+        if directory_id is not None:
+            user_dir_path = Path.home() / app_name / directory_id
+        else:
+            user_dir_path = Path.home() / app_name
     else:
         user_dir_path = Path.home() / directory_id
     return user_dir_path
@@ -288,8 +295,16 @@ def _user_dir_linux_tmp(directory_type: str, app_name: Optional[str]=None) -> Pa
     :returns: the path to the directory in the Linux user environment
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_TMP, 'forbidden in TMP')
+
+    if app_name is None and directory_id is None:
+        msg = 'Cannot create user dir {} with path None in tmp without specifying app_name'
+        raise ValueError(msg.format(directory_type))
+
     if app_name is not None:
-        user_dir_prefix = '{}_{}_'.format(app_name, directory_id)
+        if directory_id is not None:
+            user_dir_prefix = '{}_{}_'.format(app_name, directory_id)
+        else:
+            user_dir_prefix = '{}_'.format(app_name)
     else:
         user_dir_prefix = '{}_'.format(directory_id)
     return Path(mkdtemp(prefix=user_dir_prefix))
