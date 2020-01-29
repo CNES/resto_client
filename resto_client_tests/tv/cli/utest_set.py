@@ -145,7 +145,7 @@ class UTestCliSet(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['set', 'server', 'bad_server'])
         output = out_string_io.getvalue().strip()  # type: ignore
-        msg = 'Server bad_server does not exist in the servers database'
+        msg = 'No persisted server and bad_server is not a valid server name.'
         self.assertIn(msg, output)
 
     def test_d_set_account(self) -> None:

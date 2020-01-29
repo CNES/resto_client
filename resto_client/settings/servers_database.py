@@ -13,7 +13,7 @@
    limitations under the License.
 """
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.services.service_access import AuthenticationServiceAccess, RestoServiceAccess
@@ -156,38 +156,24 @@ class ServersDatabase():
         :returns: the full definition of the server composed of its 2 services.
         :raises RestoClientUnexistingServer: when the server is unknown in the database.
         """
-        requested_server_name = ServersDatabase.get_canonical_name(server_name)
+        requested_server_name = server_name.lower()
         try:
             return ServerDescription.from_descr(self.db_servers[requested_server_name])
         except KeyError:
             msg = 'Server {} does not exist in the servers database'
             raise RestoClientUnexistingServer(msg.format(requested_server_name))
 
-    def exist_server(self, server_name: Union[str, None]) -> Optional[str]:
+    def check_server_name(self, server_name: str) -> Optional[str]:
         """
         Check that the server exists in the servers database and returns its canonical name.
 
         :param server_name: name of the server to retrieve in the database
-        :returns: the canonical name of the server or None if it does not exist.
+        :returns: the canonical name of the server or None if it does not exist in the database.
         """
-        server_name = ServersDatabase.get_canonical_name(server_name)
-        try:
-            _ = self.db_servers[server_name]
-        except KeyError:
-            server_name = None
-        return server_name
-
-    @staticmethod
-    def get_canonical_name(server_name: Union[str, None]) -> Optional[str]:
-        """
-        Returns the normalized name of the server without looking for it in the database
-
-        :param server_name: name of the server or None
-        :returns: the canonical name of the server or None if server_name is None.
-        """
-        if server_name is not None:
-            server_name = server_name.lower()
-        return server_name
+        canonical_server_name: Optional[str] = server_name.lower()
+        if canonical_server_name not in self.db_servers:
+            canonical_server_name = None
+        return canonical_server_name
 
     def get_resto_service_protocol(self, server_name: str) -> str:
         """
@@ -205,13 +191,13 @@ class ServersDatabase():
         :param server_name: name of the server to delete in the database
         :raises RestoClientUnexistingServer: when the server is unknown in the database.
         """
-        canonical_server_name = self.exist_server(server_name)
+        canonical_server_name = self.check_server_name(server_name)
         if canonical_server_name is not None:
             del self.db_servers[canonical_server_name]
             self.db_servers.save()
 
     def create_server(self,
-                      server_name: Union[str, None],
+                      server_name: str,
                       resto_access: RestoServiceAccess,
                       auth_access: AuthenticationServiceAccess) -> None:
         """
@@ -232,17 +218,18 @@ class ServersDatabase():
         if not isinstance(auth_access, AuthenticationServiceAccess):
             msg = 'auth_access must be of AuthenticationServiceAccess type. Found {} instead.'
             raise RestoClientDesignError(msg.format(type(auth_access)))
-        server_name = ServersDatabase.get_canonical_name(server_name)
         if not isinstance(server_name, str):
             msg = 'Invalid server name type. Found {} instead of str'
             raise RestoClientUserError(msg.format(type(server_name)))
 
-        if self.exist_server(server_name) is not None:
+        canonical_server_name = self.check_server_name(server_name)
+        if canonical_server_name is not None:
             # Server already exist
             msg = 'Server {} already exists in the server database.'
-            raise RestoClientUserError(msg.format(server_name))
+            raise RestoClientUserError(msg.format(canonical_server_name))
 
-        self.db_servers[server_name] = ServerDescription(resto_access, auth_access).as_descr()
+        self.db_servers[server_name.lower()] = ServerDescription(resto_access,
+                                                                 auth_access).as_descr()
         self.db_servers.save()
 
     def __str__(self) -> str:

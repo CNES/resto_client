@@ -24,10 +24,10 @@ from prettytable import PrettyTable
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.cli_utils import get_from_args
 from resto_client.cli.resto_client_parameters import RestoClientParameters
-from resto_client.cli.resto_server_persisted import (RestoClientNoPersistedServer,
-                                                     RestoServerPersisted)
+from resto_client.cli.resto_server_persisted import RestoServerPersisted
+from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
 from resto_client.functions.aoi_utils import find_region_choice
-from resto_client.services.resto_server import RestoServer
+from resto_client.settings.servers_database import DB_SERVERS
 
 from .parser_common import (EPILOG_CREDENTIALS, CliFunctionReturnType, credentials_options_parser,
                             collection_option_parser, download_dir_option_parser)
@@ -40,19 +40,16 @@ def get_table_help_criteria() -> str:
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
     :raises RestoClientUserError: when the resto service is not initialized
     """
-    # FIXME: this approach implies a server instanciation which is useless
-    resto_server: RestoServer
-    try:
-        resto_server = RestoServerPersisted.build_from_argparse()
-    except RestoClientNoPersistedServer:
-        resto_server = RestoServer()
-    dict_to_print = resto_server.get_supported_criteria()
-
-    if resto_server.server_name is not None:
-        msg = 'Current {} server supports the following criteria (defined in the Resto API):'
-        title_help = msg.format(resto_server.server_name)
-    else:
+    persisted_server_name = RestoServerPersisted.get_persisted_server_name()
+    if persisted_server_name is None:
+        protocol_name = None
         title_help = 'Following criteria are supported by all resto servers:'
+    else:
+        protocol_name = DB_SERVERS.get_server(persisted_server_name).resto_access.protocol
+        msg = 'Current {} server supports the following criteria (defined in the Resto API):'
+        title_help = msg.format(persisted_server_name)
+
+    dict_to_print = get_criteria_for_protocol(protocol_name)
 
     criteria_table = PrettyTable()
     criteria_table.title = title_help
@@ -111,23 +108,6 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
 
     if page is not None:
         criteria_dict['page'] = page
-
-    if 'lat' in criteria_dict or 'lon' in criteria_dict:
-        try:
-            criteria_dict['geomPoint'] = {'lat': criteria_dict['lat'],
-                                          'lon': criteria_dict['lon']}
-            del criteria_dict['lat']
-            del criteria_dict['lon']
-        except KeyError:
-            raise RestoClientUserError('lat AND lon must be present simultaneously')
-
-    if 'radius' in criteria_dict:
-        if 'geomPoint' not in criteria_dict:
-            raise RestoClientUserError('With radius, latitude AND longitude must be present')
-        criteria_dict['geomSurface'] = {'radius': criteria_dict['radius']}
-        criteria_dict['geomSurface'].update(criteria_dict['geomPoint'])
-        del criteria_dict['geomPoint']
-        del criteria_dict['radius']
 
     return criteria_dict
 

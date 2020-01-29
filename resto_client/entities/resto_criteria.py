@@ -12,19 +12,13 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import (Optional, Dict, Any, TYPE_CHECKING)  # @NoMove @UnusedImport
+from typing import (Optional, Any)  # @NoMove @UnusedImport
 
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_criteria_definition import (test_criterion,
-                                                             COMMON_CRITERIA_KEYS,
-                                                             SPECIFIC_CRITERIA_KEYS)
-from resto_client.entities.resto_criteria_definition import CriteriaDictType   # @UnusedImport
+                                                             get_criteria_for_protocol)
 from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_to_bbox
-
-
-if TYPE_CHECKING:
-    from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
 class RestoCriteria(dict):
@@ -32,23 +26,16 @@ class RestoCriteria(dict):
     A class to hold criteria in a dictionary which can be read and written by the API.
     """
 
-    # FIXME: replace resto_service by a resto_protocol : Optional[str]
-    def __init__(self, resto_service: Optional['RestoService'], **kwargs: str) -> None:
+    def __init__(self, resto_protocol: Optional[str], **kwargs: str) -> None:
         """
         Constructor
 
-        :param resto_service : associated resto_service
-        :param dict kwargs : dictonary in keyword=value form
+        :param resto_protocol : name of the resto protocol or None for common criteria.
+        :param dict kwargs : dictionary in keyword=value form
         :raises IndexError: if no service protocol given
-        :raises RestoClientUserError: if a criterion is not in criteria key list or
-        resto_server has not resto_service
+        :raises RestoClientUserError: if a criterion is not in criteria key list
         """
-        self.supported_criteria: CriteriaDictType = {}
-        self.supported_criteria.update(COMMON_CRITERIA_KEYS)
-
-        if resto_service is not None:
-            resto_protocol = resto_service.service_access.protocol
-            self.supported_criteria.update(SPECIFIC_CRITERIA_KEYS[resto_protocol])
+        self.supported_criteria = get_criteria_for_protocol(resto_protocol)
 
         super(RestoCriteria, self).__init__()
         self.update(kwargs)
@@ -106,7 +93,25 @@ class RestoCriteria(dict):
         """
         Update this dictionary such that __setitem__ is called
         """
-        for key, value in dict(*args, **kwargs).items():
+        criteria_dict = dict(*args, **kwargs)
+        if 'lat' in criteria_dict or 'lon' in criteria_dict:
+            try:
+                criteria_dict['geomPoint'] = {'lat': criteria_dict['lat'],
+                                              'lon': criteria_dict['lon']}
+                del criteria_dict['lat']
+                del criteria_dict['lon']
+            except KeyError:
+                raise RestoClientUserError('lat AND lon must be present simultaneously')
+
+        if 'radius' in criteria_dict:
+            if 'geomPoint' not in criteria_dict:
+                raise RestoClientUserError('With radius, latitude AND longitude must be present')
+            criteria_dict['geomSurface'] = {'radius': criteria_dict['radius']}
+            criteria_dict['geomSurface'].update(criteria_dict['geomPoint'])
+            del criteria_dict['geomPoint']
+            del criteria_dict['radius']
+
+        for key, value in criteria_dict.items():
             self[key] = value
 
     def _manage_geometry(self, region: Optional[str]=None) -> None:
