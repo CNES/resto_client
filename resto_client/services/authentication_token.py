@@ -14,105 +14,69 @@
 """
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
-from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.generic.property_decoration import managed_getter, managed_setter
-
 
 if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from .authentication_credentials import AuthenticationCredentials  # @UnusedImport
 
 
 class AuthenticationToken():
     """
     Class implementing the token for a connexion.
     """
-    properties_storage = RESTO_CLIENT_SETTINGS
 
-    def __init__(self, authentication_service: 'AuthenticationService') -> None:
+    def __init__(self, parent_credentials: 'AuthenticationCredentials') -> None:
         """
         Constructor
 
-        :param authentication_service: parent authentication service for this token.
+        :param parent_credentials: parent credentials of this token.
         """
-        self._parent_service = authentication_service
+        self.parent_credentials = parent_credentials
+        self._token_value: Optional[str] = None
+        self._unvalidated_token = True
 
-    def reset(self) -> None:
+    @property
+    def token_value(self) -> Optional[str]:
         """
-        Reset the token unconditionally.
+        :returns: The current token, either None or a validated value.
         """
-        self.token = None  # type: ignore
+        if self._token_value is not None:
+            if self._unvalidated_token:
+                self._unvalidated_token = not self.parent_credentials.check_token(self._token_value)
+                if self._unvalidated_token:
+                    self._token_value = self.parent_credentials.get_token()
+                    self._unvalidated_token = self._token_value is None
+        return self._token_value
 
-    @classmethod
-    def persisted(cls, authentication_service: 'AuthenticationService') -> 'AuthenticationToken':
-        """
-        Create an instance from persisted attributes (token), connected to a provided
-        authentication service.
-
-        :param authentication_service: authentication service onto which this token valid
-        :returns: a token instance from the persisted token
-        """
-        # We only need to create a standard instance, as persisted token will be retrieved at
-        # first get(), if it exists.
-        return cls(authentication_service)
-
-    @property  # type: ignore
-    @managed_getter()
-    def token(self) -> Optional[str]:
-        """
-        :returns: The current token value
-        """
-
-    @token.setter  # type: ignore
-    @managed_setter(pre_set_func='_check_token')
-    def token(self, token_value: str) -> None:
+    @token_value.setter
+    def token_value(self, token_value: Optional[str]) -> None:
         """
         Set the token value.
 
-        :param token_value: If None, reset the token. If anything else, validate the current
+        :param token_value: If None, reset the token. If different from current value,
+                            validate the current
                                    token or renew it if it is invalid.
         """
+        self._unvalidated_token = token_value is None or token_value != self.token_value
+        self._token_value = token_value
 
-    def _check_token(self, unused_arg: Any) -> str:
+    def get_authorization_header(self,
+                                 authentication_required: bool,
+                                 username_defined: bool) -> dict:
         """
-        Check function used by token setter as a callback.
+        Build the Authorization header if the token is not None or if it is required.
 
-        :returns: the token to use, either the previous one if still valid, or a new valid one
-        """
-        _ = unused_arg  # to avoid pylint warning
-        # Trigger content retrieval from persisted value, if any
-        new_token = self.token
-        if not self.valid_token():
-            new_token = self._parent_service.get_token()  # type: ignore
-        return new_token
-
-    def valid_token(self) -> bool:
-        """
-        :returns: True if the token is still valid, False otherwise
-        """
-        if self.token is None:
-            return False
-        return self._parent_service.check_token()
-
-    def update_authorization_header(self,
-                                    headers: dict,
-                                    token_required: bool,
-                                    username_defined: bool) -> None:
-        """
-        Update the Authorization header if the token is not None or if it is required.
-
-        :param headers: the headers into which the Authorization header must be recorded.
-        :param token_required: If True ensure to retrieve an Authorization header, otherwise
-                               provide it only if a valid token can be retrieved silently.
+        :param authentication_required: If True ensure to retrieve an Authorization header,
+                                        otherwise provide it only if a valid token can be
+                                        retrieved silently.
         :param username_defined: True if a username is defined in the service credentials.
+        :returns: the authorization header
         """
-        if token_required:
-            self.token = 'A fake token value to trigger get_token()'   # type: ignore
+        authorization_header = {}
+        if authentication_required:
+            self.token_value = 'A fake token value to trigger get_token()'
         else:
-            # If the token is valid use it, otherwise renew it if the username is not None
-            if not self.valid_token():
-                # Token is None or has been revoked. Make sure to store None for persistence
-                self.reset()
-                if username_defined:
-                    self.token = 'A fake token value to trigger get_token()'  # type: ignore
-        if self.token is not None:
-            headers['Authorization'] = 'Bearer ' + self.token
+            if username_defined:
+                self.token_value = 'A fake token value to trigger get_token()'
+        if self.token_value is not None:
+            authorization_header['Authorization'] = 'Bearer ' + self.token_value
+        return authorization_header

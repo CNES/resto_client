@@ -14,20 +14,21 @@
 """
 from abc import ABC, abstractmethod
 from pathlib import Path
+import tempfile
 from typing import Optional, Tuple, Union, TYPE_CHECKING  # @NoMove
 from warnings import warn
-import tempfile
 
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_feature import RestoFeature
+from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
-from resto_client.functions.utils import get_file_properties
 
 from .anonymous_request import AnonymousRequest
 from .authentication_required_request import AuthenticationRequiredRequest
 from .utils import RestrictedProductError, download_file, get_response
+
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
@@ -76,7 +77,7 @@ class SignLicenseRequest(AuthenticationRequiredRequest):
         """
         self._license_id = license_id
         super(SignLicenseRequest, self).__init__(service,
-                                                 user=service.auth_service.credentials.username_b64,
+                                                 user=service.auth_service.username_b64,
                                                  license_id=license_id)
 
     def run(self) -> bool:

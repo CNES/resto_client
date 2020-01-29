@@ -17,3 +17,17 @@ from resto_client.settings.resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
 
 RESTO_CLIENT_SETTINGS = DictSettingsJson(RESTO_CLIENT_CONFIG_DIR / 'resto_client_settings.json')
+
+# Process resto_client_settings versions
+
+CURRENT_SETTINGS_VERSION = 'V1'
+SETTING_VERSION_KEY = 'settings_version'
+if SETTING_VERSION_KEY not in RESTO_CLIENT_SETTINGS:
+    # Settings written previously to setting version introduction: delete all of them
+    RESTO_CLIENT_SETTINGS.clear()
+    RESTO_CLIENT_SETTINGS[SETTING_VERSION_KEY] = CURRENT_SETTINGS_VERSION
+
+if RESTO_CLIENT_SETTINGS[SETTING_VERSION_KEY] != CURRENT_SETTINGS_VERSION:
+    # Do some processing here to upgrade the settings to the current version
+    # Process sequentially RestoClientParameters and RestoServerPersisted parameters
+    pass

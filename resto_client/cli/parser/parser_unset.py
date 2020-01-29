@@ -14,88 +14,98 @@
 """
 import argparse
 
-from resto_client.cli.cli_utils import build_resto_client_params
-from resto_client.services.authentication_service import AuthenticationService
-from resto_client.services.resto_service import RestoService
+from resto_client.cli.resto_client_parameters import RestoClientParameters
+from resto_client.cli.resto_server_persisted import RestoServerPersisted
 
-# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
-# pylint: disable=protected-access
+from .parser_common import CliFunctionReturnType
 
 
-def cli_unset_server(args: argparse.Namespace) -> None:
+def cli_unset_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset the persistent server parameters
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    _ = args  # to avoid pylint warning
-    service = RestoService.persisted()
-    service.reset()
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
+    resto_server.server_name = None
+    return None, resto_server
 
 
-def cli_unset_collection(args: argparse.Namespace) -> None:
+def cli_unset_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset the persistent default collection to be used
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    _ = args  # to avoid pylint warning
-    service = RestoService.persisted()
-    service.current_collection = None
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
+    resto_server.current_collection = None
+    return None, resto_server
 
 
-def cli_unset_account(args: argparse.Namespace) -> None:
+def cli_unset_account(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset the default account to be used.
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    _ = args  # to avoid pylint warning
-    service = AuthenticationService.persisted()
-    service.credentials.username = None  # type: ignore
+    resto_server = RestoServerPersisted.build_from_argparse(
+        args, debug_server=RestoClientParameters.is_debug())
+    resto_server.reset_credentials()
+    return None, resto_server
 
 
-def cli_unset_download_dir(args: argparse.Namespace) -> None:
+def cli_unset_download_dir(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset download directory to be used
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    client_parameters = build_resto_client_params(args)
-    client_parameters.download_dir = None  # type: ignore
+    client_params = RestoClientParameters.build_from_argparse(args)
+    client_params.download_dir = None  # type: ignore
+    return client_params, None
 
 
-def cli_unset_region(args: argparse.Namespace) -> None:
+def cli_unset_region(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset region/AOI to be used
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    client_parameters = build_resto_client_params(args)
-    client_parameters.region = None  # type: ignore
+    client_params = RestoClientParameters.build_from_argparse(args)
+    client_params.region = None  # type: ignore
+    return client_params, None
 
 
-def cli_unset_verbosity(args: argparse.Namespace) -> None:
+def cli_unset_verbosity(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     CLI adapter to unset verbosity level
 
     :param args: arguments parsed by the CLI parser
+    :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    client_parameters = build_resto_client_params(args)
-    client_parameters.verbosity = None  # type: ignore
+    client_params = RestoClientParameters.build_from_argparse(args)
+    client_params.verbosity = None  # type: ignore
+    return client_params, None
 
 
+# We need to specify argparse._SubParsersAction for mypy to run. Thus pylint squeals.
+# pylint: disable=protected-access
 def add_unset_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'unset' subparser
     """
-    parser_unset = sub_parsers.add_parser('unset', help='unset application parameters: '
-                                          'server, account, collection, download_dir, region, '
-                                          'verbosity',
+    parser_unset = sub_parsers.add_parser('unset', help='unset application parameters.',
                                           description='Reset application parameters to their '
                                           ' default values.')
-    help_msg = 'For more help: {} unset <parameter> -h'
-    sub_parsers_unset = parser_unset.add_subparsers(description=help_msg.format(parser_unset.prog))
+    help_msg = 'For more help: {} <parameter> -h'.format(parser_unset.prog)
+    sub_parsers_unset = parser_unset.add_subparsers(description=help_msg)
 
     add_unset_server_parser(sub_parsers_unset)
     add_unset_account_parser(sub_parsers_unset)
@@ -113,8 +123,6 @@ def add_unset_server_parser(sub_parsers_unset: argparse._SubParsersAction) -> No
                                              description='Unset the stored resto server.',
                                              epilog='The stored collection and account parameters '
                                              'are also unset by this command.')
-    subparser.add_argument('server_name', help="name of the server to delete from database",
-                           nargs='?')
     subparser.set_defaults(func=cli_unset_server)
 
 

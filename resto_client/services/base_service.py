@@ -12,14 +12,15 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
-
-from typing import Optional, TYPE_CHECKING  # @UnusedImport
+from abc import ABC
+from typing import TYPE_CHECKING, Optional  # @UnusedImport
 
 from .service_access import ServiceAccess
 
+
 if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from .authentication_service import AuthenticationService  # @UnusedImport
+    from .resto_server import RestoServer  # @UnusedImport
 
 
 class BaseService(ABC):
@@ -27,42 +28,36 @@ class BaseService(ABC):
     An abstract base class for all services
     """
 
-    def __init__(self, service_access: ServiceAccess) -> None:
+    def __init__(self,
+                 service_access: ServiceAccess,
+                 auth_service: 'AuthenticationService',
+                 parent_server: 'RestoServer') -> None:
         """
         Constructor
 
         :param service_access: Service access.
+        :param auth_service: Authentication service associated to this service.
+        :param parent_server: The server which uses this service.
         :raises RestoClientDesignError: when service_access is not of the right type
         """
-        # Initialize from service_access.
         self.service_access = service_access
-        self.service_access.set_service(self)
+        self._auth_service = auth_service
+        self.parent_server = parent_server
 
     @property
-    @abstractmethod
     def auth_service(self) -> 'AuthenticationService':
         """
-        :returns: the authentication service associated to this service.
+        :returns: the authentication service associated to this application service.
         """
+        return self._auth_service
 
-    @abstractmethod
-    def update_after_url_change(self) -> None:
-        """
-        Callback method to update service after base URL has been changed.
-        """
-
-    @abstractmethod
-    def reset(self) -> None:
-        """
-        Reset the service to its creation state, and without any service access defined.
-        """
-        self.service_access.reset()
+    @auth_service.setter
+    def auth_service(self, auth_service: 'AuthenticationService') -> None:
+        self._auth_service = auth_service
 
     def __str__(self) -> str:
         result = str(self.service_access)
-        if self.auth_service is None:
-            result += '    associated authentication service : None'
-        elif self.auth_service == self:
+        if self.auth_service == self:
             result += '    associated authentication service : self'
         else:
             result += '    associated authentication service : {}'.format(self.auth_service)

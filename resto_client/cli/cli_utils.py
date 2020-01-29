@@ -13,54 +13,18 @@
    limitations under the License.
 """
 import argparse
-
-from resto_client.base_exceptions import RestoClientDesignError
-from resto_client.services.resto_service import RestoService
-from resto_client.settings.resto_client_parameters import RestoClientParameters
+from typing import Optional, Any
 
 
-class RestoClientParserError(RestoClientDesignError):
+def get_from_args(arg_name: str, args: Optional[argparse.Namespace] = None) -> Optional[Any]:
     """
-    Exception raised when a parser design error has been detected.
+    Returns the content of an argument in an argparse Namespace, or None if the argument is not
+    found or the Namespace is None.
+
+    :param arg_name: name of an argument to retrieve in the Namespace
+    :param args: CLI arguments as parsed by argparse
+    :returns: the content of the selected argument or None if not found.
     """
-
-
-def build_resto_service(args: argparse.Namespace) -> RestoService:
-    """
-    Build a RestoService instance from parsed arguments, suitable for further processing
-    in CLI context.
-
-    :param args: arguments as parsed by ArgParse
-    :raises RestoClientParserError: when no server_name specified in the argparse namespace.
-    :returns: RestoService instance suitable for further processing in CLI context
-    """
-    if not hasattr(args, 'server_name'):
-        msg = 'Trying to build RestoService without server_name defined in the parsed arguments'
-        raise RestoClientParserError(msg)
-    server_name = args.server_name
-    username = args.username if hasattr(args, 'username') else None
-    password = args.password if hasattr(args, 'password') else None
-
-    if server_name is not None:
-        return RestoService.from_name(server_name, username=username, password=password)
-
-    persisted_resto_service = RestoService.persisted()
-    if username is not None or password is not None:
-        persisted_resto_service.auth_service.credentials.set(username=username,
-                                                             password=password)
-    return persisted_resto_service
-
-
-def build_resto_client_params(args: argparse.Namespace) -> RestoClientParameters:
-    """
-    Build a RestoClientParameters instance from parsed arguments, suitable for further processing
-    in CLI context.
-
-    :param args: arguments as parsed by ArgParse
-    :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
-    """
-    download_dir = args.download_dir if hasattr(args, 'download_dir') else None
-    region = args.region if hasattr(args, 'region') else None
-    verbosity = args.verbosity if hasattr(args, 'verbosity') else None
-
-    return RestoClientParameters(download_dir=download_dir, region=region, verbosity=verbosity)
+    if args is None:
+        return None
+    return getattr(args, arg_name) if hasattr(args, arg_name) else None

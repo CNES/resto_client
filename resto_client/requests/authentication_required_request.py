@@ -27,21 +27,21 @@ class AuthenticationRequiredRequest(AuthenticationOptionalRequest):
     """
      Base class for several Resto Requests which do need authentication
     """
-    token_required = True
+    authentication_required = True
 
     @property
-    def authorization(self) -> HTTPBasicAuth:
+    def http_basic_auth(self) -> HTTPBasicAuth:
         """
-        :returns: the authorization for the service
+        :returns: the basic HTTP authorization for the service
         """
-        return self.auth_service.get_http_basic_auth()
+        return self.auth_service.http_basic_auth
 
     @property
     def authorization_data(self) -> Dict[str, Optional[str]]:
         """
-        :returns: the authorization for the service
+        :returns: the authorization data for the service
         """
-        return self.auth_service.get_auth_data()
+        return self.auth_service.authorization_data
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, str, None, Response]:

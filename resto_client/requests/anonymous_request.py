@@ -13,7 +13,7 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from typing import Optional, Union  # @NoMove
+from typing import Union  # @NoMove
 
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
@@ -26,13 +26,6 @@ class AnonymousRequest(BaseRequest):
     """
      Base class for resto requests which does need authentication
     """
-
-    def set_headers(self, dict_input: Optional[dict]=None) -> None:
-        """
-        Set headers because parent's abstract method
-
-        :param dict_input: entries to add in headers
-        """
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, RestoCollection, RestoCollections, str, None]:

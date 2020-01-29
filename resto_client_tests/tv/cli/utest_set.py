@@ -19,12 +19,12 @@ import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
+from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.services.service_access import RestoClientNoPersistedAccess
+from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
+                                                     TOKEN_KEY)
+from resto_client.cli.resto_server_persisted import RestoClientNoPersistedServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
-from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY,
-                                                 TOKEN_KEY, VERBOSITY_KEY, REGION_KEY,
-                                                 COLLECTION_KEY)
 
 
 class UTestCliSet(unittest.TestCase):
@@ -43,8 +43,8 @@ class UTestCliSet(unittest.TestCase):
         for server_name in WELL_KNOWN_SERVERS:
             resto_client_run(arguments=['set', 'server', server_name])
             # Verify that RESTO_CLIENT_SETTINGS contain all server info from server database
-            self.assertTrue(WELL_KNOWN_SERVERS[server_name].items()
-                            <= RESTO_CLIENT_SETTINGS.items())
+            self.assertTrue(SERVER_KEY in RESTO_CLIENT_SETTINGS)
+            self.assertEqual(RESTO_CLIENT_SETTINGS[SERVER_KEY], server_name)
 
     def test_n_set_account(self) -> None:
         """
@@ -135,7 +135,7 @@ class UTestCliSet(unittest.TestCase):
         """
         RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'server', 'ro'])
-        self.assertTrue(RESTO_CLIENT_SETTINGS[COLLECTION_KEY], 'ROHAITI')
+        self.assertEqual(RESTO_CLIENT_SETTINGS[COLLECTION_KEY], 'ROHAITI')
 
     def test_d_set_server(self) -> None:
         """
@@ -145,7 +145,7 @@ class UTestCliSet(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['set', 'server', 'bad_server'])
         output = out_string_io.getvalue().strip()  # type: ignore
-        msg = 'Server bad_server does not exist in the servers database'
+        msg = 'No persisted server and bad_server is not a valid server name.'
         self.assertIn(msg, output)
 
     def test_d_set_account(self) -> None:
@@ -154,7 +154,7 @@ class UTestCliSet(unittest.TestCase):
         """
         RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
-        with self.assertRaises(RestoClientNoPersistedAccess):
+        with self.assertRaises(RestoClientNoPersistedServer):
             resto_client_run(arguments=['set', 'account', 'test_name'])
         # Verify non-setting of parameters
         self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)

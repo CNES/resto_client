@@ -13,6 +13,7 @@
    limitations under the License.
 """
 from typing import cast, TYPE_CHECKING  # @NoMove
+import warnings
 
 import requests
 
@@ -87,7 +88,11 @@ class CheckTokenRequest(AnonymousRequest):
         """
         :returns: True if the token is still valid
         """
-        if self.service_access.protocol in ['sso_theia', 'sso_dotcloud']:
+        if not self.supported_by_service():
+            # CheckTokenRequest not supported by the service
+            if self.parent_service.parent_server.debug_server:
+                msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
+                warnings.warn(msg.format(self.auth_service.parent_server.server_name))
             response_json = {'status': 'error', 'message': 'user not connected'}
         else:
             self.set_headers()

@@ -16,10 +16,11 @@ from pathlib import Path
 import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
+from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
-from resto_client_tests.tv.cli.cli_utils import (USERNAME_KEY, DOWNLOAD_DIR_KEY, TOKEN_KEY,
-                                                 VERBOSITY_KEY, REGION_KEY, COLLECTION_KEY)
+from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
+                                                     TOKEN_KEY)
+from resto_client.generic.user_dirs import user_download_dir
 
 
 class UTestCliUnset(unittest.TestCase):
@@ -37,8 +38,8 @@ class UTestCliUnset(unittest.TestCase):
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        for key in WELL_KNOWN_SERVERS['kalideos']:
-            self.assertTrue(key not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
         # With server persisted and account persisted
@@ -46,8 +47,6 @@ class UTestCliUnset(unittest.TestCase):
         resto_client_run(arguments=['set', 'account', 'test_account'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        for key in WELL_KNOWN_SERVERS['kalideos']:
-            self.assertTrue(key not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
         self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
 
@@ -58,8 +57,10 @@ class UTestCliUnset(unittest.TestCase):
         RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['unset', 'server'])
         resto_client_run(arguments=['unset', 'server'])
-        for key in WELL_KNOWN_SERVERS['kalideos']:
-            self.assertTrue(key not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
 
     def test_n_unset_account(self) -> None:
         """
@@ -115,11 +116,12 @@ class UTestCliUnset(unittest.TestCase):
         # With download directory already persisted
         directory_test = str(Path.home())
         resto_client_run(arguments=['set', 'download_dir', directory_test])
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], directory_test)
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertTrue(DOWNLOAD_DIR_KEY not in RESTO_CLIENT_SETTINGS)
-        # With no download directory persisted
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], str(user_download_dir()))
+        # With default directory persisted
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertTrue(DOWNLOAD_DIR_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], str(user_download_dir()))
 
     def test_n_unset_verbosity(self) -> None:
         """

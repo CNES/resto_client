@@ -12,14 +12,19 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+import argparse
 from pathlib import Path
 from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
-from resto_client.settings.resto_client_config import RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
+from resto_client.generic.user_dirs import user_download_dir
+
+from .cli_utils import get_from_args
+from .parser.parser_settings import (DIRECTORY_ARGNAME, REGION_ARGNAME, VERBOSITY_ARGNAME)
+from .persistence import PersistedAttributes
+from .resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
 def _check_download_dir(download_dir: str) -> str:
@@ -35,7 +40,6 @@ def _check_download_dir(download_dir: str) -> str:
     return download_dir
 
 
-VERBOSITY_KEY = 'verbosity'
 ALLOWED_VERBOSITY = ['NORMAL', 'DEBUG']
 
 
@@ -75,34 +79,45 @@ def _check_region(key_region: str) -> str:
     return key_region
 
 
-class RestoClientParameters():
+DOWNLOAD_DIR_KEY = 'download_dir'
+REGION_KEY = 'region'
+VERBOSITY_KEY = 'verbosity'
+
+
+class RestoClientParameters(PersistedAttributes):
     """
     Class implementing parameters used by resto client.
     """
     properties_storage = RESTO_CLIENT_SETTINGS
+    persisted_attributes = [DOWNLOAD_DIR_KEY, REGION_KEY, VERBOSITY_KEY]
 
-    def __init__(self,
-                 region: Optional[str]=None,
-                 download_dir: Optional[str]=None,
-                 verbosity: Optional[str]=None) -> None:
+    @classmethod
+    def build_from_argparse(cls, args: argparse.Namespace) -> 'RestoClientParameters':
         """
-        Constructor
+        Build a RestoClientParameters instance from arguments parsed by argparse,
+        suitable for further processing in CLI context.
 
-        :param region: region of search
-        :param download_dir: directory for downloading files
-        :param verbosity: verbosity level to use
+        :param args: arguments as parsed by ArgParse
+        :returns: a RestoClientParameters instance, suitable for further processing in CLI context.
         """
+        instance = cls()
+
         # Attribute holding the download directory
+        download_dir = get_from_args(DIRECTORY_ARGNAME, args)
         if download_dir is not None:
-            self.download_dir = download_dir  # type: ignore
+            instance.download_dir = download_dir  # type: ignore
 
         # attribute to handle the region criterion with search
+        region = get_from_args(REGION_ARGNAME, args)
         if region is not None:
-            self.region = region  # type: ignore
+            instance.region = region  # type: ignore
 
         # attribute to handle the verbosity level
+        verbosity = get_from_args(VERBOSITY_ARGNAME, args)
         if verbosity is not None:
-            self.verbosity = verbosity  # type: ignore
+            instance.verbosity = verbosity  # type: ignore
+
+        return instance
 
     @property  # type: ignore
     @managed_getter()
@@ -122,7 +137,7 @@ class RestoClientParameters():
         """
 
     @property  # type: ignore
-    @managed_getter(default=str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
+    @managed_getter(default=str(user_download_dir()))
     def download_dir(self) -> Optional[str]:
         """
         :returns: The current download directory

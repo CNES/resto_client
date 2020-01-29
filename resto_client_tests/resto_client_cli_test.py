@@ -19,7 +19,8 @@ import sys
 from typing import List
 
 from resto_client.base_exceptions import RestoClientError
-from resto_client.cli.resto_client_cli import build_parser, resto_client_run
+from resto_client.cli.parser.resto_client_parser import build_parser
+from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 
 
