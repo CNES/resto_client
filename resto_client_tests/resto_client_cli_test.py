@@ -17,11 +17,20 @@ from contextlib import redirect_stdout
 import io
 import sys
 from typing import List
+import unittest
 
 from resto_client.base_exceptions import RestoClientError
 from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+
+
+class TestRestoClient(unittest.TestCase):
+    """
+    Basic Tests Class for resto_client Unit Test
+    """
+    def setUp(self) -> None:
+        RESTO_CLIENT_SETTINGS.clear()
 
 
 def catch_output_from_run(test_args: dict) -> str:

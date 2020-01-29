@@ -15,7 +15,6 @@
 from contextlib import redirect_stdout
 import io
 from pathlib import Path
-import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
@@ -25,19 +24,18 @@ from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, C
                                                      TOKEN_KEY)
 from resto_client.cli.resto_server_persisted import RestoClientNoPersistedServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
+from resto_client_tests.resto_client_cli_test import TestRestoClient
 
 
-class UTestCliSet(unittest.TestCase):
+class UTestCliSet(TestRestoClient):
     """
     Unit Tests of the cli set module
     server, account, collection, download_dir, region, verbosity
     """
-
     def test_n_set_server(self) -> None:
         """
         Unit test of set server in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # Test setting of all default server
         for server_name in WELL_KNOWN_SERVERS:
@@ -50,7 +48,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set account in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         # With no account already set
@@ -64,7 +61,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set collection in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         # With no collection already set
@@ -78,7 +74,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set region in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'region', 'bretagne'])
         self.assertEqual('bretagne.geojson', RESTO_CLIENT_SETTINGS[REGION_KEY])
@@ -90,7 +85,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set download directory in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # get an existing directory for test
         directory_test_1 = Path.home()
@@ -105,7 +99,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set verbosity in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         self.assertEqual('DEBUG', RESTO_CLIENT_SETTINGS[VERBOSITY_KEY])
         # With verbosity already persisted
@@ -116,7 +109,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set server with already saved parameters in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # First set server with parameters
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -133,7 +125,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set server with a server with one collection in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'server', 'ro'])
         self.assertEqual(RESTO_CLIENT_SETTINGS[COLLECTION_KEY], 'ROHAITI')
 
@@ -141,7 +132,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set server in degraded cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['set', 'server', 'bad_server'])
         output = out_string_io.getvalue().strip()  # type: ignore
@@ -152,7 +142,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set account in degraded cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(RestoClientNoPersistedServer):
             resto_client_run(arguments=['set', 'account', 'test_name'])
@@ -164,7 +153,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set collection in degraded cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         with self.assertRaises(RestoClientUserError) as context:
@@ -175,7 +163,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set download directory in degraded cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(NotADirectoryError) as context:
             resto_client_run(arguments=['set', 'download_dir', 'ICI'])
@@ -187,7 +174,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set region in degraded cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(SystemExit) as context:
             resto_client_run(arguments=['set', 'region', 'JaimeLaBretagne'])
@@ -199,7 +185,6 @@ class UTestCliSet(unittest.TestCase):
         """
         Unit test of set verbosity in degraded cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(SystemExit) as context:
             resto_client_run(arguments=['set', 'verbosity', 'Parle_Moi'])
