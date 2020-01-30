@@ -118,10 +118,12 @@ class UTestCliUnset(unittest.TestCase):
         resto_client_run(arguments=['set', 'download_dir', directory_test])
         self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], directory_test)
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY],
+                         str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
         # With default directory persisted
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY], str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
+        self.assertEqual(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY],
+                         str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
 
     def test_n_unset_verbosity(self) -> None:
         """
