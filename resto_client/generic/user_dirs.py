@@ -231,7 +231,7 @@ def _user_dir_linux(directory_type: str, app_name: Optional[str]=None) -> Path:
     cfg_dirs_path = user_home_path / '.config' / 'user-dirs.dirs'
     if cfg_dirs_path.exists():
         # XDG available. Try to use it.
-        return _user_dir_linux_xdg(directory_type, cfg_dirs_path)
+        return _user_dir_linux_xdg(directory_type, cfg_dirs_path, app_name)
 
     # HOME available but XDG unavailable. Use HOME to create the directory
     return _user_dir_linux_home(directory_type, app_name)
