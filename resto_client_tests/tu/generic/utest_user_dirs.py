@@ -77,12 +77,13 @@ class UTestUserDirCommon(unittest.TestCase):
         Unit test of user_download_dir() in nominal cases
         """
         # Directory is set by the system and does not exist
-        download_path = user_download_dir('fake_download_dir_for_tests')
+        download_path = user_download_dir(app_name='fake_download_dir_for_tests')
         print(download_path)
         self.assertIsNotNone(download_path)
         self.assertFalse(download_path.is_dir())
 
-        download_path = user_download_dir('fake_download_dir_for_tests', ensure_exists=True)
+        download_path = user_download_dir(app_name='fake_download_dir_for_tests',
+                                          ensure_exists=True)
         print(download_path)
         self.assertIsNotNone(download_path)
         self.assertTrue(download_path.is_dir())
@@ -116,9 +117,9 @@ class UTestUserDirWindows(unittest.TestCase):
                         'RoamingTiles', 'SavedGames', 'SavedSearches']
         for dir_key in USER_DIRS_WINDOWS:
             if dir_key in defined_dirs:
-                user_dir_path = user_dir(dir_key, 'fake_app')
+                user_dir_path = user_dir(dir_key, app_name='fake_app')
                 self.assertFalse(user_dir_path.is_dir())
-                user_dir_path = user_dir(dir_key, 'fake_app', ensure_exists=True)
+                user_dir_path = user_dir(dir_key, app_name='fake_app', ensure_exists=True)
                 self.assertTrue(user_dir_path.is_dir())
                 shutil.rmtree(user_dir_path)
             else:
@@ -140,9 +141,9 @@ class UTestUserDirLinux(unittest.TestCase):
                         'PublicShare', 'Templates', 'Videos']
         for dir_key in USER_DIRS_XDG:
             if dir_key in defined_dirs:
-                user_dir_path = user_dir(dir_key, 'fake_app')
+                user_dir_path = user_dir(dir_key, app_name='fake_app')
                 self.assertFalse(user_dir_path.is_dir())
-                user_dir_path = user_dir(dir_key, 'fake_app', ensure_exists=True)
+                user_dir_path = user_dir(dir_key, app_name='fake_app', ensure_exists=True)
                 self.assertTrue(user_dir_path.is_dir())
                 shutil.rmtree(user_dir_path)
             else:

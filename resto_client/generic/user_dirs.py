@@ -144,7 +144,7 @@ def user_download_dir(app_name: Optional[str] = None, ensure_exists: bool=False)
     :param ensure_exists: If True, check that the user directory exists before returning its path.
     :returns: the user download directory depending on the system (linux or windows)
     """
-    return user_dir('Downloads', app_name, ensure_exists)
+    return user_dir('Downloads', app_name=app_name, ensure_exists=ensure_exists)
 
 
 def user_dir(directory_type: str, app_name: Optional[str]=None, ensure_exists: bool=False) -> Path:
@@ -169,10 +169,10 @@ def user_dir(directory_type: str, app_name: Optional[str]=None, ensure_exists: b
 
     # Windows case
     if MSWINDOWS:
-        user_dir_path = _user_dir_windows(directory_type, app_name)
+        user_dir_path = _user_dir_windows(directory_type, app_name=app_name)
     else:
         # LINUX case
-        user_dir_path = _user_dir_linux(directory_type, app_name)
+        user_dir_path = _user_dir_linux(directory_type, app_name=app_name)
 
     if ensure_exists:
         user_dir_path.mkdir(parents=True, exist_ok=True)
@@ -225,16 +225,16 @@ def _user_dir_linux(directory_type: str, app_name: Optional[str]=None) -> Path:
 
     if user_home_path is None:
         # No user home directory available. Use directories in /tmp.
-        return _user_dir_linux_tmp(directory_type, app_name)
+        return _user_dir_linux_tmp(directory_type, app_name=app_name)
 
     # User home directory is available
     cfg_dirs_path = user_home_path / '.config' / 'user-dirs.dirs'
     if cfg_dirs_path.exists():
         # XDG available. Try to use it.
-        return _user_dir_linux_xdg(directory_type, cfg_dirs_path, app_name)
+        return _user_dir_linux_xdg(directory_type, cfg_dirs_path, app_name=app_name)
 
     # HOME available but XDG unavailable. Use HOME to create the directory
-    return _user_dir_linux_home(directory_type, app_name)
+    return _user_dir_linux_home(directory_type, app_name=app_name)
 
 
 def _user_dir_linux_xdg(directory_type: str,

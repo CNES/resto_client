@@ -34,4 +34,5 @@ if RESTO_CLIENT_SETTINGS[SETTING_VERSION_KEY] != CURRENT_SETTINGS_VERSION:
     pass
 
 
-RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR = user_download_dir('resto_client_files', ensure_exists=True)
+RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR = user_download_dir(app_name='resto_client_files',
+                                                      ensure_exists=True)
