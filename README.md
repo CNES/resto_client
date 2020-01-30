@@ -12,7 +12,7 @@
 Once you have installed it, **resto_client** offers the possibility to interact with these servers by issuing commands from a simple terminal.
 Currently implemented commands allow to:
 - define and manage a list of well known servers,
-- select one of them and browse its collection and their characteristics,
+- select one of them and browse its collections and their characteristics,
 - **search** a collection by criteria for retrieving features (images for instance) and display their characteristics,
 - **show** : retrieve and display feature metadata when you know its identifier,
 - **download** files composing the feature: the product itself, but also its quicklook, thumbnail or annexes,
@@ -37,12 +37,12 @@ This list is augmented regularly, but you can of course add your own server by p
 - Python 3.6, 3.7 or 3.8
 - Any Operating System supporting the above versions of Python (Windows, Linux, MacOS, etc.)
 
-resto_client tests are done on Windows and Linux using the supported python versions.
+**resto_client** tests are done on Windows and Linux using the supported python versions.
 
 
 ### Resto_client installation
 
-The recommended way to intall `resto_client` is to simply use [`pip`](https://pypi.org/project/pip/) which will install the package available from [Python Package Index](https://pypi.org/project/resto_client/) in your python environment:
+The recommended way of installing `resto_client` is to simply use [`pip`](https://pypi.org/project/pip/) which will install the package from the [Python Package Index](https://pypi.org/project/resto_client/) in your python environment:
 
 ```console
 $ pip install resto_client
@@ -54,11 +54,22 @@ Once **resto_client** package is installed you can test it by issuing the follow
 $ resto_client --help
 ```
 
+### Resto_client configuration
+
+**resto_client** configuration is managed through the `set`, `unset` and `configure_server` commands (see help for each of them), except for the networking configuration which is parameterized by environment variables.
+
+For network access we use the popular [requests](https://requests.readthedocs.io/en/master/) python package which directly takes into account several environment variables describing your networking configuration. Namely you might need to set the following environment variables:
+
+- `HTTP_PROXY` and `HTTPS_PROXY` if your machine is behind a proxy: have a look at [requests Proxies configuration](https://requests.readthedocs.io/en/master/user/advanced/#proxies).
+- `REQUESTS_CA_BUNDLE` because default policy is to enforce SSL certificates verification and your corporate policy might differ from this baseline: refer to [requests SSL certificates verification](https://requests.readthedocs.io/en/master/user/advanced/#ssl-cert-verification) in that case. 
+
+The values to provide in these variables depends on the networking configuration of the machine where you are installing **resto_client**.
+Please refer to your system administrator for defining how to set them in your case.
 
 ### How to use resto_client?
 
 Firstly you can select the server to be used for all subsequent commands. This selection is not 
-mandatory and you may prefer to specify the server to use in each subsequent commands. 
+mandatory and you may prefer to specify the server in each command. 
 But it is more convenient if you are using the same server for a long time. 
 
 You can use a well known server:
@@ -85,7 +96,7 @@ Server URL: https://www.kalideos.fr/resto2/
 |     KALHAITI    | public | RestoModel_dotcloud | unlicensed |  No license  |
 +-----------------+--------+---------------------+------------+--------------+
 ```
-This shows you the server URL as well as its collection and their main characteristics. If you want the details of a collection, you can type in:
+This shows you the server URL as well as its collections and their main characteristics. If you want the details of a collection, you can type in:
 
 ```console
 $ resto_client show collection KALCNES
@@ -141,8 +152,8 @@ Metadata available for product 1926127184714545
 ```
 Here we have also truncated the result but there are much more metadata available for each feature.
 
-Finally you may want to download some file associated to that feature : product, quicklook, thumbnail, annexes.
-The following example is for its quicklook:
+Finally you may want to download some file associated to that feature : product, quicklook, thumbnail or annexes.
+The following example is for the quicklook of a feature:
 
 ```console
 $ resto_client download quicklook 1926127184714545
