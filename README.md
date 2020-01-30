@@ -135,7 +135,7 @@ $ resto_client search --criteria platform:"PLEIADES 1A" resolution:[0,1.5] start
 4 results shown on a total of  4 results beginning at index 1
 ```
 
-And you can get the details of some feature by specifying its **identifier**:
+And you can get the details of some feature by specifying its identifier:
 
 ```console
 $ resto_client show feature 1926127184714545
