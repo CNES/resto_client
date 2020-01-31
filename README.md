@@ -24,9 +24,11 @@ Currently implemented commands allow to:
 
 * [kalideos : CNES Kalideos platform](https://www.kalideos.fr)
 * [ro : CEOS Recovery Observatory](https://www.recovery-observatory.org)
+* [pleiades : CNES pleiades platform](https://www.pleiades-cnes.fr)
 * [peps : The French Sentinel Data Processing center](https://peps.cnes.fr)
 * [theia : The French Space Agency, THEIA land data center](https://theia.cnes.fr)
 * [creodias : Copernicus DIAS CREODIAS](https://www.creodias.eu)
+* [cop_nci : Sentinel Australasia regional Access](https://copernicus.nci.org.au)
 
 
 This list is augmented regularly, but you can of course add your own server by providing its configuration through **resto_client**.
