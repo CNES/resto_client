@@ -45,7 +45,7 @@ class GetCollectionRequest(AnonymousRequest):
         :returns: collection descriptor
         :raises ValueError: when no collection is currently defined
         """
-        self.set_headers()
+        self.update_headers()
         json_response = cast(dict, self.get_as_json())
         collection_response = CollectionDescription(self, json_response)
         return collection_response.as_resto_object()
@@ -83,7 +83,7 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
         :returns: the result of the search
         """
 
-        self.set_headers()
+        self.update_headers()
         json_response = cast(dict, self.get_as_json())
         feature_collection_response = FeatureCollectionResponse(self, json_response)
         return feature_collection_response.as_resto_object()
@@ -103,7 +103,7 @@ class GetCollectionsRequest(AnonymousRequest):
         :returns: the set of collections as well as the server synthesis
         :raises ValueError: when the service  URL does not point to a valid Resto server
         """
-        self.set_headers()
+        self.update_headers()
         json_response = cast(dict, self.get_as_json())
         try:
             collections_descr = CollectionsDescription(self, json_response)

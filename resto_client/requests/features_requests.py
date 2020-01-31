@@ -88,7 +88,7 @@ class SignLicenseRequest(AuthenticationRequiredRequest):
          :raises RestoResponseError: when license signature was not accepted.
         """
 
-        self.set_headers({'Accept': 'application/json'})
+        self.update_headers({'Accept': 'application/json'})
         result = self.post()
         response = SignLicenseResponse(self, result.json())
 
@@ -263,7 +263,7 @@ class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase)
         :param download_directory: directory where to download the file
         """
         AuthenticationRequiredRequest.__init__(self, service)
-        self.set_headers()
+        self.update_headers()
         DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
 
     def run(self) -> Optional[str]:
@@ -295,7 +295,7 @@ class DownloadQuicklookRequest(AnonymousRequest, DownloadRequestBase):
         :param download_directory: directory where to download the file
         """
         AnonymousRequest.__init__(self, service)
-        self.set_headers()
+        self.update_headers()
         DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
 
     def run(self) -> Optional[str]:
@@ -327,7 +327,7 @@ class DownloadThumbnailRequest(AnonymousRequest, DownloadRequestBase):
         :param download_directory: directory where to download the file
         """
         AnonymousRequest.__init__(self, service)
-        self.set_headers()
+        self.update_headers()
         DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
 
     def run(self) -> Optional[str]:
@@ -359,7 +359,7 @@ class DownloadAnnexesRequest(AnonymousRequest, DownloadRequestBase):
         :param download_directory: directory where to download the file
         """
         AnonymousRequest.__init__(self, service)
-        self.set_headers()
+        self.update_headers()
         DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
 
     def run(self) -> Optional[str]:

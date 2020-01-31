@@ -41,7 +41,7 @@ class RevokeTokenRequest(AuthenticationRequiredRequest):
         :returns: unknown result at the moment (not working)
         """
         # closing of user session impossible for now because of resto incapability
-        self.set_headers()
+        self.update_headers()
         result = self.post()
         return result
 
@@ -95,6 +95,6 @@ class CheckTokenRequest(AnonymousRequest):
                 warnings.warn(msg.format(self.auth_service.parent_server.server_name))
             response_json = {'status': 'error', 'message': 'user not connected'}
         else:
-            self.set_headers()
+            self.update_headers()
             response_json = cast(dict, self.get_as_json())
         return CheckTokenResponse(self, response_json).as_resto_object()

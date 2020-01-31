@@ -34,7 +34,7 @@ class DescribeRequest(AnonymousRequest):
         :returns: the server collections description
         :raises ValueError: when the service URL does not point to a valid Resto server
         """
-        self.set_headers()
+        self.update_headers()
         json_response = cast(dict, self.get_as_json())
         try:
             collections_descr = CollectionsDescription(self, json_response)

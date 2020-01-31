@@ -94,14 +94,14 @@ class BaseRequest(ABC):
         return urljoin(self.service_access.base_url,
                        url_extension.format(**self._url_kwargs))
 
-    def set_headers(self, dict_input: Optional[dict]=None) -> None:
+    def update_headers(self, dict_input: Optional[dict]=None) -> None:
         """
-        Set headers with dic_input
+        Update the current headers with dic_input
 
         :param dict_input: entry to add in headers
         """
         if dict_input is not None:
-            self.headers = dict_input
+            self.headers.update(dict_input)
 
     @abstractmethod
     def run(self) -> Union['RestoResponse', str, bool, RestoCollection, RestoCollections, None,
@@ -118,24 +118,23 @@ class BaseRequest(ABC):
         """
         The default basic HTTP authorization for the service (None)
         """
+        return None
 
     @property
     def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
         """
         The default authorization data for the service (None)
         """
+        return None
 
     def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
         """
          This create and execute a GET request and return the response content interpreted as json
          or None if no json can be found
         """
-        headers_with_json = {}
-        if self.headers is not None:
-            headers_with_json.update(self.headers)
-        headers_with_json.update({'Accept': 'application/json'})
+        BaseRequest.update_headers(self, {'Accept': 'application/json'})
         result = get_response(self.get_url(), self.request_action,
-                              headers=headers_with_json, auth=self.http_basic_auth)
+                              headers=self.headers, auth=self.http_basic_auth)
         return result.json()
 
     def post_as_text(self, stream: bool=False) -> Optional[str]:
