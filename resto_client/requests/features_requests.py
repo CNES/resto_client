@@ -275,7 +275,50 @@ class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase)
         return DownloadRequestBase.run(self)
 
 
-class DownloadQuicklookRequest(AnonymousRequest, DownloadRequestBase):
+class AnonymousDownloadRequest(AnonymousRequest, DownloadRequestBase):
+    """
+     Abstract class for downloading files anonymously
+    """
+
+    @property
+    @abstractmethod
+    def filename_suffix(self) -> str:
+        """
+        :returns: a file type specific suffix to add before the extension in the filename.
+        """
+
+    @property
+    @abstractmethod
+    def file_type(self) -> str:
+        """
+        :returns: file type: one of 'quicklook', 'thumbnail' or 'annexes'
+        """
+
+    def __init__(self,
+                 service: 'RestoService',
+                 feature: RestoFeature,
+                 download_directory: Path) -> None:
+        """
+        Constructor
+
+        :param service: resto service
+        :param  feature: resto feature
+        :param download_directory: directory where to download the file
+        """
+        AnonymousRequest.__init__(self, service)
+        self.update_headers()
+        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
+
+    def run(self) -> Optional[str]:
+        """
+         Download the requested file.
+
+        :returns: the name of the downloaded file
+        """
+        return DownloadRequestBase.run(self)
+
+
+class DownloadQuicklookRequest(AnonymousDownloadRequest):
     """
      Request for downloading the quicklook file
     """
@@ -283,31 +326,8 @@ class DownloadQuicklookRequest(AnonymousRequest, DownloadRequestBase):
     filename_suffix = '_ql'
     request_action = 'downloading quicklook'
 
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
 
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AnonymousRequest.__init__(self, service)
-        self.update_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the quicklook file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-
-class DownloadThumbnailRequest(AnonymousRequest, DownloadRequestBase):
+class DownloadThumbnailRequest(AnonymousDownloadRequest):
     """
      Request for downloading the thumbnail file
     """
@@ -315,57 +335,11 @@ class DownloadThumbnailRequest(AnonymousRequest, DownloadRequestBase):
     filename_suffix = '_th'
     request_action = 'downloading thumbnail'
 
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
 
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AnonymousRequest.__init__(self, service)
-        self.update_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the thumbnail file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-
-class DownloadAnnexesRequest(AnonymousRequest, DownloadRequestBase):
+class DownloadAnnexesRequest(AnonymousDownloadRequest):
     """
      Request for downloading the annexes file
     """
     file_type = 'annexes'
     filename_suffix = '_ann'
     request_action = 'downloading annexes'
-
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
-
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AnonymousRequest.__init__(self, service)
-        self.update_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the annexes file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
