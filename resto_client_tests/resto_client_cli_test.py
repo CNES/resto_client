@@ -17,6 +17,7 @@ from contextlib import redirect_stdout
 import io
 from pathlib import Path
 import sys
+from tempfile import TemporaryDirectory
 from typing import List
 import unittest
 
@@ -89,7 +90,8 @@ class TestRestoClientCli(unittest.TestCase):
         :returns: the path to the file
         :raises RestoClientError: when the download directory is not set.
         """
-        return Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]) / base_filename
+        return (Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]) /
+                RESTO_CLIENT_SETTINGS[SERVER_KEY] / base_filename)
 
     def assert_downloaded_file_ok(self, base_filename: str) -> None:
         """
@@ -98,7 +100,24 @@ class TestRestoClientCli(unittest.TestCase):
         :param base_filename: base file name
         """
         downloaded_file_path = self.get_downloaded_file_path(base_filename)
-        self.assertTrue(downloaded_file_path.is_file())
+        self.assertTrue(downloaded_file_path.is_file(),
+                        'Could not find expected file: {}'.format(str(downloaded_file_path)))
+
+    def do_test_download_file(self, command: List[str], expected_files: List[str]) -> None:
+        """
+        Test that the provided command, which is supposed to download one or several files,
+        succeed in downloading them.
+
+        :param command: list of words composing the command
+        :param expected_files: the base file names of the expected downloaded files
+        """
+        with TemporaryDirectory() as tmp_dir:
+            resto_client_run(arguments=['set', 'download_dir', tmp_dir])
+            resto_client_run(arguments=command)
+            for file_name in expected_files:
+                self.assert_downloaded_file_ok(file_name)
+        # verify removing of tmp_dir
+        self.assertFalse(Path(tmp_dir).is_dir())
 
 
 def catch_output_from_run(test_args: dict) -> str:
