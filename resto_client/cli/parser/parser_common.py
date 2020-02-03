@@ -39,11 +39,10 @@ submitting a request, it will be interactively requested.
 EPILOG_FEATURES = EPILOG_IDENTIFIERS + EPILOG_CREDENTIALS
 
 
-# TODO: parameterize by displaying system dependent directory or persisted directory
 EPILOG_DOWNLOAD_DIR = '''
 Download directory is used to download all the files. If no directory
-is specified a default one is used, whose location depends on your system.
-'''
+is specified following one is used: {}
+'''.format(RestoClientParameters().download_dir)
 
 
 def credentials_options_parser() -> ArgumentParser:
