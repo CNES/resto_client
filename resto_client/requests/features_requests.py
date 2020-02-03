@@ -28,7 +28,7 @@ from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
 
 from .anonymous_request import AnonymousRequest
-from .authentication_required_request import AuthenticationRequiredRequest
+from .authentication_optional_request import AuthenticationOptionalRequest
 from .utils import RestrictedProductError, download_file, get_response
 
 
@@ -64,11 +64,12 @@ class FeatureOnTape(RestoResponseError):
         super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
-class SignLicenseRequest(AuthenticationRequiredRequest):
+class SignLicenseRequest(AuthenticationOptionalRequest):
     """
      Requests for signing a license
     """
     request_action = 'signing license'
+    authentication_required = True
 
     def __init__(self, service: 'RestoService', license_id: str) -> None:
         """
@@ -265,13 +266,14 @@ class DownloadRequestBase(ABC):
         return file_name
 
 
-class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase):
+class DownloadProductRequest(AuthenticationOptionalRequest, DownloadRequestBase):
     """
      Request for downloading the product file
     """
     file_type = 'product'
     filename_suffix = ''
     request_action = 'downloading product'
+    authentication_required = True
 
     def __init__(self,
                  service: 'RestoService',
@@ -284,7 +286,7 @@ class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase)
         :param  feature: resto feature
         :param download_directory: directory where to download the file
         """
-        AuthenticationRequiredRequest.__init__(self, service)
+        AuthenticationOptionalRequest.__init__(self, service)
         self.update_headers()
         DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
 

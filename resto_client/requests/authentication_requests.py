@@ -20,7 +20,7 @@ from requests import Response
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
 from .anonymous_request import AnonymousRequest
-from .authentication_required_request import AuthenticationRequiredRequest
+from .authentication_optional_request import AuthenticationOptionalRequest
 from .base_request import RestoRequestResult
 
 
@@ -29,12 +29,13 @@ if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
-class RevokeTokenRequest(AuthenticationRequiredRequest):
+class RevokeTokenRequest(AuthenticationOptionalRequest):
     """
      Request to revoke a token, and thus disconnecting the user.
     """
 
     request_action = 'revoking token'
+    authentication_required = True
 
     def finalize_request(self) -> None:
         self.update_headers()
@@ -47,11 +48,12 @@ class RevokeTokenRequest(AuthenticationRequiredRequest):
         return request_result
 
 
-class GetTokenRequest(AuthenticationRequiredRequest):
+class GetTokenRequest(AuthenticationOptionalRequest):
     """
      Request to retrieve the token associated to the user
     """
     request_action = 'getting token'
+    authentication_required = True
 
     def finalize_request(self) -> None:
         # No call to update_headers(), in order to avoid recursive calls

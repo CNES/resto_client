@@ -13,9 +13,10 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from typing import Optional, Union  # @NoMove
+from typing import Optional, Union, Dict  # @NoMove
 
 from requests import Response
+from requests.auth import HTTPBasicAuth
 
 from .base_request import BaseRequest, RestoRequestResult
 
@@ -36,6 +37,24 @@ class AuthenticationOptionalRequest(BaseRequest):
         authorization_header = self.auth_service.get_authorization_header(
             self.authentication_required)
         super(AuthenticationOptionalRequest, self).update_headers(authorization_header)
+
+    @property
+    def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
+        """
+        :returns: the basic HTTP authorization for the service
+        """
+        if self.authentication_required:
+            return self.auth_service.http_basic_auth
+        return super(AuthenticationOptionalRequest, self).http_basic_auth
+
+    @property
+    def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
+        """
+        :returns: the authorization data for the service
+        """
+        if self.authentication_required:
+            return self.auth_service.authorization_data
+        return super(AuthenticationOptionalRequest, self).authorization_data
 
     @abstractmethod
     def finalize_request(self) -> Optional[dict]:
