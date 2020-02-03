@@ -101,7 +101,7 @@ USER_DIRS_XDG = {'Desktop': 'XDG_DESKTOP_DIR',
 
 
 USER_DIRS_HOME = {'Documents': 'documents',
-                  'Downloads': 'downloads',
+                  'Downloads': None,
                   }
 USER_DIRS_TMP = USER_DIRS_HOME
 
@@ -144,7 +144,7 @@ def user_download_dir(app_name: Optional[str] = None, ensure_exists: bool=False)
     :param ensure_exists: If True, check that the user directory exists before returning its path.
     :returns: the user download directory depending on the system (linux or windows)
     """
-    return user_dir('Downloads', app_name, ensure_exists)
+    return user_dir('Downloads', app_name=app_name, ensure_exists=ensure_exists)
 
 
 def user_dir(directory_type: str, app_name: Optional[str]=None, ensure_exists: bool=False) -> Path:
@@ -169,10 +169,10 @@ def user_dir(directory_type: str, app_name: Optional[str]=None, ensure_exists: b
 
     # Windows case
     if MSWINDOWS:
-        user_dir_path = _user_dir_windows(directory_type, app_name)
+        user_dir_path = _user_dir_windows(directory_type, app_name=app_name)
     else:
         # LINUX case
-        user_dir_path = _user_dir_linux(directory_type, app_name)
+        user_dir_path = _user_dir_linux(directory_type, app_name=app_name)
 
     if ensure_exists:
         user_dir_path.mkdir(parents=True, exist_ok=True)
@@ -225,16 +225,16 @@ def _user_dir_linux(directory_type: str, app_name: Optional[str]=None) -> Path:
 
     if user_home_path is None:
         # No user home directory available. Use directories in /tmp.
-        return _user_dir_linux_tmp(directory_type, app_name)
+        return _user_dir_linux_tmp(directory_type, app_name=app_name)
 
     # User home directory is available
     cfg_dirs_path = user_home_path / '.config' / 'user-dirs.dirs'
     if cfg_dirs_path.exists():
         # XDG available. Try to use it.
-        return _user_dir_linux_xdg(directory_type, cfg_dirs_path)
+        return _user_dir_linux_xdg(directory_type, cfg_dirs_path, app_name=app_name)
 
     # HOME available but XDG unavailable. Use HOME to create the directory
-    return _user_dir_linux_home(directory_type, app_name)
+    return _user_dir_linux_home(directory_type, app_name=app_name)
 
 
 def _user_dir_linux_xdg(directory_type: str,
@@ -269,11 +269,19 @@ def _user_dir_linux_home(directory_type: str, app_name: Optional[str]=None) -> P
     :param directory_type: the code of some user directory
     :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
+    :raises ValueError: when arguments do not define at least one level of directory in home
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_HOME, 'forbidden in HOME')
 
+    if app_name is None and directory_id is None:
+        msg = 'Cannot create user dir {} with path None in home without specifying app_name'
+        raise ValueError(msg.format(directory_type))
+
     if app_name is not None:
-        user_dir_path = Path.home() / app_name / directory_id
+        if directory_id is not None:
+            user_dir_path = Path.home() / app_name / directory_id
+        else:
+            user_dir_path = Path.home() / app_name
     else:
         user_dir_path = Path.home() / directory_id
     return user_dir_path
@@ -286,10 +294,19 @@ def _user_dir_linux_tmp(directory_type: str, app_name: Optional[str]=None) -> Pa
     :param directory_type: the code of some user directory
     :param app_name: used to insert a sub directory with that name in the user directory path.
     :returns: the path to the directory in the Linux user environment
+    :raises ValueError: when arguments do not define at least one level of directory in tmp
     """
     directory_id = _user_dir_get_symbol(directory_type, USER_DIRS_TMP, 'forbidden in TMP')
+
+    if app_name is None and directory_id is None:
+        msg = 'Cannot create user dir {} with path None in tmp without specifying app_name'
+        raise ValueError(msg.format(directory_type))
+
     if app_name is not None:
-        user_dir_prefix = '{}_{}_'.format(app_name, directory_id)
+        if directory_id is not None:
+            user_dir_prefix = '{}_{}_'.format(app_name, directory_id)
+        else:
+            user_dir_prefix = '{}_'.format(app_name)
     else:
         user_dir_prefix = '{}_'.format(directory_id)
     return Path(mkdtemp(prefix=user_dir_prefix))

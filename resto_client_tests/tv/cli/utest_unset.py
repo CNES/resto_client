@@ -16,8 +16,8 @@ from pathlib import Path
 
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
 from resto_client.cli.resto_server_persisted import COLLECTION_KEY
-from resto_client.generic.user_dirs import user_download_dir
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
@@ -102,10 +102,10 @@ class UTestCliUnset(TestRestoClientCli):
         resto_client_run(arguments=['set', 'download_dir', directory_test])
         self.assert_setting_equal(DOWNLOAD_DIR_KEY, directory_test)
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assert_setting_equal(DOWNLOAD_DIR_KEY, str(user_download_dir()))
+        self.assert_setting_equal(DOWNLOAD_DIR_KEY, str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
         # With default directory persisted
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assert_setting_equal(DOWNLOAD_DIR_KEY, str(user_download_dir()))
+        self.assert_setting_equal(DOWNLOAD_DIR_KEY, str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
 
     def test_n_unset_verbosity(self) -> None:
         """

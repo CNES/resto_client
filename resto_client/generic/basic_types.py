@@ -13,8 +13,9 @@
    limitations under the License.
 """
 from typing import Sequence, Optional  # @NoMove
-from urllib.parse import urlparse
 from datetime import datetime
+from urllib.parse import urlparse
+
 from shapely import wkt
 from shapely.errors import WKTReadingError
 
@@ -45,6 +46,8 @@ class DateYMDInterval():  # pylint: disable=too-few-public-methods
         Test the input in order to have a proper %Y-%m-%d:%Y-%m-%d format
 
         :param date_interval_text: date interval in str format to test
+        :raises ValueError: when argument does not have 2 components or when one of them is not
+                            a DateYMD.
         """
         interval = date_interval_text.split(':')
         # Test that two numbers are given

@@ -29,8 +29,9 @@ from resto_client.entities.resto_criteria_definition import get_criteria_for_pro
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.settings.servers_database import DB_SERVERS
 
-from .parser_common import (EPILOG_CREDENTIALS, CliFunctionReturnType, credentials_options_parser,
-                            collection_option_parser, download_dir_option_parser)
+from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
+                            download_dir_option_parser, EPILOG_DOWNLOAD_DIR,
+                            collection_option_parser, CliFunctionReturnType)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME)
 
@@ -165,7 +166,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     """
     Add the 'search' subparser
     """
-    epilog_total = EPILOG_CREDENTIALS + get_table_help_criteria()
+    epilog_total = EPILOG_CREDENTIALS + EPILOG_DOWNLOAD_DIR + get_table_help_criteria()
     parser_search = sub_parsers.add_parser('search',
                                            formatter_class=RawDescriptionHelpFormatter,
                                            help='search feature(s) in a collection.',
