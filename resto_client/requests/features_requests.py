@@ -15,10 +15,12 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 import tempfile
-from typing import Optional, Tuple, Union, TYPE_CHECKING  # @NoMove
 from warnings import warn
+from typing import Optional, Tuple, Union, TYPE_CHECKING  # @NoMove
 
-from resto_client.base_exceptions import RestoClientDesignError
+from requests import Response
+
+from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
@@ -80,17 +82,16 @@ class SignLicenseRequest(AuthenticationRequiredRequest):
                                                  user=service.auth_service.username_b64,
                                                  license_id=license_id)
 
-    def run(self) -> bool:
-        """
-         Sign the license of a license_id product
-
-         :returns: True if the license has been signed
-         :raises RestoResponseError: when license signature was not accepted.
-        """
-
+    def finalize_request(self) -> None:
         self.update_headers({'Accept': 'application/json'})
+        return None
+
+    def run_request(self) -> Response:
         result = self.post()
-        response = SignLicenseResponse(self, result.json())
+        return result
+
+    def process_request_result(self, request_result: Response) -> bool:
+        response = SignLicenseResponse(self, request_result.json())
 
         if not response.is_signed:
             msg = 'Unable to sign license {}. Reason : {}'
@@ -172,6 +173,39 @@ class DownloadRequestBase(ABC):
 
     def run(self) -> Optional[str]:
         """
+        Submit the request and provide its result
+
+        :returns: an object of base type (bool, str) or of a type from resto_client.entities
+                  directly usable by resto_client.
+        """
+        request_result: Union[dict, Response]
+        fake_response = DownloadRequestBase.finalize_request(self)
+        if fake_response is None:
+            request_result = DownloadRequestBase.run_request(self)
+        else:
+            request_result = fake_response
+        return DownloadRequestBase.process_request_result(self, request_result)
+
+    def finalize_request(self) -> Optional[dict]:
+        # FIXME: no update_headers ?
+        self.update_headers()
+        # If there is no file to download
+        if self._url_to_download is None:
+            msg = 'There is no {} to download for product {}.'
+            raise RestoClientUserError(msg.format(self.file_type, self._feature.product_identifier))
+
+        if self.file_type == 'product':
+            if self._service.service_access.protocol == 'theia_version':
+                self._url_to_download += "/?issuerId=theia"
+        return None
+
+    def run_request(self) -> Response:
+        result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
+                              headers=self._headers, stream=True)
+        return result
+
+    def process_request_result(self, request_result: Response) -> Optional[str]:
+        """
          Download one of the different files available for a feature.
 
         :returns: the name of the downloaded file
@@ -179,22 +213,10 @@ class DownloadRequestBase(ABC):
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
         """
-        # If there is no file to download
-        if self._url_to_download is None:
-            msg = 'There is no {} to download for product {}.'
-            warn(msg.format(self.file_type, self._feature.product_identifier))
-            return None
-
-        if self.file_type == 'product':
-            if self._service.service_access.protocol == 'theia_version':
-                self._url_to_download += "/?issuerId=theia"
-
-        result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
-                              headers=self._headers, stream=True)
-        content_type = result.headers.get('content-type')
+        content_type = request_result.headers.get('content-type')
 
         if content_type == 'application/json':
-            dict_json = result.json()
+            dict_json = request_result.json()
             try:
                 error_response = DownloadErrorResponse(self, dict_json).as_resto_object()
             except RestoResponseError as excp:
@@ -223,7 +245,7 @@ class DownloadRequestBase(ABC):
                 # However download will not happen.
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     tmp_file_path = Path(tmp_dir) / file_name
-                    download_file(result, tmp_file_path)
+                    download_file(request_result, tmp_file_path)
                 raise FeatureOnTape()
             # If it's a product waiting to be on disk
             if self.file_type == 'product' and self._feature.storage == 'staging':
@@ -231,10 +253,10 @@ class DownloadRequestBase(ABC):
                      "Try again later.")
                 raise FeatureOnTape()
             # If it's a Quicklook, Thumbnail or annexes
-            download_file(result, full_file_path)
+            download_file(request_result, full_file_path)
         # If it's a product
         elif content_type == self._feature.product_mimetype:
-            download_file(result, full_file_path, file_size=self._feature.product_size)
+            download_file(request_result, full_file_path, file_size=self._feature.product_size)
         else:
             msg = 'Unexpected content-type {} when downloading {}.'
             raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
@@ -273,6 +295,18 @@ class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase)
         :returns: the name of the downloaded file
         """
         return DownloadRequestBase.run(self)
+
+    # FIXME: defined only for being able to instantiate abstract class
+    def finalize_request(self) -> None:
+        return None
+
+    # FIXME: defined only for being able to instantiate abstract class
+    def run_request(self) -> Response:
+        pass
+
+    # FIXME: defined only for being able to instantiate abstract class
+    def process_request_result(self, request_result: Response) -> None:
+        return None
 
 
 class AnonymousDownloadRequest(AnonymousRequest, DownloadRequestBase):
@@ -316,6 +350,10 @@ class AnonymousDownloadRequest(AnonymousRequest, DownloadRequestBase):
         :returns: the name of the downloaded file
         """
         return DownloadRequestBase.run(self)
+
+    # FIXME: defined only for being able to instantiate abstract class
+    def process_request_result(self, request_result: Response) -> None:
+        return None
 
 
 class DownloadQuicklookRequest(AnonymousDownloadRequest):

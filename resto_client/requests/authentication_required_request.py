@@ -13,14 +13,13 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from typing import Union, Dict, Optional  # @NoMove
+from typing import Dict, Union, Optional  # @NoMove
 
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
-from resto_client.responses.resto_response import RestoResponse
-
 from .authentication_optional_request import AuthenticationOptionalRequest
+from .base_request import RestoRequestResult
 
 
 class AuthenticationRequiredRequest(AuthenticationOptionalRequest):
@@ -44,5 +43,13 @@ class AuthenticationRequiredRequest(AuthenticationOptionalRequest):
         return self.auth_service.authorization_data
 
     @abstractmethod
-    def run(self) -> Union[RestoResponse, bool, str, None, Response]:
+    def finalize_request(self) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def run_request(self) -> Union[Response, dict]:
+        pass
+
+    @abstractmethod
+    def process_request_result(self, request_result: Response) -> RestoRequestResult:
         pass

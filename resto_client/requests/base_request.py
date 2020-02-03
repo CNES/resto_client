@@ -25,13 +25,14 @@ from requests.exceptions import HTTPError, SSLError
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
 from .utils import AccesDeniedError, get_response
 
 
-if TYPE_CHECKING:
-    from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
+RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoCollections, None,
+                           Response]
 
 
 class BaseRequest(ABC):
@@ -103,15 +104,7 @@ class BaseRequest(ABC):
         if dict_input is not None:
             self.headers.update(dict_input)
 
-    @abstractmethod
-    def run(self) -> Union['RestoResponse', str, bool, RestoCollection, RestoCollections, None,
-                           Response]:
-        """
-        Submit the request and provide its result
-
-        :returns: an object of base type (bool,, str) or of a type from resto_client.entities
-                  directly usable by resto_client.
-        """
+# +++++++++++++++++++++ request authentifier ++++++++++++++++++++++++++++
 
     @property
     def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
@@ -127,15 +120,55 @@ class BaseRequest(ABC):
         """
         return None
 
+# ++++++++++++++ Request runner +++++++++++++++++++++++++++++
+
+    # FIXME: try to remove __class__
+    def run(self) -> RestoRequestResult:
+        """
+        Submit the request and provide its result
+
+        :returns: an object of base type (bool, str) or of a type from resto_client.entities
+                  directly usable by resto_client.
+        """
+        fake_response = self.__class__.finalize_request(self)
+        if fake_response is None:
+            request_result = self.__class__.run_request(self)
+            if isinstance(request_result, Response):
+                return self.__class__.process_request_result(self, request_result)
+            return self.__class__.process_dict_result(self, request_result)
+        return self.__class__.process_dict_result(self, fake_response)
+
+    @abstractmethod
+    def finalize_request(self) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def run_request(self) -> Union[Response, dict]:
+        pass
+
+    @abstractmethod
+    def process_request_result(self, request_result: Response) -> RestoRequestResult:
+        pass
+
+    def process_dict_result(self, request_result: dict) -> RestoRequestResult:
+        pass
+
+    # FIXME/ Return type seems to always be a dict?
     def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
         """
          This create and execute a GET request and return the response content interpreted as json
          or None if no json can be found
         """
-        BaseRequest.update_headers(self, {'Accept': 'application/json'})
-        result = get_response(self.get_url(), self.request_action,
-                              headers=self.headers, auth=self.http_basic_auth)
+        result = self.get_response_as_json()
         return result.json()
+
+    def get_response_as_json(self) -> Response:
+        """
+         This create and execute a GET request imposing json response
+        """
+        BaseRequest.update_headers(self, {'Accept': 'application/json'})
+        return get_response(self.get_url(), self.request_action,
+                            headers=self.headers, auth=self.http_basic_auth)
 
     def post_as_text(self, stream: bool=False) -> Optional[str]:
         """

@@ -78,8 +78,6 @@ class UTestUserDir(unittest.TestCase):
         """
         # Directory is set by the system and must exist
         download_path = user_download_dir('fake_app')
-        print(download_path)
-        print(download_path.exists())
         self.assertTrue(download_path.is_dir())
         # Verify that it is inside the user name space (is it really mandatory ?)
         self.assertTrue(Path.home() in download_path.parents)

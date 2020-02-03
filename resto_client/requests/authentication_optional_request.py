@@ -14,11 +14,10 @@
 """
 from abc import abstractmethod
 from typing import Optional, Union  # @NoMove
+
 from requests import Response
 
-from resto_client.responses.resto_response import RestoResponse
-
-from .base_request import BaseRequest
+from .base_request import BaseRequest, RestoRequestResult
 
 
 class AuthenticationOptionalRequest(BaseRequest):
@@ -39,5 +38,13 @@ class AuthenticationOptionalRequest(BaseRequest):
         super(AuthenticationOptionalRequest, self).update_headers(authorization_header)
 
     @abstractmethod
-    def run(self) -> Union[RestoResponse, bool, str, None, Response]:
+    def finalize_request(self) -> Optional[dict]:
+        pass
+
+    @abstractmethod
+    def run_request(self) -> Union[Response, dict]:
+        pass
+
+    @abstractmethod
+    def process_request_result(self, request_result: Response) -> RestoRequestResult:
         pass

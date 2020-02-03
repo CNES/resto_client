@@ -13,13 +13,10 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from typing import Union  # @NoMove
+from typing import Optional
+from requests import Response
 
-from resto_client.entities.resto_collection import RestoCollection
-from resto_client.entities.resto_collections import RestoCollections
-from resto_client.responses.resto_response import RestoResponse
-
-from .base_request import BaseRequest
+from .base_request import BaseRequest, RestoRequestResult
 
 
 class AnonymousRequest(BaseRequest):
@@ -27,6 +24,13 @@ class AnonymousRequest(BaseRequest):
      Base class for resto requests which does need authentication
     """
 
+    def finalize_request(self) -> Optional[dict]:
+        self.update_headers()
+        return None
+
+    def run_request(self) -> Response:
+        return self.get_response_as_json()
+
     @abstractmethod
-    def run(self) -> Union[RestoResponse, bool, RestoCollection, RestoCollections, str, None]:
+    def process_request_result(self, request_result: Response) -> RestoRequestResult:
         pass

@@ -12,18 +12,20 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import cast, TYPE_CHECKING  # @NoMove
+from typing import Optional, Union, TYPE_CHECKING  # @NoMove
 import warnings
 
-import requests
+from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
 from .anonymous_request import AnonymousRequest
 from .authentication_required_request import AuthenticationRequiredRequest
+from .base_request import RestoRequestResult
 
 
 if TYPE_CHECKING:
+    from resto_client.services.resto_service import RestoService  # @UnusedImport
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
@@ -34,16 +36,15 @@ class RevokeTokenRequest(AuthenticationRequiredRequest):
 
     request_action = 'revoking token'
 
-    def run(self) -> requests.Response:
-        """
-        Close a user session with resto
-
-        :returns: unknown result at the moment (not working)
-        """
-        # closing of user session impossible for now because of resto incapability
+    def finalize_request(self) -> None:
         self.update_headers()
-        result = self.post()
-        return result
+        return None
+
+    def run_request(self) -> Response:
+        return self.post()
+
+    def process_request_result(self, request_result: Response) -> Response:
+        return request_result
 
 
 class GetTokenRequest(AuthenticationRequiredRequest):
@@ -52,20 +53,26 @@ class GetTokenRequest(AuthenticationRequiredRequest):
     """
     request_action = 'getting token'
 
-    def run(self) -> str:
-        """
-        :returns: the resto token associated to the user account
-        """
+    def finalize_request(self) -> None:
+        # No call to update_headers(), in order to avoid recursive calls
+        return None
+
+    def run_request(self) -> Union[Response, dict]:
+        response: Union[Response, dict]
         if self.service_access.protocol == 'sso_dotcloud':
-            response_post = self.post().json()
-            response_json = cast(dict, response_post)
+            response = self.post()
         elif self.service_access.protocol == 'sso_theia':
             response_text = self.post_as_text()
-            response_json = {'token': response_text}
+            response = {'token': response_text}
         else:
-            response_json = cast(dict, self.get_as_json())
+            response = self.get_response_as_json()
+        return response
 
-        return GetTokenResponse(self, response_json).as_resto_object()
+    def process_request_result(self, request_result: Response) -> str:
+        return GetTokenResponse(self, request_result.json()).as_resto_object()
+
+    def process_dict_result(self, request_result: dict) -> RestoRequestResult:
+        return GetTokenResponse(self, request_result).as_resto_object()
 
 
 class CheckTokenRequest(AnonymousRequest):
@@ -84,17 +91,23 @@ class CheckTokenRequest(AnonymousRequest):
             raise TypeError('token argument must be of type <str>')
         super(CheckTokenRequest, self).__init__(service, token=token)
 
-    def run(self) -> bool:
-        """
-        :returns: True if the token is still valid
-        """
+    def finalize_request(self) -> Optional[dict]:
+        simulated_response: Optional[dict]
         if not self.supported_by_service():
             # CheckTokenRequest not supported by the service
             if self.parent_service.parent_server.debug_server:
                 msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
                 warnings.warn(msg.format(self.auth_service.parent_server.server_name))
-            response_json = {'status': 'error', 'message': 'user not connected'}
+            simulated_response = {'status': 'error', 'message': 'user not connected'}
         else:
-            self.update_headers()
-            response_json = cast(dict, self.get_as_json())
-        return CheckTokenResponse(self, response_json).as_resto_object()
+            simulated_response = super(CheckTokenRequest, self).finalize_request()
+        return simulated_response
+
+    def run_request(self) -> Response:
+        return self.get_response_as_json()
+
+    def process_request_result(self, request_result: Response) -> bool:
+        return CheckTokenResponse(self, request_result.json()).as_resto_object()
+
+    def process_dict_result(self, request_result: dict) -> RestoRequestResult:
+        return CheckTokenResponse(self, request_result).as_resto_object()

@@ -49,6 +49,7 @@ class RestoCollections():
         if not isinstance(collection, RestoCollection):
             msg_err = 'collection argument must be of RestoCollection type. Found {} instead.'
             raise TypeError(msg_err.format(type(collection)))
+        # FIXME: use self.normalize_name
         if collection.name in self._collections:
             raise IndexError('A collection with name {} already exists.'.format(collection.name))
         if collection.name is None:

@@ -22,18 +22,21 @@ from tqdm import tqdm
 from resto_client.base_exceptions import RestoClientUserError
 
 
+# TODO: move somewhere else
 class AccesDeniedError(RestoClientUserError):
     """
     Exception corresponding to HTTP Error 403
     """
 
 
+# TODO: move inside features_requests
 class RestrictedProductError(RestoClientUserError):
     """
     Exception used when a product exist but cannot be downloaded
     """
 
 
+# TODO: move as part of BaseRequest
 def get_response(url: str,
                  req_type: str,
                  headers: Optional[dict]=None,
@@ -58,6 +61,7 @@ def get_response(url: str,
     return result
 
 
+# TODO: move as part of process_request_result
 def download_file(requ_result: requests.Response,
                   full_file_name: Path,
                   file_size: Optional[int]=None) -> None:
