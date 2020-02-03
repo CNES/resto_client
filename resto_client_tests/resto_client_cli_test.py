@@ -60,6 +60,25 @@ class TestRestoClientCli(unittest.TestCase):
         self.assert_not_in_settings(USERNAME_KEY)
         self.assert_not_in_settings(TOKEN_KEY)
 
+    def assert_no_server_in_settings(self) -> None:
+        """
+        Verify that the server related keys are absent from the settings.
+        """
+        self.assert_not_in_settings(SERVER_KEY)
+        self.assert_not_in_settings(COLLECTION_KEY)
+        self.assert_no_account_in_settings()
+
+    def assert_setting_equal(self, settings_key: str, expected_value: str) -> None:
+        """
+        Verify that the provided key is present in the settings and its value is equal to the
+        expected one.
+
+        :param settings_key: name of the key to test
+        :param expected_value: expected value of the setting
+        """
+        self.assert_in_settings(settings_key)
+        self.assertEqual(RESTO_CLIENT_SETTINGS[settings_key], expected_value)
+
 
 def catch_output_from_run(test_args: dict) -> str:
     """
@@ -67,6 +86,7 @@ def catch_output_from_run(test_args: dict) -> str:
 
     :param  test_args: dictionnary with cli verb, targeted collection, server name and product id
     :returns: output of a run
+    :raises RestoClientError: when the mandatory key is not present in arguments
     """
     try:
         arguments = test_args.pop('mandatory')
