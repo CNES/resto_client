@@ -80,7 +80,8 @@ class TestRestoClientCli(unittest.TestCase):
         self.assert_in_settings(settings_key)
         self.assertEqual(RESTO_CLIENT_SETTINGS[settings_key], expected_value)
 
-    def get_downloaded_file_path(self, base_filename: str) -> Path:
+    @staticmethod
+    def get_downloaded_file_path(base_filename: str) -> Path:
         """
         Returns the path in the downlaod directory of a file specified by its basename.
 
@@ -89,6 +90,15 @@ class TestRestoClientCli(unittest.TestCase):
         :raises RestoClientError: when the download directory is not set.
         """
         return Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]) / base_filename
+
+    def assert_downloaded_file_ok(self, base_filename: str) -> None:
+        """
+        Verify that the download file is correct.
+
+        :param base_filename: base file name
+        """
+        downloaded_file_path = self.get_downloaded_file_path(base_filename)
+        self.assertTrue(downloaded_file_path.is_file())
 
 
 def catch_output_from_run(test_args: dict) -> str:
