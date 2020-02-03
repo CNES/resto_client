@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
 import tempfile
 from warnings import warn
@@ -100,7 +100,7 @@ class SignLicenseRequest(AuthenticationOptionalRequest):
         return response.as_resto_object()
 
 
-class DownloadRequestBase(ABC):
+class DownloadRequestBase(AuthenticationOptionalRequest):
     """
      Base class for all file download requests downloading in the client download directory
     """
@@ -122,20 +122,17 @@ class DownloadRequestBase(ABC):
     def __init__(self,
                  service: 'RestoService',
                  feature: RestoFeature,
-                 download_directory: Path,
-                 headers: dict) -> None:
+                 download_directory: Path) -> None:
         """
         Constructor
 
         :param service: resto service
         :param  feature: resto feature
         :param download_directory: an existing directory path where download will occur
-        :param headers: dict for header to send in get_response
         """
         self._feature = feature
-        self._service = service
-        self._headers = headers
 
+        super(DownloadRequestBase, self).__init__(service=service)
         # product specific initialization
         self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
         self._download_directory = download_directory
@@ -171,21 +168,6 @@ class DownloadRequestBase(ABC):
 
         return filename, full_file_path, mimetype, encoding
 
-    def run(self) -> Optional[str]:
-        """
-        Submit the request and provide its result
-
-        :returns: an object of base type (bool, str) or of a type from resto_client.entities
-                  directly usable by resto_client.
-        """
-        request_result: Union[dict, Response]
-        fake_response = DownloadRequestBase.finalize_request(self)
-        if fake_response is None:
-            request_result = DownloadRequestBase.run_request(self)
-        else:
-            request_result = fake_response
-        return DownloadRequestBase.process_request_result(self, request_result)
-
     def finalize_request(self) -> Optional[dict]:
         # FIXME: no update_headers ?
         self.update_headers()
@@ -195,13 +177,13 @@ class DownloadRequestBase(ABC):
             raise RestoClientUserError(msg.format(self.file_type, self._feature.product_identifier))
 
         if self.file_type == 'product':
-            if self._service.service_access.protocol == 'theia_version':
+            if self.parent_service.service_access.protocol == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
         return None
 
     def run_request(self) -> Response:
         result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
-                              headers=self._headers, stream=True)
+                              headers=self.headers, stream=True)
         return result
 
     def process_request_result(self, request_result: Response) -> Optional[str]:
@@ -265,7 +247,7 @@ class DownloadRequestBase(ABC):
         return file_name
 
 
-class DownloadProductRequest(AuthenticationOptionalRequest, DownloadRequestBase):
+class DownloadProductRequest(DownloadRequestBase):
     """
      Request for downloading the product file
     """
@@ -274,93 +256,22 @@ class DownloadProductRequest(AuthenticationOptionalRequest, DownloadRequestBase)
     request_action = 'downloading product'
     authentication_type = 'ALWAYS'
 
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
 
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AuthenticationOptionalRequest.__init__(self, service)
-        self.update_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the product file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-    # FIXME: defined only for being able to instantiate abstract class
-    def run_request(self) -> Response:
-        pass
-
-    # FIXME: defined only for being able to instantiate abstract class
-    def process_request_result(self, request_result: Response) -> None:
-        return None
-
-
-class AnonymousDownloadRequest(AuthenticationOptionalRequest, DownloadRequestBase):
+class AnonymousDownloadRequest(DownloadRequestBase):
     """
      Abstract class for downloading files anonymously
     """
     authentication_type = 'NEVER'
 
-    @property
-    @abstractmethod
-    def filename_suffix(self) -> str:
-        """
-        :returns: a file type specific suffix to add before the extension in the filename.
-        """
 
-    @property
-    @abstractmethod
-    def file_type(self) -> str:
-        """
-        :returns: file type: one of 'quicklook', 'thumbnail' or 'annexes'
-        """
-
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
-
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AuthenticationOptionalRequest.__init__(self, service)
-        self.update_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the requested file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-    # FIXME: defined only for being able to instantiate abstract class
-    def process_request_result(self, request_result: Response) -> None:
-        return None
-
-
-class DownloadQuicklookRequest(AnonymousDownloadRequest):
+class DownloadQuicklookRequest(DownloadRequestBase):
     """
      Request for downloading the quicklook file
     """
     file_type = 'quicklook'
     filename_suffix = '_ql'
     request_action = 'downloading quicklook'
+    authentication_type = 'NEVER'
 
 
 class DownloadThumbnailRequest(AnonymousDownloadRequest):
@@ -370,6 +281,7 @@ class DownloadThumbnailRequest(AnonymousDownloadRequest):
     file_type = 'thumbnail'
     filename_suffix = '_th'
     request_action = 'downloading thumbnail'
+    authentication_type = 'NEVER'
 
 
 class DownloadAnnexesRequest(AnonymousDownloadRequest):
@@ -379,3 +291,4 @@ class DownloadAnnexesRequest(AnonymousDownloadRequest):
     file_type = 'annexes'
     filename_suffix = '_ann'
     request_action = 'downloading annexes'
+    authentication_type = 'NEVER'

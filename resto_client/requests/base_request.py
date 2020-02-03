@@ -122,7 +122,6 @@ class BaseRequest(ABC):
 
 # ++++++++++++++ Request runner +++++++++++++++++++++++++++++
 
-    # FIXME: try to remove __class__
     def run(self) -> RestoRequestResult:
         """
         Submit the request and provide its result
@@ -130,13 +129,13 @@ class BaseRequest(ABC):
         :returns: an object of base type (bool, str) or of a type from resto_client.entities
                   directly usable by resto_client.
         """
-        fake_response = self.__class__.finalize_request(self)
+        fake_response = self.finalize_request()
         if fake_response is None:
-            request_result = self.__class__.run_request(self)
+            request_result = self.run_request()
             if isinstance(request_result, Response):
-                return self.__class__.process_request_result(self, request_result)
-            return self.__class__.process_dict_result(self, request_result)
-        return self.__class__.process_dict_result(self, fake_response)
+                return self.process_request_result(request_result)
+            return self.process_dict_result(request_result)
+        return self.process_dict_result(fake_response)
 
     @abstractmethod
     def finalize_request(self) -> Optional[dict]:
