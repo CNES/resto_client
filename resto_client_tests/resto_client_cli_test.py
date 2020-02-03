@@ -15,6 +15,7 @@
 import argparse
 from contextlib import redirect_stdout
 import io
+from pathlib import Path
 import sys
 from typing import List
 import unittest
@@ -22,8 +23,8 @@ import unittest
 from resto_client.base_exceptions import RestoClientError
 from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.resto_client_cli import resto_client_run
+from resto_client.cli.resto_client_parameters import DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-
 from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
                                                      TOKEN_KEY)
 
@@ -78,6 +79,16 @@ class TestRestoClientCli(unittest.TestCase):
         """
         self.assert_in_settings(settings_key)
         self.assertEqual(RESTO_CLIENT_SETTINGS[settings_key], expected_value)
+
+    def get_downloaded_file_path(self, base_filename: str) -> Path:
+        """
+        Returns the path in the downlaod directory of a file specified by its basename.
+
+        :param base_filename: base file name
+        :returns: the path to the file
+        :raises RestoClientError: when the download directory is not set.
+        """
+        return Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]) / base_filename
 
 
 def catch_output_from_run(test_args: dict) -> str:
