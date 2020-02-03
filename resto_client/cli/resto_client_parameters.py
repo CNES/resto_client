@@ -19,12 +19,11 @@ from typing import Optional
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
-from resto_client.generic.user_dirs import user_download_dir
 
 from .cli_utils import get_from_args
 from .parser.parser_settings import (DIRECTORY_ARGNAME, REGION_ARGNAME, VERBOSITY_ARGNAME)
 from .persistence import PersistedAttributes
-from .resto_client_settings import RESTO_CLIENT_SETTINGS
+from .resto_client_settings import RESTO_CLIENT_SETTINGS, RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
 
 
 def _check_download_dir(download_dir: str) -> str:
@@ -137,7 +136,7 @@ class RestoClientParameters(PersistedAttributes):
         """
 
     @property  # type: ignore
-    @managed_getter(default=str(user_download_dir()))
+    @managed_getter(default=str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
     def download_dir(self) -> Optional[str]:
         """
         :returns: The current download directory
