@@ -37,17 +37,19 @@ class UTestCliUnset(TestRestoClientCli):
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(SERVER_KEY)
+        self.assert_not_in_settings(COLLECTION_KEY)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
         # With server persisted and account persisted
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_account'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(SERVER_KEY)
+        self.assert_not_in_settings(COLLECTION_KEY)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
 
     def test_n_unset_server_noserver(self) -> None:
         """
@@ -55,10 +57,10 @@ class UTestCliUnset(TestRestoClientCli):
         """
         resto_client_run(arguments=['unset', 'server'])
         resto_client_run(arguments=['unset', 'server'])
-        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(SERVER_KEY)
+        self.assert_not_in_settings(COLLECTION_KEY)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
 
     def test_n_unset_account(self) -> None:
         """
@@ -66,14 +68,15 @@ class UTestCliUnset(TestRestoClientCli):
         """
         # With no server persisted
         resto_client_run(arguments=['unset', 'account'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
         # With server persisted and account already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_name'])
         # With no account already set
         resto_client_run(arguments=['unset', 'account'])
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
 
     def test_n_unset_collection(self) -> None:
         """
@@ -81,15 +84,15 @@ class UTestCliUnset(TestRestoClientCli):
         """
         # With no server persisted
         resto_client_run(arguments=['unset', 'collection'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(COLLECTION_KEY)
         # With server persisted and collection already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
         resto_client_run(arguments=['unset', 'collection'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(COLLECTION_KEY)
         # With server persisted and no collection persisted
         resto_client_run(arguments=['unset', 'collection'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(COLLECTION_KEY)
 
     def test_n_unset_region(self) -> None:
         """
@@ -98,10 +101,10 @@ class UTestCliUnset(TestRestoClientCli):
         # With region already persisted
         resto_client_run(arguments=['set', 'region', 'bretagne'])
         resto_client_run(arguments=['unset', 'region'])
-        self.assertTrue(REGION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(REGION_KEY)
         # With no region persisted
         resto_client_run(arguments=['unset', 'region'])
-        self.assertTrue(REGION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(REGION_KEY)
 
     def test_n_unset_download_dir(self) -> None:
         """
@@ -124,7 +127,7 @@ class UTestCliUnset(TestRestoClientCli):
         # With verbosity already persisted
         resto_client_run(arguments=['set', 'verbosity', 'NORMAL'])
         resto_client_run(arguments=['unset', 'verbosity'])
-        self.assertTrue(VERBOSITY_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(VERBOSITY_KEY)
         # With no verbosity persisted
         resto_client_run(arguments=['unset', 'verbosity'])
-        self.assertTrue(VERBOSITY_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(VERBOSITY_KEY)

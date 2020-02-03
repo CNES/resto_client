@@ -29,8 +29,26 @@ class TestRestoClientCli(unittest.TestCase):
     """
     Basic Tests Class for resto_client Unit Test
     """
+
     def setUp(self) -> None:
         RESTO_CLIENT_SETTINGS.clear()
+
+    def assert_not_in_settings(self, settings_key: str) -> None:
+        """
+        Verify that the provided key is absent from the settings.
+
+        :param settings_key: name of the key to test
+        """
+        self.assertNotIn(settings_key, RESTO_CLIENT_SETTINGS)
+
+    def assert_in_settings(self, settings_key: str) -> None:
+        """
+        Verify that the provided key is present in the settings and different from None.
+
+        :param settings_key: name of the key to test
+        """
+        self.assertIn(settings_key, RESTO_CLIENT_SETTINGS)
+        self.assertIsNotNone(RESTO_CLIENT_SETTINGS[settings_key])
 
 
 def catch_output_from_run(test_args: dict) -> str:

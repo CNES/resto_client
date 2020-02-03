@@ -32,6 +32,7 @@ class UTestCliSet(TestRestoClientCli):
     Unit Tests of the cli set module
     server, account, collection, download_dir, region, verbosity
     """
+
     def test_n_set_server(self) -> None:
         """
         Unit test of set server in nominal cases
@@ -40,7 +41,7 @@ class UTestCliSet(TestRestoClientCli):
         # Test setting of all default server
         for server_name in WELL_KNOWN_SERVERS:
             resto_client_run(arguments=['set', 'server', server_name])
-            # Verify that RESTO_CLIENT_SETTINGS contain all server info from server database
+            # Verify that settings contain all server info from server database
             self.assertTrue(SERVER_KEY in RESTO_CLIENT_SETTINGS)
             self.assertEqual(RESTO_CLIENT_SETTINGS[SERVER_KEY], server_name)
 
@@ -117,9 +118,9 @@ class UTestCliSet(TestRestoClientCli):
         # Then set another server
         resto_client_run(arguments=['set', 'server', 'peps'])
         # Verify resetting of parameters
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_not_in_settings(COLLECTION_KEY)
 
     def test_n_set_server_mono_col(self) -> None:
         """
@@ -146,8 +147,8 @@ class UTestCliSet(TestRestoClientCli):
         with self.assertRaises(RestoClientNoPersistedServer):
             resto_client_run(arguments=['set', 'account', 'test_name'])
         # Verify non-setting of parameters
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
 
     def test_d_set_collection(self) -> None:
         """
