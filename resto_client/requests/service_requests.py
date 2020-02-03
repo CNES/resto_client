@@ -18,14 +18,15 @@ from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.collections_description import (CollectionsDescription,
                                                             RestoResponseError)
 
-from .anonymous_request import AnonymousRequest
+from .authentication_optional_request import AuthenticationOptionalRequest
 
 
-class DescribeRequest(AnonymousRequest):
+class DescribeRequest(AuthenticationOptionalRequest):
     """
      Request to retrieve the service description
     """
     request_action = 'getting service description'
+    authentication_type = 'NEVER'
 
     def process_request_result(self, request_result: Response) -> RestoCollections:
         try:

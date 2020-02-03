@@ -24,7 +24,6 @@ from resto_client.responses.collections_description import CollectionsDescriptio
 from resto_client.responses.feature_collection_response import FeatureCollectionResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 
-from .anonymous_request import AnonymousRequest
 from .authentication_optional_request import AuthenticationOptionalRequest
 from .base_request import RestoRequestResult
 
@@ -33,12 +32,13 @@ if TYPE_CHECKING:
     from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 
 
-class GetCollectionRequest(AnonymousRequest):
+class GetCollectionRequest(AuthenticationOptionalRequest):
     """
      Request accessing a single collection
     """
 
     request_action = 'getting collection'
+    authentication_type = 'NEVER'
 
     def process_request_result(self, request_result: Response) -> RestoCollection:
         collection_response = CollectionDescription(self, request_result.json())
@@ -70,10 +70,6 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
                                                       collection=collection,
                                                       criteria_url=criteria_url)
 
-    def finalize_request(self) -> None:
-        self.update_headers()
-        return None
-
     def run_request(self) -> Response:
         return self.get_response_as_json()
 
@@ -82,12 +78,13 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
         return feature_collection_response.as_resto_object()
 
 
-class GetCollectionsRequest(AnonymousRequest):
+class GetCollectionsRequest(AuthenticationOptionalRequest):
     """
      Request retrieving all the service collections
     """
 
     request_action = 'listing collections'
+    authentication_type = 'NEVER'
 
     def process_request_result(self, request_result: Response) -> RestoCollections:
         try:

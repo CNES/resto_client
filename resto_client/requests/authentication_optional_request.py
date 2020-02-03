@@ -25,7 +25,7 @@ class AuthenticationOptionalRequest(BaseRequest):
     """
      Base class for several Resto Requests which can request Authentication
     """
-    authentication_required = False
+    authentication_type = 'OPPORTUNITY'
 
     def update_headers(self, dict_input: Optional[dict]=None) -> None:
         """
@@ -34,9 +34,14 @@ class AuthenticationOptionalRequest(BaseRequest):
         :param dict_input: entries to add in headers
         """
         super(AuthenticationOptionalRequest, self).update_headers(dict_input)
-        authorization_header = self.auth_service.get_authorization_header(
-            self.authentication_required)
-        super(AuthenticationOptionalRequest, self).update_headers(authorization_header)
+        if self.authentication_type != 'NEVER':
+            authorization_header = self.auth_service.get_authorization_header(
+                self.authentication_required)
+            super(AuthenticationOptionalRequest, self).update_headers(authorization_header)
+
+    @property
+    def authentication_required(self) -> bool:
+        return self.authentication_type == 'ALWAYS'
 
     @property
     def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
@@ -56,13 +61,15 @@ class AuthenticationOptionalRequest(BaseRequest):
             return self.auth_service.authorization_data
         return super(AuthenticationOptionalRequest, self).authorization_data
 
-    @abstractmethod
     def finalize_request(self) -> Optional[dict]:
-        pass
+        self.update_headers()
+        return None
 
-    @abstractmethod
     def run_request(self) -> Union[Response, dict]:
-        pass
+        # FIXME: this is not the right way to select the request type
+        if self.authentication_type == 'NEVER':
+            return self.get_response_as_json()
+        return self.__class__.run_request(self)
 
     @abstractmethod
     def process_request_result(self, request_result: Response) -> RestoRequestResult:

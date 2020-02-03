@@ -19,7 +19,6 @@ from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
-from .anonymous_request import AnonymousRequest
 from .authentication_optional_request import AuthenticationOptionalRequest
 from .base_request import RestoRequestResult
 
@@ -35,11 +34,7 @@ class RevokeTokenRequest(AuthenticationOptionalRequest):
     """
 
     request_action = 'revoking token'
-    authentication_required = True
-
-    def finalize_request(self) -> None:
-        self.update_headers()
-        return None
+    authentication_type = 'ALWAYS'
 
     def run_request(self) -> Response:
         return self.post()
@@ -53,7 +48,7 @@ class GetTokenRequest(AuthenticationOptionalRequest):
      Request to retrieve the token associated to the user
     """
     request_action = 'getting token'
-    authentication_required = True
+    authentication_type = 'ALWAYS'
 
     def finalize_request(self) -> None:
         # No call to update_headers(), in order to avoid recursive calls
@@ -77,11 +72,12 @@ class GetTokenRequest(AuthenticationOptionalRequest):
         return GetTokenResponse(self, request_result).as_resto_object()
 
 
-class CheckTokenRequest(AnonymousRequest):
+class CheckTokenRequest(AuthenticationOptionalRequest):
     """
      Request to check a service token.
     """
     request_action = 'checking token'
+    authentication_type = 'NEVER'
 
     def __init__(self, service: 'AuthenticationService', token: str) -> None:
         """
