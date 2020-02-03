@@ -20,8 +20,7 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
-                                                     TOKEN_KEY)
+from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY)
 from resto_client.cli.resto_server_persisted import RestoClientNoPersistedServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
@@ -118,8 +117,7 @@ class UTestCliSet(TestRestoClientCli):
         # Then set another server
         resto_client_run(arguments=['set', 'server', 'peps'])
         # Verify resetting of parameters
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
         self.assert_not_in_settings(COLLECTION_KEY)
 
     def test_n_set_server_mono_col(self) -> None:
@@ -147,8 +145,7 @@ class UTestCliSet(TestRestoClientCli):
         with self.assertRaises(RestoClientNoPersistedServer):
             resto_client_run(arguments=['set', 'account', 'test_name'])
         # Verify non-setting of parameters
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
 
     def test_d_set_collection(self) -> None:
         """

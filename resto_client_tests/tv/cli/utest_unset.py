@@ -17,8 +17,7 @@ from pathlib import Path
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
-from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
-                                                     TOKEN_KEY)
+from resto_client.cli.resto_server_persisted import SERVER_KEY, COLLECTION_KEY
 from resto_client.generic.user_dirs import user_download_dir
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
@@ -39,8 +38,7 @@ class UTestCliUnset(TestRestoClientCli):
         resto_client_run(arguments=['unset', 'server'])
         self.assert_not_in_settings(SERVER_KEY)
         self.assert_not_in_settings(COLLECTION_KEY)
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
         # With server persisted and account persisted
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_account'])
@@ -48,8 +46,7 @@ class UTestCliUnset(TestRestoClientCli):
         resto_client_run(arguments=['unset', 'server'])
         self.assert_not_in_settings(SERVER_KEY)
         self.assert_not_in_settings(COLLECTION_KEY)
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
 
     def test_n_unset_server_noserver(self) -> None:
         """
@@ -59,8 +56,7 @@ class UTestCliUnset(TestRestoClientCli):
         resto_client_run(arguments=['unset', 'server'])
         self.assert_not_in_settings(SERVER_KEY)
         self.assert_not_in_settings(COLLECTION_KEY)
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
 
     def test_n_unset_account(self) -> None:
         """
@@ -68,15 +64,13 @@ class UTestCliUnset(TestRestoClientCli):
         """
         # With no server persisted
         resto_client_run(arguments=['unset', 'account'])
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
         # With server persisted and account already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_name'])
         # With no account already set
         resto_client_run(arguments=['unset', 'account'])
-        self.assert_not_in_settings(USERNAME_KEY)
-        self.assert_not_in_settings(TOKEN_KEY)
+        self.assert_no_account_in_settings()
 
     def test_n_unset_collection(self) -> None:
         """

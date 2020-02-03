@@ -24,6 +24,9 @@ from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 
+from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
+                                                     TOKEN_KEY)
+
 
 class TestRestoClientCli(unittest.TestCase):
     """
@@ -49,6 +52,13 @@ class TestRestoClientCli(unittest.TestCase):
         """
         self.assertIn(settings_key, RESTO_CLIENT_SETTINGS)
         self.assertIsNotNone(RESTO_CLIENT_SETTINGS[settings_key])
+
+    def assert_no_account_in_settings(self) -> None:
+        """
+        Verify that the account related keys are absent from the settings.
+        """
+        self.assert_not_in_settings(USERNAME_KEY)
+        self.assert_not_in_settings(TOKEN_KEY)
 
 
 def catch_output_from_run(test_args: dict) -> str:
