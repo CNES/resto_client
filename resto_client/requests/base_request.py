@@ -12,14 +12,12 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from urllib.parse import urljoin
-
 from typing import Optional, Union, Dict, TYPE_CHECKING  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from requests import post, Response
-from requests.auth import HTTPBasicAuth
 from requests.exceptions import HTTPError, SSLError
 
 from resto_client.base_exceptions import RestoClientDesignError
@@ -28,6 +26,7 @@ from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
+from .authenticator import Authenticator
 from .utils import AccesDeniedError, get_response
 
 
@@ -36,21 +35,10 @@ RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoColle
 
 
 # TODO: make request result an attribute of the request runner
-class BaseRequest(ABC):
+class BaseRequest(Authenticator):
     """
      Base class for all service Requests
     """
-
-    @property
-    @abstractmethod
-    def authentication_type(self) -> str:
-        """
-        :returns: the authentication type of this request (NEVER or ALWAYS or OPPORTUNITY)
-        """
-
-    @property
-    def authentication_required(self) -> bool:
-        return self.authentication_type == 'ALWAYS'
 
     @property
     @abstractmethod
@@ -69,19 +57,19 @@ class BaseRequest(ABC):
         """
         # FIXME: Could it be better to check that the route is supported at creation time?
         # Problem: routes for DOnwloadRequests are not parameterized, but come from json response
-        self.request_headers: Dict[str, str] = {}
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
         self.parent_service = service
         self.service_access = self.parent_service.service_access
-        self.auth_service = self.parent_service.auth_service
-        self._url_kwargs = url_kwargs
         if self.parent_service.parent_server.debug_server:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
                                                           self.service_access.base_url)
                 print(Fore.CYAN + msg + Style.RESET_ALL)
+        self.request_headers: Dict[str, str] = {}
+        self._url_kwargs = url_kwargs
+        Authenticator.__init__(self, self.parent_service.auth_service)
 
     def get_route(self) -> Optional[str]:
         """
@@ -115,32 +103,7 @@ class BaseRequest(ABC):
         """
         if dict_input is not None:
             self.request_headers.update(dict_input)
-        if self.authentication_type != 'NEVER':
-            authorization_header = self.auth_service.get_authorization_header(
-                self.authentication_required)
-            self.request_headers.update(authorization_header)
-
-# +++++++++++++++++++++ request authentifier ++++++++++++++++++++++++++++
-
-    @property
-    def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
-        """
-        :returns: the basic HTTP authorization for the service
-        """
-        if self.authentication_type != 'NEVER':
-            if self.authentication_required:
-                return self.auth_service.http_basic_auth
-        return None
-
-    @property
-    def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
-        """
-        :returns: the authorization data for the service
-        """
-        if self.authentication_type != 'NEVER':
-            if self.authentication_required:
-                return self.auth_service.authorization_data
-        return None
+        self.update_authorization_headers(self.request_headers)
 
 # ++++++++++++++ Request runner +++++++++++++++++++++++++++++
 
@@ -193,6 +156,8 @@ class BaseRequest(ABC):
         return get_response(self.get_url(), self.request_action,
                             headers=self.request_headers, auth=self.http_basic_auth)
 
+    # TODO: remove this method; use post() and put the processing code in
+    # adequate process_request_result()
     def post_as_text(self, stream: bool=False) -> Optional[str]:
         """
          This create and execute a POST request and return the response content interpreted as text
