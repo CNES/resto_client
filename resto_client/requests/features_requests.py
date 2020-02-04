@@ -27,7 +27,7 @@ from resto_client.responses.download_error_response import DownloadErrorResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
 
-from .authentication_optional_request import AuthenticationOptionalRequest
+from .base_request import BaseRequest
 from .utils import RestrictedProductError, download_file, get_response
 
 
@@ -63,7 +63,7 @@ class FeatureOnTape(RestoResponseError):
         super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
-class SignLicenseRequest(AuthenticationOptionalRequest):
+class SignLicenseRequest(BaseRequest):
     """
      Requests for signing a license
     """
@@ -83,7 +83,7 @@ class SignLicenseRequest(AuthenticationOptionalRequest):
                                                  license_id=license_id)
 
     def finalize_request(self) -> None:
-        self.update_headers({'Accept': 'application/json'})
+        self.update_headers(dict_input={'Accept': 'application/json'})
         return None
 
     def run_request(self) -> Response:
@@ -100,7 +100,7 @@ class SignLicenseRequest(AuthenticationOptionalRequest):
         return response.as_resto_object()
 
 
-class DownloadRequestBase(AuthenticationOptionalRequest):
+class DownloadRequestBase(BaseRequest):
     """
      Base class for all file download requests downloading in the client download directory
     """
@@ -169,8 +169,6 @@ class DownloadRequestBase(AuthenticationOptionalRequest):
         return filename, full_file_path, mimetype, encoding
 
     def finalize_request(self) -> Optional[dict]:
-        # FIXME: no update_headers ?
-        self.update_headers()
         # If there is no file to download
         if self._url_to_download is None:
             msg = 'There is no {} to download for product {}.'
@@ -179,11 +177,13 @@ class DownloadRequestBase(AuthenticationOptionalRequest):
         if self.file_type == 'product':
             if self.parent_service.service_access.protocol == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
+        # TODO: comment in order to generate error messages for testing purposes
+        super(DownloadRequestBase, self).update_headers()
         return None
 
     def run_request(self) -> Response:
         result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
-                              headers=self.headers, stream=True)
+                              headers=self.request_headers, stream=True)
         return result
 
     def process_request_result(self, request_result: Response) -> Optional[str]:

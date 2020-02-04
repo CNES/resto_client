@@ -19,8 +19,7 @@ from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
-from .authentication_optional_request import AuthenticationOptionalRequest
-from .base_request import RestoRequestResult
+from .base_request import RestoRequestResult, BaseRequest
 
 
 if TYPE_CHECKING:
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
-class RevokeTokenRequest(AuthenticationOptionalRequest):
+class RevokeTokenRequest(BaseRequest):
     """
      Request to revoke a token, and thus disconnecting the user.
     """
@@ -43,7 +42,7 @@ class RevokeTokenRequest(AuthenticationOptionalRequest):
         return request_result
 
 
-class GetTokenRequest(AuthenticationOptionalRequest):
+class GetTokenRequest(BaseRequest):
     """
      Request to retrieve the token associated to the user
     """
@@ -72,7 +71,7 @@ class GetTokenRequest(AuthenticationOptionalRequest):
         return GetTokenResponse(self, request_result).as_resto_object()
 
 
-class CheckTokenRequest(AuthenticationOptionalRequest):
+class CheckTokenRequest(BaseRequest):
     """
      Request to check a service token.
     """

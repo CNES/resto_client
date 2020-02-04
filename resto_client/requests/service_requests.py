@@ -18,10 +18,10 @@ from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.collections_description import (CollectionsDescription,
                                                             RestoResponseError)
 
-from .authentication_optional_request import AuthenticationOptionalRequest
+from .base_request import BaseRequest
 
 
-class DescribeRequest(AuthenticationOptionalRequest):
+class DescribeRequest(BaseRequest):
     """
      Request to retrieve the service description
     """

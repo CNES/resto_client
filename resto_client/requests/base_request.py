@@ -35,10 +35,22 @@ RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoColle
                            Response]
 
 
+# TODO: make request result an attribute of the request runner
 class BaseRequest(ABC):
     """
      Base class for all service Requests
     """
+
+    @property
+    @abstractmethod
+    def authentication_type(self) -> str:
+        """
+        :returns: the authentication type of this request (NEVER or ALWAYS or OPPORTUNITY)
+        """
+
+    @property
+    def authentication_required(self) -> bool:
+        return self.authentication_type == 'ALWAYS'
 
     @property
     @abstractmethod
@@ -57,7 +69,7 @@ class BaseRequest(ABC):
         """
         # FIXME: Could it be better to check that the route is supported at creation time?
         # Problem: routes for DOnwloadRequests are not parameterized, but come from json response
-        self.headers: Dict[str, str] = {}
+        self.request_headers: Dict[str, str] = {}
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
@@ -97,27 +109,37 @@ class BaseRequest(ABC):
 
     def update_headers(self, dict_input: Optional[dict]=None) -> None:
         """
-        Update the current headers with dic_input
+        Update the headers with dict_input and with authorization header
 
-        :param dict_input: entry to add in headers
+        :param dict_input: entries to add in headers
         """
         if dict_input is not None:
-            self.headers.update(dict_input)
+            self.request_headers.update(dict_input)
+        if self.authentication_type != 'NEVER':
+            authorization_header = self.auth_service.get_authorization_header(
+                self.authentication_required)
+            self.request_headers.update(authorization_header)
 
 # +++++++++++++++++++++ request authentifier ++++++++++++++++++++++++++++
 
     @property
     def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
         """
-        The default basic HTTP authorization for the service (None)
+        :returns: the basic HTTP authorization for the service
         """
+        if self.authentication_type != 'NEVER':
+            if self.authentication_required:
+                return self.auth_service.http_basic_auth
         return None
 
     @property
     def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
         """
-        The default authorization data for the service (None)
+        :returns: the authorization data for the service
         """
+        if self.authentication_type != 'NEVER':
+            if self.authentication_required:
+                return self.auth_service.authorization_data
         return None
 
 # ++++++++++++++ Request runner +++++++++++++++++++++++++++++
@@ -137,13 +159,15 @@ class BaseRequest(ABC):
             return self.process_dict_result(request_result)
         return self.process_dict_result(fake_response)
 
-    @abstractmethod
     def finalize_request(self) -> Optional[dict]:
-        pass
+        self.update_headers()
+        return None
 
-    @abstractmethod
     def run_request(self) -> Union[Response, dict]:
-        pass
+        # FIXME: this is not the right way to select the request type
+        if self.authentication_type == 'NEVER':
+            return self.get_response_as_json()
+        return self.run_request()
 
     @abstractmethod
     def process_request_result(self, request_result: Response) -> RestoRequestResult:
@@ -165,9 +189,9 @@ class BaseRequest(ABC):
         """
          This create and execute a GET request imposing json response
         """
-        BaseRequest.update_headers(self, {'Accept': 'application/json'})
+        self.update_headers(dict_input={'Accept': 'application/json'})
         return get_response(self.get_url(), self.request_action,
-                            headers=self.headers, auth=self.http_basic_auth)
+                            headers=self.request_headers, auth=self.http_basic_auth)
 
     def post_as_text(self, stream: bool=False) -> Optional[str]:
         """
@@ -187,12 +211,12 @@ class BaseRequest(ABC):
         """
 
         try:
-            if 'Authorization' in self.headers:
-                result = post(self.get_url(), headers=self.headers,
+            if 'Authorization' in self.request_headers:
+                result = post(self.get_url(), headers=self.request_headers,
                               stream=stream)
             else:
-                result = post(self.get_url(), headers=self.headers, auth=self.http_basic_auth,
-                              stream=stream, data=self.authorization_data)
+                result = post(self.get_url(), headers=self.request_headers, stream=stream,
+                              auth=self.http_basic_auth, data=self.authorization_data)
             result.raise_for_status()
         except (HTTPError, SSLError) as excp:
             msg = 'Error {} when {} {}.'

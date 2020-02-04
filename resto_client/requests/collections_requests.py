@@ -24,15 +24,14 @@ from resto_client.responses.collections_description import CollectionsDescriptio
 from resto_client.responses.feature_collection_response import FeatureCollectionResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 
-from .authentication_optional_request import AuthenticationOptionalRequest
-from .base_request import RestoRequestResult
+from .base_request import RestoRequestResult, BaseRequest
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
     from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 
 
-class GetCollectionRequest(AuthenticationOptionalRequest):
+class GetCollectionRequest(BaseRequest):
     """
      Request accessing a single collection
     """
@@ -45,12 +44,13 @@ class GetCollectionRequest(AuthenticationOptionalRequest):
         return collection_response.as_resto_object()
 
 
-class SearchCollectionRequest(AuthenticationOptionalRequest):
+class SearchCollectionRequest(BaseRequest):
     """
      Request searching a single collection
     """
 
     request_action = 'searching'
+    authentication_type = 'OPPORTUNITY'
 
     def __init__(self, service: 'RestoService',
                  collection: str, criteria: Optional[RestoCriteria] = None) -> None:
@@ -78,7 +78,7 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
         return feature_collection_response.as_resto_object()
 
 
-class GetCollectionsRequest(AuthenticationOptionalRequest):
+class GetCollectionsRequest(BaseRequest):
     """
      Request retrieving all the service collections
     """
