@@ -33,6 +33,7 @@ class AuthenticationToken():
         self.parent_credentials = parent_credentials
         self._token_value: Optional[str] = None
         self._unvalidated_token = True
+        self._being_renewed = False
 
     @property
     def token_value(self) -> Optional[str]:
@@ -43,7 +44,11 @@ class AuthenticationToken():
             if self._unvalidated_token:
                 self._unvalidated_token = not self.parent_credentials.check_token(self._token_value)
                 if self._unvalidated_token:
+                    if self._being_renewed:
+                        return None
+                    self._being_renewed = True
                     self._token_value = self.parent_credentials.get_token()
+                    self._being_renewed = False
                     self._unvalidated_token = self._token_value is None
         return self._token_value
 
