@@ -100,9 +100,6 @@ class CheckTokenRequest(BaseRequest):
             simulated_response = super(CheckTokenRequest, self).finalize_request()
         return simulated_response
 
-    def run_request(self) -> Response:
-        return self.get_response_as_json()
-
     def process_request_result(self, request_result: Response) -> bool:
         return CheckTokenResponse(self, request_result.json()).as_resto_object()
 

@@ -125,10 +125,8 @@ class BaseRequest(Authenticator):
         return None
 
     def run_request(self) -> Response:
-        # FIXME: this is not the right way to select the request type
-        if self.authentication_type == 'NEVER':
-            return self.get_response_as_json()
-        return self.run_request()
+        # Default is submitting a get request, requesting json response.
+        return self.get_response_as_json()
 
     @abstractmethod
     def process_request_result(self, request_result: Response) -> RestoRequestResult:

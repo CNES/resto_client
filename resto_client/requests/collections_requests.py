@@ -70,9 +70,6 @@ class SearchCollectionRequest(BaseRequest):
                                                       collection=collection,
                                                       criteria_url=criteria_url)
 
-    def run_request(self) -> Response:
-        return self.get_response_as_json()
-
     def process_request_result(self, request_result: Response) -> RestoRequestResult:
         feature_collection_response = FeatureCollectionResponse(self, request_result.json())
         return feature_collection_response.as_resto_object()
