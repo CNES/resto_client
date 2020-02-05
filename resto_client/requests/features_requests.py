@@ -26,6 +26,7 @@ from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
+from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest
 from .utils import RestrictedProductError, download_file, get_response
@@ -93,8 +94,8 @@ class SignLicenseRequest(BaseRequest):
         result = self.post()
         return result
 
-    def process_request_result(self, request_result: Response) -> bool:
-        response = SignLicenseResponse(self, request_result.json())
+    def process_request_result(self) -> bool:
+        response = SignLicenseResponse(self, self._request_result.json())
 
         if not response.is_signed:
             msg = 'Unable to sign license {}. Reason : {}'
@@ -165,6 +166,7 @@ class DownloadRequestBase(BaseRequest):
                                    self.filename_suffix, extension)
         full_file_path = self._download_directory / filename
 
+        # TODO: isolate this part in a generic function
         if full_file_path.is_file():
             count = 1
             while full_file_path.is_file():
@@ -176,6 +178,11 @@ class DownloadRequestBase(BaseRequest):
         return filename, full_file_path, mimetype, encoding
 
     def finalize_request(self) -> None:
+        try:
+            super(DownloadRequestBase, self).finalize_request()
+        except RestoClientUnsupportedRequest:
+            # Nominal case as url for download is contained in the feature
+            pass
         # If there is no file to download
         if self._url_to_download is None:
             msg = 'There is no {} to download for product {}.'
@@ -185,14 +192,13 @@ class DownloadRequestBase(BaseRequest):
             if self.parent_service.service_access.protocol == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
         # TODO: comment in order to generate error messages for testing purposes
-        super(DownloadRequestBase, self).update_headers()
 
     def run_request(self) -> Response:
         result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
                               headers=self.request_headers, stream=True)
         return result
 
-    def process_request_result(self, request_result: Response) -> Path:
+    def process_request_result(self) -> Path:
         """
          Download one of the different files available for a feature.
 
@@ -201,10 +207,10 @@ class DownloadRequestBase(BaseRequest):
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
         """
-        content_type = request_result.headers.get('content-type')
+        content_type = self._request_result.headers.get('content-type')
 
         if content_type == 'application/json':
-            dict_json = request_result.json()
+            dict_json = self._request_result.json()
             try:
                 error_response = DownloadErrorResponse(self, dict_json).as_resto_object()
             except RestoResponseError as excp:
@@ -233,7 +239,7 @@ class DownloadRequestBase(BaseRequest):
                 # However download will not happen.
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     tmp_file_path = Path(tmp_dir) / file_name
-                    download_file(request_result, tmp_file_path)
+                    download_file(self._request_result, tmp_file_path)
                 raise FeatureOnTape()
             # If it's a product waiting to be on disk
             if self.file_type == 'product' and self._feature.storage == 'staging':
@@ -241,10 +247,11 @@ class DownloadRequestBase(BaseRequest):
                      "Try again later.")
                 raise FeatureOnTape()
             # If it's a Quicklook, Thumbnail or annexes
-            download_file(request_result, full_file_path)
+            download_file(self._request_result, full_file_path)
         # If it's a product
         elif content_type == self._feature.product_mimetype:
-            download_file(request_result, full_file_path, file_size=self._feature.product_size)
+            download_file(self._request_result, full_file_path,
+                          file_size=self._feature.product_size)
         else:
             msg = 'Unexpected content-type {} when downloading {}.'
             raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))

@@ -12,14 +12,14 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, TYPE_CHECKING, cast  # @NoMove
-import warnings
+from typing import TYPE_CHECKING, cast  # @NoMove
 
 from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
+from resto_client.services.service_access import RestoClientUnsupportedRequest
 
-from .base_request import BaseRequest
+from .base_request import BaseRequest, RestoClientEmulatedResponse
 from .utils import AccesDeniedError
 
 if TYPE_CHECKING:
@@ -42,8 +42,8 @@ class RevokeTokenRequest(BaseRequest):
     def run_request(self) -> Response:
         return self.post()
 
-    def process_request_result(self, request_result: Response) -> Response:
-        return request_result
+    def process_request_result(self) -> Response:
+        return self._request_result
 
 
 class GetTokenRequest(BaseRequest):
@@ -68,15 +68,15 @@ class GetTokenRequest(BaseRequest):
             response = self.get_response_as_json()
         return response
 
-    def process_request_result(self, request_result: Response) -> str:
+    def process_request_result(self) -> str:
         # FIXME: check if text could be tested instead of protocol
         if self.service_access.protocol == 'sso_theia':
-            response_text = request_result.text
+            response_text = self._request_result.text
             if response_text == 'Please set mail and password':
                 msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
                 raise AccesDeniedError(msg.format(response_text))
             return GetTokenResponse(self, {'token': response_text}).as_resto_object()
-        return GetTokenResponse(self, request_result.json()).as_resto_object()
+        return GetTokenResponse(self, self._request_result.json()).as_resto_object()
 
 
 class CheckTokenRequest(BaseRequest):
@@ -100,20 +100,15 @@ class CheckTokenRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(bool, super(CheckTokenRequest, self).run())
 
-    def finalize_request(self) -> Optional[dict]:
-        simulated_response: Optional[dict]
-        if not self.supported_by_service():
-            # CheckTokenRequest not supported by the service
-            if self.parent_service.parent_server.debug_server:
-                msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
-                warnings.warn(msg.format(self.auth_service.parent_server.server_name))
-            simulated_response = {'status': 'error', 'message': 'user not connected'}
-        else:
-            simulated_response = super(CheckTokenRequest, self).finalize_request()
-        return simulated_response
+    def finalize_request(self) -> None:
+        try:
+            super(CheckTokenRequest, self).finalize_request()
+        except RestoClientUnsupportedRequest:
+            print('emulating unsupported CheckTokenRequest')
+            emulated_response = RestoClientEmulatedResponse()
+            emulated_json = {'status': 'error', 'message': 'user not connected'}
+            emulated_response.result = CheckTokenResponse(self, emulated_json).as_resto_object()
+            raise emulated_response
 
-    def process_request_result(self, request_result: Response) -> bool:
-        return CheckTokenResponse(self, request_result.json()).as_resto_object()
-
-    def process_dict_result(self, request_result: dict) -> bool:
-        return CheckTokenResponse(self, request_result).as_resto_object()
+    def process_request_result(self) -> bool:
+        return CheckTokenResponse(self, self._request_result.json()).as_resto_object()

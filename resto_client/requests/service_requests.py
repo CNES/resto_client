@@ -14,8 +14,6 @@
 """
 from typing import cast  # @NoMove
 
-from requests import Response
-
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.collections_description import (CollectionsDescription,
                                                             RestoResponseError)
@@ -34,9 +32,9 @@ class DescribeRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoCollections, super(DescribeRequest, self).run())
 
-    def process_request_result(self, request_result: Response) -> RestoCollections:
+    def process_request_result(self) -> RestoCollections:
         try:
-            collections_descr = CollectionsDescription(self, request_result.json())
+            collections_descr = CollectionsDescription(self, self._request_result.json())
         except RestoResponseError:
             msg = 'URL {} does not point to a valid resto server'
             raise ValueError(msg.format(self.service_access.base_url))

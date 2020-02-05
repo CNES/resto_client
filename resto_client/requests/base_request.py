@@ -35,6 +35,13 @@ RestoRequestResult = Union[RestoResponse, Path, str,
                            bool, RestoCollection, RestoCollections, Response]
 
 
+class RestoClientEmulatedResponse(RestoClientDesignError):
+    """
+    Exception raised when an emulated response is to be processed.
+    """
+    result: RestoRequestResult
+
+
 # TODO: make request result an attribute of the request runner
 class BaseRequest(Authenticator):
     """
@@ -69,20 +76,15 @@ class BaseRequest(Authenticator):
                                                           self.service_access.base_url)
                 print(Fore.CYAN + msg + Style.RESET_ALL)
         self.request_headers: Dict[str, str] = {}
+        self._request_result: Response
         self._url_kwargs = url_kwargs
         Authenticator.__init__(self, self.parent_service.auth_service)
 
-    def get_route(self) -> Optional[str]:
+    def get_route(self) -> str:
         """
-        :returns: True if this request type is supported by the service, False otherwise.
+        :returns: The route pattern of this request
         """
         return self.service_access.get_route_pattern(self)
-
-    def supported_by_service(self) -> bool:
-        """
-        :returns: True if this request type is supported by the service, False otherwise.
-        """
-        return self.get_route() is not None
 
     def get_url(self) -> str:
         """
@@ -90,9 +92,6 @@ class BaseRequest(Authenticator):
         :raises RestoClientDesignError: when the request is unsupported by the service
         """
         url_extension = self.get_route()
-        if url_extension is None:
-            msg_fmt = 'Trying to build an URL for {} request, unsupported by the service.'
-            raise RestoClientDesignError(msg_fmt.format(type(self).__name__))
         return urljoin(self.service_access.base_url,
                        url_extension.format(**self._url_kwargs))
 
@@ -116,27 +115,26 @@ class BaseRequest(Authenticator):
         :returns: an object of base type (bool, str) or of a type from resto_client.entities
                   directly usable by resto_client.
         """
-        fake_response = self.finalize_request()
-        if fake_response is None:
-            request_result = self.run_request()
-            return self.process_request_result(request_result)
-        return self.process_dict_result(fake_response)
+        try:
+            self.finalize_request()
+        except RestoClientEmulatedResponse as excp:
+            return excp.result
+        self._request_result = self.run_request()
+        return self.process_request_result()
 
-    def finalize_request(self) -> Optional[dict]:
+    def finalize_request(self) -> None:
         self.update_headers()
+        self.get_route()  # Will trigger an exception if the route is undefined
 
     def run_request(self) -> Response:
         # Default is submitting a get request, requesting json response.
         return self.get_response_as_json()
 
     @abstractmethod
-    def process_request_result(self, request_result: Response) -> RestoRequestResult:
+    def process_request_result(self) -> RestoRequestResult:
         pass
 
-    def process_dict_result(self, request_result: dict) -> RestoRequestResult:
-        pass
-
-    # FIXME/ Return type seems to always be a dict?
+    # FIXME: Return type seems to always be a dict?
     def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
         """
          This create and execute a GET request and return the response content interpreted as json

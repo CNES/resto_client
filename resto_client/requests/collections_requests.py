@@ -14,8 +14,6 @@
 """
 from typing import TYPE_CHECKING, Optional, cast  # @NoMove
 
-from requests import Response
-
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
@@ -45,8 +43,8 @@ class GetCollectionRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoCollection, super(GetCollectionRequest, self).run())
 
-    def process_request_result(self, request_result: Response) -> RestoCollection:
-        collection_response = CollectionDescription(self, request_result.json())
+    def process_request_result(self) -> RestoCollection:
+        collection_response = CollectionDescription(self, self._request_result.json())
         return collection_response.as_resto_object()
 
 
@@ -80,8 +78,8 @@ class SearchCollectionRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoFeatureCollection, super(SearchCollectionRequest, self).run())
 
-    def process_request_result(self, request_result: Response) -> RestoFeatureCollection:
-        feature_collection_response = FeatureCollectionResponse(self, request_result.json())
+    def process_request_result(self) -> RestoFeatureCollection:
+        feature_collection_response = FeatureCollectionResponse(self, self._request_result.json())
         return feature_collection_response.as_resto_object()
 
 
@@ -97,9 +95,9 @@ class GetCollectionsRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoCollections, super(GetCollectionsRequest, self).run())
 
-    def process_request_result(self, request_result: Response) -> RestoCollections:
+    def process_request_result(self) -> RestoCollections:
         try:
-            collections_descr = CollectionsDescription(self, request_result.json())
+            collections_descr = CollectionsDescription(self, self._request_result.json())
         except RestoResponseError:
             msg = 'URL {} does not point to a valid resto server'
             raise ValueError(msg.format(self.service_access.base_url))
