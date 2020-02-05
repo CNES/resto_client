@@ -86,7 +86,7 @@ class RestoServer():
     def server_name(self, server_name: Optional[str]) -> None:
         if server_name is not None:
             canonical_server_name = DB_SERVERS.check_server_name(server_name)
-            if canonical_server_name != self._server_name:
+            if canonical_server_name is not None and canonical_server_name != self._server_name:
                 self._init_from_db(canonical_server_name)
                 self._server_name = canonical_server_name
                 self.current_collection = None  # Not None in case there is a single collection
