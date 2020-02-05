@@ -14,13 +14,12 @@
 """
 from contextlib import redirect_stdout
 import io
-import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliShow(unittest.TestCase):
+class UTestCliShow(TestRestoClientCli):
     """
     Unit Tests of the cli show module
     """
@@ -29,12 +28,10 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show server in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         with redirect_stdout(io.StringIO()) as out_string_io1:
             resto_client_run(arguments=['show', 'server'])
         output1 = out_string_io1.getvalue().strip()  # type: ignore
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io2:
             resto_client_run(arguments=['show', 'server', 'kalideos'])
         output2 = out_string_io2.getvalue().strip()  # type: ignore
@@ -44,7 +41,10 @@ class UTestCliShow(unittest.TestCase):
         first_line = out_string_io2.getvalue().splitlines()[0]  # type: ignore
         self.assertEqual(first_line, 'Server URL: https://www.kalideos.fr/resto2/')
 
-        RESTO_CLIENT_SETTINGS.clear()
+    def test_n_show_server_stats(self) -> None:
+        """
+        Unit test of show server in nominal cases
+        """
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'server', 'kalideos', '--stats'])
         expect_out = (['No statistics available for KALCNES',
@@ -56,7 +56,6 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show collection in nominal cases: nothing persisted
         """
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'collection', 'KALHAITI', '--server=kalideos'])
         second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
@@ -66,7 +65,6 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show collection in nominal cases : current collection
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
         with redirect_stdout(io.StringIO()) as out_string_io:
@@ -78,7 +76,6 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show collection in nominal cases : another collection on the current server
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
         with redirect_stdout(io.StringIO()) as out_string_io:
@@ -90,7 +87,6 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show settings in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'settings'])
         second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
@@ -101,7 +97,6 @@ class UTestCliShow(unittest.TestCase):
         Unit test of show feature in nominal cases
         With Kalideos and Creodias
         """
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'feature', '1363714904970542',
                                         '--collection=KALCNES', '--server=kalideos'])
@@ -120,7 +115,6 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show server in degraded cases (no result found)
         """
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'server'])
         output = out_string_io.getvalue()  # type: ignore
@@ -131,7 +125,6 @@ class UTestCliShow(unittest.TestCase):
         """
         Unit test of show collection in degraded cases (no result found)
         """
-        RESTO_CLIENT_SETTINGS.clear()
         with redirect_stdout(io.StringIO()) as out_string_io:
             resto_client_run(arguments=['show', 'collection', 'oups', '--server=kalideos'])
         output = out_string_io.getvalue()  # type: ignore

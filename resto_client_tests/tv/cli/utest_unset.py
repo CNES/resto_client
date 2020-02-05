@@ -13,17 +13,15 @@
    limitations under the License.
 """
 from pathlib import Path
-import unittest
 
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
-from resto_client.cli.resto_client_settings import (RESTO_CLIENT_SETTINGS,
-                                                    RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR)
-from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
-                                                     TOKEN_KEY)
+from resto_client.cli.resto_client_settings import RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
+from resto_client.cli.resto_server_persisted import COLLECTION_KEY
+from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliUnset(unittest.TestCase):
+class UTestCliUnset(TestRestoClientCli):
     """
     Unit Tests of the cli unset module
     server, account, collection, download_dir, region, verbosity
@@ -33,107 +31,90 @@ class UTestCliUnset(unittest.TestCase):
         """
         Unit test of unset server in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         # With server persisted and no account persisted
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_no_server_in_settings()
         # With server persisted and account persisted
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_account'])
         # Test setting of all default server
         resto_client_run(arguments=['unset', 'server'])
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_no_server_in_settings()
 
     def test_n_unset_server_noserver(self) -> None:
         """
         Unit test of unset server if there is no server in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         resto_client_run(arguments=['unset', 'server'])
         resto_client_run(arguments=['unset', 'server'])
-        self.assertTrue(SERVER_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_no_server_in_settings()
 
     def test_n_unset_account(self) -> None:
         """
         Unit test of unset account in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         # With no server persisted
         resto_client_run(arguments=['unset', 'account'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_no_account_in_settings()
         # With server persisted and account already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_name'])
         # With no account already set
         resto_client_run(arguments=['unset', 'account'])
-        self.assertTrue(USERNAME_KEY not in RESTO_CLIENT_SETTINGS)
-        self.assertTrue(TOKEN_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_no_account_in_settings()
 
     def test_n_unset_collection(self) -> None:
         """
         Unit test of unset collection in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         # With no server persisted
         resto_client_run(arguments=['unset', 'collection'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(COLLECTION_KEY)
         # With server persisted and collection already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
         resto_client_run(arguments=['unset', 'collection'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(COLLECTION_KEY)
         # With server persisted and no collection persisted
         resto_client_run(arguments=['unset', 'collection'])
-        self.assertTrue(COLLECTION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(COLLECTION_KEY)
 
     def test_n_unset_region(self) -> None:
         """
         Unit test of unset region in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         # With region already persisted
         resto_client_run(arguments=['set', 'region', 'bretagne'])
         resto_client_run(arguments=['unset', 'region'])
-        self.assertTrue(REGION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(REGION_KEY)
         # With no region persisted
         resto_client_run(arguments=['unset', 'region'])
-        self.assertTrue(REGION_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(REGION_KEY)
 
     def test_n_unset_download_dir(self) -> None:
         """
         Unit test of unset download directory in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         # With download directory already persisted
-        directory_test = Path.home()
-        resto_client_run(arguments=['set', 'download_dir', str(directory_test)])
-        self.assertEqual(Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]), directory_test)
+        directory_test = str(Path.home())
+        resto_client_run(arguments=['set', 'download_dir', directory_test])
+        self.assert_setting_equal(DOWNLOAD_DIR_KEY, directory_test)
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertEqual(Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]),
-                         RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR)
+        self.assert_setting_equal(DOWNLOAD_DIR_KEY, str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
         # With default directory persisted
         resto_client_run(arguments=['unset', 'download_dir'])
-        self.assertEqual(Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]),
-                         RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR)
+        self.assert_setting_equal(DOWNLOAD_DIR_KEY, str(RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR))
 
     def test_n_unset_verbosity(self) -> None:
         """
         Unit test of unset verbosity in nominal cases
         """
-        RESTO_CLIENT_SETTINGS.clear()
         # With verbosity already persisted
         resto_client_run(arguments=['set', 'verbosity', 'NORMAL'])
         resto_client_run(arguments=['unset', 'verbosity'])
-        self.assertTrue(VERBOSITY_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(VERBOSITY_KEY)
         # With no verbosity persisted
         resto_client_run(arguments=['unset', 'verbosity'])
-        self.assertTrue(VERBOSITY_KEY not in RESTO_CLIENT_SETTINGS)
+        self.assert_not_in_settings(VERBOSITY_KEY)
