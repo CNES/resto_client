@@ -14,10 +14,10 @@
 """
 from abc import ABC, abstractmethod
 import copy
-from typing import List, Dict, Union, TypeVar, Optional, TYPE_CHECKING
+from typing import List, Dict, Union, TypeVar, Optional, TYPE_CHECKING  # @NoMove @UnusedImport
 from urllib.parse import urljoin
 
-from resto_client.base_exceptions import RestoClientUserError
+from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.generic.basic_types import URLType
 
 
@@ -33,6 +33,12 @@ and the value is another dictionary. This second dictionary has the request clas
 and the route itself as the value. This route can be None in case it is not defined for some
 protocol.
 """
+
+
+class RestoClientUnsupportedRequest(RestoClientDesignError):
+    """
+    Exception raised when a request is unsupported by the service access.
+    """
 
 
 class ServiceAccess(ABC):
@@ -76,15 +82,29 @@ class ServiceAccess(ABC):
         self.base_url = service_url
         self.protocol = service_protocol
 
-    def get_route_pattern(self, request: 'BaseRequest') -> Optional[str]:
+    def get_route_pattern(self, request: 'BaseRequest') -> str:
         """
         Returns the route pattern for a request
 
         :param request: the request instance for which route must be found.
         :returns: the route pattern
+        :raises RestoClientUnsupportedRequest: when the request has no associated route in this
+                                               service access.
         """
         routes = self.routes_patterns()[self.protocol]
-        return routes[type(request).__name__]
+        try:
+            route = routes[type(request).__name__]
+        except KeyError:
+            msg = '{} request is undefined in route patterns for {} server.'
+            raise RestoClientUnsupportedRequest(
+                msg.format(type(request).__name__,
+                           request.parent_service.parent_server.server_name))
+        if route is None:
+            msg = '{} request is declared as None in route patterns for {} server.'
+            raise RestoClientUnsupportedRequest(
+                msg.format(type(request).__name__,
+                           request.parent_service.parent_server.server_name))
+        return route
 
     @property
     def base_url(self) -> str:
