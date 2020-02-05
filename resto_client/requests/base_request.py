@@ -117,16 +117,14 @@ class BaseRequest(Authenticator):
         fake_response = self.finalize_request()
         if fake_response is None:
             request_result = self.run_request()
-            if isinstance(request_result, Response):
-                return self.process_request_result(request_result)
-            return self.process_dict_result(request_result)
+            return self.process_request_result(request_result)
         return self.process_dict_result(fake_response)
 
     def finalize_request(self) -> Optional[dict]:
         self.update_headers()
         return None
 
-    def run_request(self) -> Union[Response, dict]:
+    def run_request(self) -> Response:
         # FIXME: this is not the right way to select the request type
         if self.authentication_type == 'NEVER':
             return self.get_response_as_json()
@@ -155,20 +153,6 @@ class BaseRequest(Authenticator):
         self.update_headers(dict_input={'Accept': 'application/json'})
         return get_response(self.get_url(), self.request_action,
                             headers=self.request_headers, auth=self.http_basic_auth)
-
-    # TODO: remove this method; use post() and put the processing code in
-    # adequate process_request_result()
-    def post_as_text(self, stream: bool=False) -> Optional[str]:
-        """
-         This create and execute a POST request and return the response content interpreted as text
-         or None if no text can be found
-        """
-        result = self.post(stream=stream)
-        response_text = result.text
-        if response_text == 'Please set mail and password':
-            msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
-            raise AccesDeniedError(msg.format(response_text))
-        return response_text
 
     def post(self, stream: bool=False) -> Response:
         """

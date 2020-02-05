@@ -20,7 +20,7 @@ from requests import Response
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
 from .base_request import RestoRequestResult, BaseRequest
-
+from .utils import AccesDeniedError
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
@@ -53,22 +53,22 @@ class GetTokenRequest(BaseRequest):
         # No call to update_headers(), in order to avoid recursive calls
         return None
 
-    def run_request(self) -> Union[Response, dict]:
-        response: Union[Response, dict]
-        if self.service_access.protocol == 'sso_dotcloud':
+    def run_request(self) -> Response:
+        if self.service_access.protocol in ['sso_dotcloud', 'sso_theia']:
             response = self.post()
-        elif self.service_access.protocol == 'sso_theia':
-            response_text = self.post_as_text()
-            response = {'token': response_text}
         else:
             response = self.get_response_as_json()
         return response
 
     def process_request_result(self, request_result: Response) -> str:
+        # FIXME: check if text could be tested instead of protocol
+        if self.service_access.protocol == 'sso_theia':
+            response_text = request_result.text
+            if response_text == 'Please set mail and password':
+                msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
+                raise AccesDeniedError(msg.format(response_text))
+            return GetTokenResponse(self, {'token': response_text}).as_resto_object()
         return GetTokenResponse(self, request_result.json()).as_resto_object()
-
-    def process_dict_result(self, request_result: dict) -> RestoRequestResult:
-        return GetTokenResponse(self, request_result).as_resto_object()
 
 
 class CheckTokenRequest(BaseRequest):
