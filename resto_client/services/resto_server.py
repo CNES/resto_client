@@ -63,11 +63,13 @@ class RestoServer():
         self.current_collection = current_collection
         self.set_credentials(username=username, password=password, token_value=token)
 
-    def _init_from_db(self) -> None:
+    def _init_from_db(self, server_name: str) -> None:
         """
         Initialize or reinitialize the server from the servers database
+
+        :param server_name: name of the server to retrieve in the database
         """
-        server_description = DB_SERVERS.get_server(self._server_name)  # type: ignore
+        server_description = DB_SERVERS.get_server(server_name)
         self._authentication_service = AuthenticationService(server_description.auth_access, self)
         self._resto_service = RestoService(server_description.resto_access,
                                            self._authentication_service, self)
@@ -85,8 +87,8 @@ class RestoServer():
         if server_name is not None:
             canonical_server_name = DB_SERVERS.check_server_name(server_name)
             if canonical_server_name != self._server_name:
+                self._init_from_db(canonical_server_name)
                 self._server_name = canonical_server_name
-                self._init_from_db()
                 self.current_collection = None  # Not None in case there is a single collection
                 self.reset_credentials()
         else:
