@@ -198,7 +198,7 @@ class RestoServer():
         return features_list
 
     def download_feature_file(self, feature: RestoFeature,
-                              file_type: str, download_dir: Path) -> Optional[str]:
+                              file_type: str, download_dir: Path) -> Path:
         """
         Download different files of a feature
 
@@ -216,7 +216,7 @@ class RestoServer():
     def download_features_file_from_ids(self,
                                         features_ids: Union[str, List[str]],
                                         file_type: str,
-                                        download_dir: Path) -> List[str]:
+                                        download_dir: Path) -> List[Path]:
         """
         Download different file types from feature id(s)
 
@@ -228,13 +228,12 @@ class RestoServer():
         # Issue a search request into the collection to retrieve features.
         features = self.get_features_from_ids(features_ids)
 
-        downloaded_filenames: List[str] = []
+        downloaded_file_paths: List[Path] = []
         for feature in features:
             # Do download
-            downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
-            if downloaded_filename is not None:
-                downloaded_filenames.append(downloaded_filename)
-        return downloaded_filenames
+            downloaded_file_path = self.download_feature_file(feature, file_type, download_dir)
+            downloaded_file_paths.append(downloaded_file_path)
+        return downloaded_file_paths
 
     def _ensure_server_directory(self, data_dir: Path) -> Path:
         """

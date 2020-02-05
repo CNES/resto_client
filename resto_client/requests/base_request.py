@@ -13,6 +13,7 @@
    limitations under the License.
 """
 from abc import abstractmethod
+from pathlib import Path
 from urllib.parse import urljoin
 from typing import Optional, Union, Dict, TYPE_CHECKING  # @UnusedImport @NoMove
 
@@ -30,7 +31,8 @@ from .authenticator import Authenticator
 from .utils import get_response
 
 
-RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoCollections, Response]
+RestoRequestResult = Union[RestoResponse, Path, str,
+                           bool, RestoCollection, RestoCollections, Response]
 
 
 # TODO: make request result an attribute of the request runner

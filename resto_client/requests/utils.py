@@ -63,7 +63,7 @@ def get_response(url: str,
 
 # TODO: move as part of process_request_result
 def download_file(requ_result: requests.Response,
-                  full_file_name: Path,
+                  file_path: Path,
                   file_size: Optional[int]=None) -> None:
     """
     method called when we know that we have a file to download
@@ -75,9 +75,9 @@ def download_file(requ_result: requests.Response,
 
     block_size = 1024
 
-    print('downloading file: {}'.format(full_file_name))
+    print('downloading file: {}'.format(file_path))
 
-    with open(full_file_name, 'wb') as file_desc:
+    with open(file_path, 'wb') as file_desc:
         # do iteration with progress bar using tqdm
         progress_bar = tqdm(unit="B", total=file_size, unit_scale=True, desc='Downloading')
         for block in requ_result.iter_content(block_size):

@@ -140,9 +140,9 @@ class DownloadRequestBase(BaseRequest):
         self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
         self._download_directory = download_directory
 
-    def run(self) -> str:
+    def run(self) -> Path:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(str, super(DownloadRequestBase, self).run())
+        return cast(Path, super(DownloadRequestBase, self).run())
 
     def get_filename(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
@@ -192,11 +192,11 @@ class DownloadRequestBase(BaseRequest):
                               headers=self.request_headers, stream=True)
         return result
 
-    def process_request_result(self, request_result: Response) -> str:
+    def process_request_result(self, request_result: Response) -> Path:
         """
          Download one of the different files available for a feature.
 
-        :returns: the name of the downloaded file
+        :returns: the path to the downloaded file
         :raises RestoResponseError: when the response does not have one of the expected contents.
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
@@ -249,8 +249,8 @@ class DownloadRequestBase(BaseRequest):
             msg = 'Unexpected content-type {} when downloading {}.'
             raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
 
-        # Download finished. Return the filename where download has been made.
-        return file_name
+        # Download finished. Return the file path where download has been made.
+        return full_file_path
 
 
 class DownloadProductRequest(DownloadRequestBase):
