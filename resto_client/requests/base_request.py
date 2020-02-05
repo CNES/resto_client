@@ -30,8 +30,7 @@ from .authenticator import Authenticator
 from .utils import get_response
 
 
-RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoCollections, None,
-                           Response]
+RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoCollections, Response]
 
 
 # TODO: make request result an attribute of the request runner

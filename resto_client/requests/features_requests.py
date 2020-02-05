@@ -16,7 +16,7 @@ from abc import abstractmethod
 from pathlib import Path
 import tempfile
 from warnings import warn
-from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
+from typing import Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 
 from requests import Response
 
@@ -192,7 +192,7 @@ class DownloadRequestBase(BaseRequest):
                               headers=self.request_headers, stream=True)
         return result
 
-    def process_request_result(self, request_result: Response) -> Optional[str]:
+    def process_request_result(self, request_result: Response) -> str:
         """
          Download one of the different files available for a feature.
 
