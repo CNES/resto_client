@@ -27,7 +27,7 @@ from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
 from .authenticator import Authenticator
-from .utils import AccesDeniedError, get_response
+from .utils import get_response
 
 
 RestoRequestResult = Union[RestoResponse, str, bool, RestoCollection, RestoCollections, None,
@@ -107,6 +107,7 @@ class BaseRequest(Authenticator):
 
 # ++++++++++++++ Request runner +++++++++++++++++++++++++++++
 
+    @abstractmethod
     def run(self) -> RestoRequestResult:
         """
         Submit the request and provide its result
@@ -122,7 +123,6 @@ class BaseRequest(Authenticator):
 
     def finalize_request(self) -> Optional[dict]:
         self.update_headers()
-        return None
 
     def run_request(self) -> Response:
         # Default is submitting a get request, requesting json response.

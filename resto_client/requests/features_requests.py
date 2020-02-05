@@ -16,7 +16,7 @@ from abc import abstractmethod
 from pathlib import Path
 import tempfile
 from warnings import warn
-from typing import Optional, Tuple, Union, TYPE_CHECKING  # @NoMove
+from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 
 from requests import Response
 
@@ -82,9 +82,12 @@ class SignLicenseRequest(BaseRequest):
                                                  user=service.auth_service.username_b64,
                                                  license_id=license_id)
 
+    def run(self) -> bool:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(bool, super(SignLicenseRequest, self).run())
+
     def finalize_request(self) -> None:
         self.update_headers(dict_input={'Accept': 'application/json'})
-        return None
 
     def run_request(self) -> Response:
         result = self.post()
@@ -137,6 +140,10 @@ class DownloadRequestBase(BaseRequest):
         self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
         self._download_directory = download_directory
 
+    def run(self) -> str:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(str, super(DownloadRequestBase, self).run())
+
     def get_filename(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
         Returns filename and full filename according to the content type.
@@ -168,7 +175,7 @@ class DownloadRequestBase(BaseRequest):
 
         return filename, full_file_path, mimetype, encoding
 
-    def finalize_request(self) -> Optional[dict]:
+    def finalize_request(self) -> None:
         # If there is no file to download
         if self._url_to_download is None:
             msg = 'There is no {} to download for product {}.'
@@ -179,7 +186,6 @@ class DownloadRequestBase(BaseRequest):
                 self._url_to_download += "/?issuerId=theia"
         # TODO: comment in order to generate error messages for testing purposes
         super(DownloadRequestBase, self).update_headers()
-        return None
 
     def run_request(self) -> Response:
         result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
@@ -262,6 +268,20 @@ class AnonymousDownloadRequest(DownloadRequestBase):
      Abstract class for downloading files anonymously
     """
     authentication_type = 'NEVER'
+
+    @property
+    @abstractmethod
+    def filename_suffix(self) -> str:
+        """
+        :returns: a file type specific suffix to add before the extension in the filename.
+        """
+
+    @property
+    @abstractmethod
+    def file_type(self) -> str:
+        """
+        :returns: file type: one of 'product', 'quicklook', 'thumbnail' or 'annexes'
+        """
 
 
 class DownloadQuicklookRequest(DownloadRequestBase):

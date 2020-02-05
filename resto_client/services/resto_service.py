@@ -204,10 +204,11 @@ class RestoService(BaseService):
                                 'thumbnail': DownloadThumbnailRequest,
                                 'annexes': DownloadAnnexesRequest}
 
+    # TODO: change str return type to Path type
     def download_feature_file(self,
                               feature: RestoFeature,
                               file_type: str,
-                              download_dir: Path) -> Optional[str]:
+                              download_dir: Path) -> str:
         """
         Download one of the files associated to a feature : product, quicklook, thumbnail, annexes.
 

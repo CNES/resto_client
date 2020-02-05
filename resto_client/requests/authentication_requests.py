@@ -12,14 +12,14 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, Union, TYPE_CHECKING  # @NoMove
+from typing import Optional, TYPE_CHECKING, cast  # @NoMove
 import warnings
 
 from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 
-from .base_request import RestoRequestResult, BaseRequest
+from .base_request import BaseRequest
 from .utils import AccesDeniedError
 
 if TYPE_CHECKING:
@@ -35,6 +35,10 @@ class RevokeTokenRequest(BaseRequest):
     request_action = 'revoking token'
     authentication_type = 'ALWAYS'
 
+    def run(self) -> Response:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(Response, super(RevokeTokenRequest, self).run())
+
     def run_request(self) -> Response:
         return self.post()
 
@@ -48,6 +52,10 @@ class GetTokenRequest(BaseRequest):
     """
     request_action = 'getting token'
     authentication_type = 'ALWAYS'
+
+    def run(self) -> str:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(str, super(GetTokenRequest, self).run())
 
     def finalize_request(self) -> None:
         # No call to update_headers(), in order to avoid recursive calls
@@ -88,6 +96,10 @@ class CheckTokenRequest(BaseRequest):
             raise TypeError('token argument must be of type <str>')
         super(CheckTokenRequest, self).__init__(service, token=token)
 
+    def run(self) -> bool:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(bool, super(CheckTokenRequest, self).run())
+
     def finalize_request(self) -> Optional[dict]:
         simulated_response: Optional[dict]
         if not self.supported_by_service():
@@ -103,5 +115,5 @@ class CheckTokenRequest(BaseRequest):
     def process_request_result(self, request_result: Response) -> bool:
         return CheckTokenResponse(self, request_result.json()).as_resto_object()
 
-    def process_dict_result(self, request_result: dict) -> RestoRequestResult:
+    def process_dict_result(self, request_result: dict) -> bool:
         return CheckTokenResponse(self, request_result).as_resto_object()

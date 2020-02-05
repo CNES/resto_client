@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import cast  # @NoMove
+
 from requests import Response
 
 from resto_client.entities.resto_collections import RestoCollections
@@ -27,6 +29,10 @@ class DescribeRequest(BaseRequest):
     """
     request_action = 'getting service description'
     authentication_type = 'NEVER'
+
+    def run(self) -> RestoCollections:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoCollections, super(DescribeRequest, self).run())
 
     def process_request_result(self, request_result: Response) -> RestoCollections:
         try:

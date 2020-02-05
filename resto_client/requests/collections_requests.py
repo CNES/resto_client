@@ -12,19 +12,21 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, cast  # @NoMove
 
 from requests import Response
 
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
+from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.responses.collection_description import CollectionDescription
 from resto_client.responses.collections_description import CollectionsDescription
 from resto_client.responses.feature_collection_response import FeatureCollectionResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 
-from .base_request import RestoRequestResult, BaseRequest
+from .base_request import BaseRequest
+
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
@@ -38,6 +40,10 @@ class GetCollectionRequest(BaseRequest):
 
     request_action = 'getting collection'
     authentication_type = 'NEVER'
+
+    def run(self) -> RestoCollection:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoCollection, super(GetCollectionRequest, self).run())
 
     def process_request_result(self, request_result: Response) -> RestoCollection:
         collection_response = CollectionDescription(self, request_result.json())
@@ -70,7 +76,11 @@ class SearchCollectionRequest(BaseRequest):
                                                       collection=collection,
                                                       criteria_url=criteria_url)
 
-    def process_request_result(self, request_result: Response) -> RestoRequestResult:
+    def run(self) -> RestoFeatureCollection:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoFeatureCollection, super(SearchCollectionRequest, self).run())
+
+    def process_request_result(self, request_result: Response) -> RestoFeatureCollection:
         feature_collection_response = FeatureCollectionResponse(self, request_result.json())
         return feature_collection_response.as_resto_object()
 
@@ -82,6 +92,10 @@ class GetCollectionsRequest(BaseRequest):
 
     request_action = 'listing collections'
     authentication_type = 'NEVER'
+
+    def run(self) -> RestoCollections:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoCollections, super(GetCollectionsRequest, self).run())
 
     def process_request_result(self, request_result: Response) -> RestoCollections:
         try:
