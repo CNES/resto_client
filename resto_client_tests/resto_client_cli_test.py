@@ -13,7 +13,6 @@
    limitations under the License.
 """
 import argparse
-from contextlib import redirect_stdout
 import io
 from pathlib import Path
 import sys
@@ -21,13 +20,13 @@ from tempfile import TemporaryDirectory
 from typing import List
 import unittest
 
-from resto_client.base_exceptions import RestoClientError
 from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
                                                      TOKEN_KEY)
+import resto_client.settings.resto_client_config as resto_client_config
 
 
 class TestRestoClientCli(unittest.TestCase):
@@ -37,6 +36,7 @@ class TestRestoClientCli(unittest.TestCase):
 
     def setUp(self) -> None:
         RESTO_CLIENT_SETTINGS.clear()
+        resto_client_run(['set', 'verbosity', 'DEBUG'])
 
     def assert_not_in_settings(self, settings_key: str) -> None:
         """
@@ -127,9 +127,13 @@ class TestRestoClientCli(unittest.TestCase):
         :param command: the command as a list of words
         :returns: the command output
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=command)
-        output = out_string_io.getvalue()  # type: ignore
+        previous_stdout = resto_client_config.RESTO_CLIENT_STDOUT
+        new_stdout = io.StringIO()
+        resto_client_config.RESTO_CLIENT_STDOUT = new_stdout
+        resto_client_run(arguments=command)
+        output = new_stdout.getvalue()
+        new_stdout.close()
+        resto_client_config.RESTO_CLIENT_STDOUT = previous_stdout
         print(output)
         return output.strip()
 
