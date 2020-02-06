@@ -14,6 +14,7 @@
 """
 from pathlib import Path
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
@@ -47,8 +48,10 @@ class UTestCliUnset(TestRestoClientCli):
         """
         Unit test of unset server if there is no server in nominal cases
         """
-        resto_client_run(arguments=['unset', 'server'])
-        resto_client_run(arguments=['unset', 'server'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['unset', 'server'])
+        expected_msg = 'No persisted server and None is not a valid server name.'
+        self.assertEqual(expected_msg, str(ctxt.exception))
         self.assert_no_server_in_settings()
 
     def test_n_unset_account(self) -> None:
@@ -56,12 +59,15 @@ class UTestCliUnset(TestRestoClientCli):
         Unit test of unset account in nominal cases
         """
         # With no server persisted
-        resto_client_run(arguments=['unset', 'account'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['unset', 'account'])
+        expected_msg = 'No persisted server and None is not a valid server name.'
+        self.assertEqual(expected_msg, str(ctxt.exception))
         self.assert_no_account_in_settings()
+
         # With server persisted and account already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_name'])
-        # With no account already set
         resto_client_run(arguments=['unset', 'account'])
         self.assert_no_account_in_settings()
 
@@ -70,8 +76,12 @@ class UTestCliUnset(TestRestoClientCli):
         Unit test of unset collection in nominal cases
         """
         # With no server persisted
-        resto_client_run(arguments=['unset', 'collection'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['unset', 'collection'])
+        expected_msg = 'No persisted server and None is not a valid server name.'
+        self.assertEqual(expected_msg, str(ctxt.exception))
         self.assert_not_in_settings(COLLECTION_KEY)
+
         # With server persisted and collection already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])

@@ -132,9 +132,10 @@ class UTestCliSet(TestRestoClientCli):
         """
         Unit test of set server in degraded cases
         """
-        output = self.get_command_output(['set', 'server', 'bad_server'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['set', 'server', 'bad_server'])
         msg = 'No persisted server and bad_server is not a valid server name.'
-        self.assertIn(msg, output)
+        self.assertEqual(msg, str(ctxt.exception))
 
     def test_d_set_account(self) -> None:
         """

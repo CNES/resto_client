@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
@@ -102,13 +103,16 @@ class UTestCliShow(TestRestoClientCli):
         """
         Unit test of show server in degraded cases (no result found)
         """
-        output = self.get_command_output(['show', 'server'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['show', 'server'])
         expected_msg = 'No persisted server and None is not a valid server name.'
-        self.assertIn(expected_msg, output)
+        self.assertEqual(expected_msg, str(ctxt.exception))
 
     def test_d_show_collection(self) -> None:
         """
         Unit test of show collection in degraded cases (no result found)
         """
-        output = self.get_command_output(['show', 'collection', 'oups', '--server=kalideos'])
-        self.assertIn('No collection found with name oups', output)
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['show', 'collection', 'oups', '--server=kalideos'])
+        expected_msg = 'No collection found with name oups'
+        self.assertEqual(expected_msg, str(ctxt.exception))
