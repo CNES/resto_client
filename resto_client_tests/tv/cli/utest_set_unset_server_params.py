@@ -37,9 +37,10 @@ class UTestSetServerParams(TestRestoClientCli):
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # Test setting of all default server
         for server_name in WELL_KNOWN_SERVERS:
-            resto_client_run(arguments=['set', 'server', server_name])
-            self.assert_setting_equal(SERVER_KEY, server_name)
-            self.assert_no_account_in_settings()
+            with self.subTest(server=server_name):
+                resto_client_run(arguments=['set', 'server', server_name])
+                self.assert_setting_equal(SERVER_KEY, server_name)
+                self.assert_no_account_in_settings()
 
     def test_n_set_account(self) -> None:
         """
