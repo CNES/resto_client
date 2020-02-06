@@ -119,6 +119,19 @@ class TestRestoClientCli(unittest.TestCase):
         # verify removing of tmp_dir
         self.assertFalse(Path(tmp_dir).is_dir())
 
+    def get_command_output(self, command: List[str]) -> str:
+        """
+        Runs the specified resto_client command and returns its output
+
+        :param command: the command as a list of words
+        :returns: the command output
+        """
+        with redirect_stdout(io.StringIO()) as out_string_io:
+            resto_client_run(arguments=command)
+        output = out_string_io.getvalue()  # type: ignore
+        print(output)
+        return output.strip()
+
 
 def catch_output_from_run(test_args: dict) -> str:
     """

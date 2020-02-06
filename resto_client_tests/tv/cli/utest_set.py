@@ -12,8 +12,6 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from contextlib import redirect_stdout
-import io
 from pathlib import Path
 
 from resto_client.base_exceptions import RestoClientUserError
@@ -23,6 +21,7 @@ from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, C
                                                      TOKEN_KEY)
 from resto_client.cli.resto_server_persisted import RestoClientNoPersistedServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
+
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
@@ -133,9 +132,7 @@ class UTestCliSet(TestRestoClientCli):
         """
         Unit test of set server in degraded cases
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['set', 'server', 'bad_server'])
-        output = out_string_io.getvalue().strip()  # type: ignore
+        output = self.get_command_output(['set', 'server', 'bad_server'])
         msg = 'No persisted server and bad_server is not a valid server name.'
         self.assertIn(msg, output)
 
