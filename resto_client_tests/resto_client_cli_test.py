@@ -119,7 +119,8 @@ class TestRestoClientCli(unittest.TestCase):
         # verify removing of tmp_dir
         self.assertFalse(Path(tmp_dir).is_dir())
 
-    def get_command_output(self, command: List[str]) -> str:
+    @staticmethod
+    def get_command_output(command: List[str]) -> str:
         """
         Runs the specified resto_client command and returns its output
 
@@ -131,29 +132,6 @@ class TestRestoClientCli(unittest.TestCase):
         output = out_string_io.getvalue()  # type: ignore
         print(output)
         return output.strip()
-
-
-def catch_output_from_run(test_args: dict) -> str:
-    """
-    Launch resto_client_run and catch output for test
-
-    :param  test_args: dictionnary with cli verb, targeted collection, server name and product id
-    :returns: output of a run
-    :raises RestoClientError: when the mandatory key is not present in arguments
-    """
-    try:
-        arguments = test_args.pop('mandatory')
-    except KeyError:
-        msg_err = 'mandatory key is mandatory in test_args dict argument'
-        raise RestoClientError(msg_err)
-
-    for key, value in test_args.items():
-        new_item = '--{}={}'.format(key, value)
-        arguments.append(new_item)
-    with redirect_stdout(io.StringIO()) as out_string_io:
-        resto_client_run(arguments=arguments)
-    output = out_string_io.getvalue()  # type: ignore
-    return output
 
 
 def print_parser_help(parser: argparse.ArgumentParser, arguments: List) -> None:
