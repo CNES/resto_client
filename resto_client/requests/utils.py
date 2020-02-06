@@ -20,6 +20,7 @@ from requests.exceptions import HTTPError, SSLError
 from tqdm import tqdm
 
 from resto_client.base_exceptions import RestoClientUserError
+from resto_client.settings.resto_client_config import resto_client_print
 
 
 class AccesDeniedError(RestoClientUserError):
@@ -71,7 +72,7 @@ def download_file(requ_result: requests.Response,
 
     block_size = 1024
 
-    print('downloading file: {}'.format(full_file_name))
+    resto_client_print('downloading file: {}'.format(full_file_name))
 
     with open(full_file_name, 'wb') as file_desc:
         # do iteration with progress bar using tqdm

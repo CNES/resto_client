@@ -12,9 +12,21 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+import sys
+from typing import Any  # @NoMove @UnusedImport
+
 from resto_client.generic.user_dirs import user_config_dir
 
 RESTO_CLIENT_APP_NAME = 'resto_client'
 RESTO_CLIENT_APP_AUTHOR = 'CNES'
 RESTO_CLIENT_CONFIG_DIR = user_config_dir(app_author=RESTO_CLIENT_APP_AUTHOR,
                                           app_name=RESTO_CLIENT_APP_NAME)
+
+RESTO_CLIENT_STDOUT = sys.stdout
+
+
+def resto_client_print(*args: Any) -> None:
+    """
+    print function for resto_client, replacing standard print() function for operational outputs.
+    """
+    print(*args, file=RESTO_CLIENT_STDOUT)
