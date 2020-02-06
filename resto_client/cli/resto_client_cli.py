@@ -56,6 +56,7 @@ from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.persistence import persist_settings
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
+from resto_client.settings.resto_client_config import resto_client_print
 
 
 def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
@@ -83,7 +84,7 @@ def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
             if RestoClientParameters.is_verbose():
                 raise
             with colorama_text():
-                print(Fore.RED + Style.BRIGHT + str(excp) + Style.RESET_ALL)
+                resto_client_print(Fore.RED + Style.BRIGHT + str(excp) + Style.RESET_ALL)
 
 
 def main(arguments: Optional[Sequence[str]]=None) -> None:

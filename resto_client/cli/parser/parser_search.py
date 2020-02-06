@@ -27,6 +27,7 @@ from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
 from resto_client.functions.aoi_utils import find_region_choice
+from resto_client.settings.resto_client_config import resto_client_print
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
@@ -135,23 +136,23 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
         if len(features_collection.all_id) == 1:
             msg_head = Fore.BLUE + 'One result found with id : ' + Style.BRIGHT
             search_feature_id = features_collection.features[0].product_identifier
-            print(msg_head + search_feature_id)
+            resto_client_print(msg_head + search_feature_id)
         elif not features_collection.all_id:
             page_search = criteria_dict.get('page', 1)
             if page_search > 1:
                 msg_search = msg_no_result + 'at page {}, try a lower page number'
-                print(msg_search.format(page_search))
+                resto_client_print(msg_search.format(page_search))
             else:
-                print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
+                resto_client_print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         else:
             search_feature_id = features_collection.all_id
-            print(features_collection.all_id)
+            resto_client_print(features_collection.all_id)
             msg_search = '{} results shown on a total of '
             msg_search += Style.BRIGHT + ' {} results ' + Style.NORMAL + 'beginning at index {}'
-            print(msg_search.format(len(features_collection.all_id),
-                                    features_collection.total_results,
-                                    features_collection.start_index))
-        print(Style.RESET_ALL)
+            resto_client_print(msg_search.format(len(features_collection.all_id),
+                                                 features_collection.total_results,
+                                                 features_collection.start_index))
+        resto_client_print(Style.RESET_ALL)
 
     download = get_from_args(DOWNLOAD_ARGNAME, args)
     if download and search_feature_id is not None:

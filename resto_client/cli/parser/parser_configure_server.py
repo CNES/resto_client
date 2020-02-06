@@ -16,6 +16,7 @@ import argparse
 
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.services.service_access import (AuthenticationServiceAccess, RestoServiceAccess)
+from resto_client.settings.resto_client_config import resto_client_print
 from resto_client.settings.servers_database import DB_SERVERS
 
 from .parser_common import CliFunctionReturnType
@@ -68,7 +69,7 @@ def cli_show_servers(args: argparse.Namespace) -> CliFunctionReturnType:
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     _ = args  # to avoid pylint warning
-    print(DB_SERVERS)
+    resto_client_print(DB_SERVERS)
     return None, None
 
 

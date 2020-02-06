@@ -12,9 +12,6 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from contextlib import redirect_stdout
-import io
-
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
@@ -97,11 +94,10 @@ class UTestSetServerParams(TestRestoClientCli):
         """
         Unit test of set server in degraded cases
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
+        with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['set', 'server', 'bad_server'])
-        output = out_string_io.getvalue().strip()  # type: ignore
         msg = 'No persisted server and bad_server is not a valid server name.'
-        self.assertIn(msg, output)
+        self.assertEqual(msg, str(ctxt.exception))
 
     def test_d_set_account(self) -> None:
         """
@@ -150,8 +146,10 @@ class UTestUnsetServerParams(TestRestoClientCli):
         """
         Unit test of unset server if there is no server in nominal cases
         """
-        resto_client_run(arguments=['unset', 'server'])
-        resto_client_run(arguments=['unset', 'server'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['unset', 'server'])
+        expected_msg = 'No persisted server and None is not a valid server name.'
+        self.assertEqual(expected_msg, str(ctxt.exception))
         self.assert_no_server_in_settings()
 
     def test_n_unset_account(self) -> None:
@@ -159,12 +157,15 @@ class UTestUnsetServerParams(TestRestoClientCli):
         Unit test of unset account in nominal cases
         """
         # With no server persisted
-        resto_client_run(arguments=['unset', 'account'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['unset', 'account'])
+        expected_msg = 'No persisted server and None is not a valid server name.'
+        self.assertEqual(expected_msg, str(ctxt.exception))
         self.assert_no_account_in_settings()
+
         # With server persisted and account already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'account', 'test_name'])
-        # With no account already set
         resto_client_run(arguments=['unset', 'account'])
         self.assert_no_account_in_settings()
 
@@ -173,8 +174,12 @@ class UTestUnsetServerParams(TestRestoClientCli):
         Unit test of unset collection in nominal cases
         """
         # With no server persisted
-        resto_client_run(arguments=['unset', 'collection'])
+        with self.assertRaises(RestoClientUserError) as ctxt:
+            resto_client_run(arguments=['unset', 'collection'])
+        expected_msg = 'No persisted server and None is not a valid server name.'
+        self.assertEqual(expected_msg, str(ctxt.exception))
         self.assert_not_in_settings(COLLECTION_KEY)
+
         # With server persisted and collection already set
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
