@@ -38,8 +38,8 @@ class RevokeTokenRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(Response, super(RevokeTokenRequest, self).run())
 
-    def run_request(self) -> Response:
-        return self.post()
+    def run_request(self) -> None:
+        self.post()
 
     def process_request_result(self) -> Response:
         return self._request_result
@@ -61,12 +61,11 @@ class GetTokenRequest(BaseRequest):
         # No call to update_headers(), in order to avoid recursive calls
         return None
 
-    def run_request(self) -> Response:
+    def run_request(self) -> None:
         if self.service_access.protocol in ['sso_dotcloud', 'sso_theia']:
-            response = self.post()
+            self.post()
         else:
-            response = self.get_response_as_json()
-        return response
+            super(GetTokenRequest, self).run_request()
 
     def process_request_result(self) -> str:
         # FIXME: check if text could be tested instead of protocol

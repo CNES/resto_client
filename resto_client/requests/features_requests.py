@@ -18,8 +18,6 @@ import tempfile
 from warnings import warn
 from typing import Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 
-from requests import Response
-
 from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
@@ -90,9 +88,8 @@ class SignLicenseRequest(BaseRequest):
     def finalize_request(self) -> None:
         self.update_headers(dict_input={'Accept': 'application/json'})
 
-    def run_request(self) -> Response:
-        result = self.post()
-        return result
+    def run_request(self) -> None:
+        self.post()
 
     def process_request_result(self) -> bool:
         response = SignLicenseResponse(self, self._request_result.json())
@@ -195,9 +192,9 @@ class DownloadRequestBase(BaseRequest):
             if self.parent_service.service_access.protocol == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
 
-    def run_request(self) -> Response:
-        return self.get_response(self._url_to_download,
-                                 'processing {} request'.format(self.file_type), stream=True)
+    def run_request(self) -> None:
+        self.get_response(self._url_to_download,
+                          'processing {} request'.format(self.file_type), stream=True)
 
     def process_request_result(self) -> Path:
         """

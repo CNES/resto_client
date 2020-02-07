@@ -126,38 +126,25 @@ class BaseRequest(Authenticator):
             self.finalize_request()
         except RestoClientEmulatedResponse as excp:
             return excp.result
-        self._request_result = self.run_request()
+        self.run_request()
         return self.process_request_result()
 
     def finalize_request(self) -> None:
         self.update_headers()
         self.get_route()  # Will trigger an exception if the route is undefined
 
-    def run_request(self) -> requests.Response:
-        # Default is submitting a get request, requesting json response.
-        return self.get_response_as_json()
+    def run_request(self) -> None:
+        """
+        Default is submitting a get request, requesting json response.
+        """
+        self.update_headers(dict_input={'Accept': 'application/json'})
+        self.get_response(self.get_url(), self.request_action, auth=self.http_basic_auth)
 
     @abstractmethod
     def process_request_result(self) -> RestoRequestResult:
         pass
 
-    # FIXME: Return type seems to always be a dict?
-    def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
-        """
-         This create and execute a GET request and return the response content interpreted as json
-         or None if no json can be found
-        """
-        result = self.get_response_as_json()
-        return result.json()
-
-    def get_response_as_json(self) -> requests.Response:
-        """
-         This create and execute a GET request imposing json response
-        """
-        self.update_headers(dict_input={'Accept': 'application/json'})
-        return self.get_response(self.get_url(), self.request_action, auth=self.http_basic_auth)
-
-    def post(self, stream: bool=False) -> requests.Response:
+    def post(self, stream: bool=False) -> None:
         """
          This create and execute a POST request and return the response content
         """
@@ -174,15 +161,15 @@ class BaseRequest(Authenticator):
             msg = 'Error {} when {} {}.'
             raise Exception(msg.format(result.status_code, self.request_action,
                                        self.get_url())) from excp
-        return result
+        self._request_result = result
 
     # FIXME: use authorization from self?
     def get_response(self, url: str,
                      req_type: str,
                      auth: Optional[requests.auth.HTTPBasicAuth]=None,
-                     stream: bool=False) -> requests.Response:
+                     stream: bool=False) -> None:
         """
-         This create and execute a GET request and return the response content
+         This create and execute a GET request and store the response content
         """
         result = None
         try:
@@ -191,10 +178,11 @@ class BaseRequest(Authenticator):
 
         except (HTTPError, SSLError) as excp:
             if result is not None:
+                self._request_result = result
                 msg = 'Error {} when {} for {}.'.format(result.status_code, req_type, url)
                 if result.status_code == 403:
                     raise AccesDeniedError(msg) from excp
             else:
                 msg = 'Error when {} for {}.'.format(req_type, url)
             raise Exception(msg) from excp
-        return result
+        self._request_result = result
