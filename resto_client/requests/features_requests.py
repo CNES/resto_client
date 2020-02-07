@@ -16,7 +16,9 @@ from abc import abstractmethod
 from pathlib import Path
 import tempfile
 from warnings import warn
-from typing import Tuple, Union, TYPE_CHECKING, cast  # @NoMove
+from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
+
+from tqdm import tqdm
 
 from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
 from resto_client.entities.resto_feature import RestoFeature
@@ -25,9 +27,9 @@ from resto_client.responses.download_error_response import DownloadErrorResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
 from resto_client.services.service_access import RestoClientUnsupportedRequest
+from resto_client.settings.resto_client_config import resto_client_print
 
 from .base_request import BaseRequest
-from .utils import download_file
 
 
 if TYPE_CHECKING:
@@ -248,7 +250,7 @@ class DownloadRequestBase(BaseRequest):
                 # However download will not happen.
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     tmp_file_path = Path(tmp_dir) / file_name
-                    download_file(self._request_result, tmp_file_path)
+                    self.download_file(tmp_file_path)
                 raise FeatureOnTape()
             # If it's a product waiting to be on disk
             if self.file_type == 'product' and self._feature.storage == 'staging':
@@ -256,17 +258,36 @@ class DownloadRequestBase(BaseRequest):
                      "Try again later.")
                 raise FeatureOnTape()
             # If it's a Quicklook, Thumbnail or annexes
-            download_file(self._request_result, full_file_path)
+            self.download_file(full_file_path)
         # If it's a product
         elif content_type == self._feature.product_mimetype:
-            download_file(self._request_result, full_file_path,
-                          file_size=self._feature.product_size)
+            self.download_file(full_file_path, file_size=self._feature.product_size)
         else:
             msg = 'Unexpected content-type {} when downloading {}.'
             raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
 
         # Download finished. Return the file path where download has been made.
         return full_file_path
+
+    # TODO: move as part of process_request_result
+    def download_file(self, file_path: Path, file_size: Optional[int]=None) -> None:
+        """
+        method called when we know that we have a file to download
+        iterate a result created with GET with stream option and write it directly in a file
+        """
+        resto_client_print('downloading file: {}'.format(file_path))
+        # Get and Save the result's size if not given
+        if file_size is None:
+            file_size = int(self._request_result.headers.get('content-length', 0))
+
+        block_size = 1024
+
+        with open(file_path, 'wb') as file_desc:
+            # do iteration with progress bar using tqdm
+            progress_bar = tqdm(unit="B", total=file_size, unit_scale=True, desc='Downloading')
+            for block in self._request_result.iter_content(block_size):
+                progress_bar.update(len(block))
+                file_desc.write(block)
 
 
 class DownloadProductRequest(DownloadRequestBase):
