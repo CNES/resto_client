@@ -34,7 +34,7 @@ RestoRequestResult = Union[RestoResponse, Path, str,
                            bool, RestoCollection, RestoCollections, requests.Response]
 
 
-# TODO: move somewhere else?
+# TODO: move in authenticator?
 class AccesDeniedError(RestoClientUserError):
     """
     Exception corresponding to HTTP Error 403
@@ -82,7 +82,7 @@ class BaseRequest(Authenticator):
                 msg = 'Building request {} for {}'.format(type(self).__name__,
                                                           self.service_access.base_url)
                 print(Fore.CYAN + msg + Style.RESET_ALL)
-        self.request_headers: Dict[str, str] = {}
+        self._request_headers: Dict[str, str] = {}
         self._request_result: requests.Response
         self._url_kwargs = url_kwargs
         Authenticator.__init__(self, self.parent_service.auth_service)
@@ -109,8 +109,8 @@ class BaseRequest(Authenticator):
         :param dict_input: entries to add in headers
         """
         if dict_input is not None:
-            self.request_headers.update(dict_input)
-        self.update_authorization_headers(self.request_headers)
+            self._request_headers.update(dict_input)
+        self.update_authorization_headers(self._request_headers)
 
 # ++++++++++++++ Request runner +++++++++++++++++++++++++++++
 
@@ -150,11 +150,11 @@ class BaseRequest(Authenticator):
         """
 
         try:
-            if 'Authorization' in self.request_headers:
-                result = requests.post(self.get_url(), headers=self.request_headers,
+            if 'Authorization' in self._request_headers:
+                result = requests.post(self.get_url(), headers=self._request_headers,
                                        stream=stream)
             else:
-                result = requests.post(self.get_url(), headers=self.request_headers, stream=stream,
+                result = requests.post(self.get_url(), headers=self._request_headers, stream=stream,
                                        auth=self.http_basic_auth, data=self.authorization_data)
             result.raise_for_status()
         except (HTTPError, SSLError) as excp:
@@ -170,11 +170,11 @@ class BaseRequest(Authenticator):
         """
         result = None
         try:
-            if 'Authorization' in self.request_headers:
-                result = requests.get(self.get_url(), headers=self.request_headers,
+            if 'Authorization' in self._request_headers:
+                result = requests.get(self.get_url(), headers=self._request_headers,
                                       auth=None, stream=stream)
             else:
-                result = requests.get(self.get_url(), headers=self.request_headers,
+                result = requests.get(self.get_url(), headers=self._request_headers,
                                       auth=self.http_basic_auth, stream=stream)
             result.raise_for_status()
 
