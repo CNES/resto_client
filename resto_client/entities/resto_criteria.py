@@ -145,6 +145,7 @@ class RestoCriteria(dict):
                     return key_to_test
             # if not found raise criterion error
             msg = 'Criterion {} not supported by this resto server'.format(key)
-            msg += ', choose from the following list: {}'.format(self.supported_criteria)
+            msg += ', choose from the following list: '
+            msg += '{}'.format(list(self.supported_criteria.keys()))
             raise RestoClientUserError(msg)
         return key
