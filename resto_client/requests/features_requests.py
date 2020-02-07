@@ -192,8 +192,14 @@ class DownloadRequestBase(BaseRequest):
             if self.parent_service.service_access.protocol == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
 
+    def get_url(self) -> str:
+        """
+        :returns: full url for this feature file download request
+        """
+        return self._url_to_download
+
     def run_request(self) -> None:
-        self.get_response(self._url_to_download, stream=True)
+        self.get_response(stream=True)
 
     def process_request_result(self) -> Path:
         """

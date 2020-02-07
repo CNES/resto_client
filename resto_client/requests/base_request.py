@@ -138,7 +138,7 @@ class BaseRequest(Authenticator):
         Default is submitting a get request, requesting json response.
         """
         self.update_headers(dict_input={'Accept': 'application/json'})
-        self.get_response(self.get_url())
+        self.get_response()
 
     @abstractmethod
     def process_request_result(self) -> RestoRequestResult:
@@ -164,19 +164,17 @@ class BaseRequest(Authenticator):
         self._request_result = result
 
     # FIXME: factorize post() and get_response()
-    # FIXME: use request_action ?
-    def get_response(self, url: str,
-                     stream: bool=False) -> None:
+    def get_response(self, stream: bool=False) -> None:
         """
          This create and execute a GET request and store the response content
         """
         result = None
         try:
             if 'Authorization' in self.request_headers:
-                result = requests.get(url, headers=self.request_headers,
+                result = requests.get(self.get_url(), headers=self.request_headers,
                                       auth=None, stream=stream)
             else:
-                result = requests.get(url, headers=self.request_headers,
+                result = requests.get(self.get_url(), headers=self.request_headers,
                                       auth=self.http_basic_auth, stream=stream)
             result.raise_for_status()
 
@@ -184,10 +182,10 @@ class BaseRequest(Authenticator):
             if result is not None:
                 self._request_result = result
                 msg = 'Error {} when {} for {}.'.format(result.status_code, self.request_action,
-                                                        url)
+                                                        self.get_url())
                 if result.status_code == 403:
                     raise AccesDeniedError(msg) from excp
             else:
-                msg = 'Error when {} for {}.'.format(self.request_action, url)
+                msg = 'Error when {} for {}.'.format(self.request_action, self.get_url())
             raise Exception(msg) from excp
         self._request_result = result
