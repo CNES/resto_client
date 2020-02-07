@@ -40,7 +40,7 @@ class RevokeTokenRequest(BaseRequest):
         return cast(Response, super(RevokeTokenRequest, self).run())
 
     def run_request(self) -> None:
-        self.post()
+        self.run_request_post()
 
     def process_request_result(self) -> Response:
         return self._request_result
@@ -64,7 +64,7 @@ class GetTokenRequest(BaseRequest):
 
     def run_request(self) -> None:
         if self.service_access.protocol in ['sso_dotcloud', 'sso_theia']:
-            self.post()
+            self.run_request_post()
         else:
             super(GetTokenRequest, self).run_request()
 

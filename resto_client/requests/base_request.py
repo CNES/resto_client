@@ -15,7 +15,7 @@
 from abc import abstractmethod
 from pathlib import Path
 from urllib.parse import urljoin
-from typing import Optional, Union, Dict, TYPE_CHECKING  # @UnusedImport @NoMove
+from typing import Tuple, Optional, Union, Dict, TYPE_CHECKING, Callable  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 import requests
@@ -61,7 +61,6 @@ class BaseRequest(Authenticator):
         :returns: the action performed by this request.
         """
 
-    # FIXME: remove url parameters from constructor and make a special method for doing it
     def __init__(self, service: BaseService, **url_kwargs: str) -> None:
         """
         Constructor
@@ -138,52 +137,42 @@ class BaseRequest(Authenticator):
         Default is submitting a get request, requesting json response.
         """
         self.update_headers(dict_input={'Accept': 'application/json'})
-        self.get_response()
+        self.run_request_get()
 
     @abstractmethod
     def process_request_result(self) -> RestoRequestResult:
         pass
 
-    def post(self, stream: bool=False) -> None:
+    def run_request_post(self, stream: bool=False) -> None:
         """
          This create and execute a POST request and store the response content
         """
+        self._do_run_request(requests.post, stream=stream)
 
-        try:
-            if 'Authorization' in self._request_headers:
-                result = requests.post(self.get_url(), headers=self._request_headers,
-                                       stream=stream)
-            else:
-                result = requests.post(self.get_url(), headers=self._request_headers, stream=stream,
-                                       auth=self.http_basic_auth, data=self.authorization_data)
-            result.raise_for_status()
-        except (HTTPError, SSLError) as excp:
-            msg = 'Error {} when {} {}.'
-            raise Exception(msg.format(result.status_code, self.request_action,
-                                       self.get_url())) from excp
-        self._request_result = result
-
-    # FIXME: factorize post() and get_response()
-    def get_response(self, stream: bool=False) -> None:
+    def run_request_get(self, stream: bool=False) -> None:
         """
          This create and execute a GET request and store the response content
         """
+        self._do_run_request(requests.get, stream=stream)
+
+    def _do_run_request(self, method: Callable[..., requests.Response], stream: bool=False) -> None:
+        """
+         This sends a request using the specified method and stores the response content
+        """
+        auth_arg, data_arg = self._get_authentication_arguments(self._request_headers)
         result = None
         try:
-            if 'Authorization' in self._request_headers:
-                result = requests.get(self.get_url(), headers=self._request_headers,
-                                      auth=None, stream=stream)
-            else:
-                result = requests.get(self.get_url(), headers=self._request_headers,
-                                      auth=self.http_basic_auth, stream=stream)
+            result = method(self.get_url(),
+                            headers=self._request_headers, stream=stream,
+                            auth=auth_arg, data=data_arg)
             result.raise_for_status()
 
         except (HTTPError, SSLError) as excp:
             if result is not None:
                 self._request_result = result
-                msg = 'Error {} when {} for {}.'.format(result.status_code, self.request_action,
-                                                        self.get_url())
-                if result.status_code == 403:
+                msg = 'Error {} when {} for {}.'.format(self._request_result.status_code,
+                                                        self.request_action, self.get_url())
+                if self._request_result.status_code == 403:
                     raise AccesDeniedError(msg) from excp
             else:
                 msg = 'Error when {} for {}.'.format(self.request_action, self.get_url())

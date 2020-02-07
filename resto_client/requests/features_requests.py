@@ -97,7 +97,7 @@ class SignLicenseRequest(BaseRequest):
         self.update_headers(dict_input={'Accept': 'application/json'})
 
     def run_request(self) -> None:
-        self.post()
+        self.run_request_post()
 
     def process_request_result(self) -> bool:
         response = SignLicenseResponse(self, self._request_result.json())
@@ -206,7 +206,7 @@ class DownloadRequestBase(BaseRequest):
         return self._url_to_download
 
     def run_request(self) -> None:
-        self.get_response(stream=True)
+        self.run_request_get(stream=True)
 
     def process_request_result(self) -> Path:
         """
