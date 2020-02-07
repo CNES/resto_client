@@ -13,6 +13,7 @@
    limitations under the License.
 """
 from typing import TYPE_CHECKING, cast  # @NoMove
+from json.decoder import JSONDecodeError
 
 from requests import Response
 
@@ -68,14 +69,15 @@ class GetTokenRequest(BaseRequest):
             super(GetTokenRequest, self).run_request()
 
     def process_request_result(self) -> str:
-        # FIXME: check if text could be tested instead of protocol
-        if self.service_access.protocol == 'sso_theia':
+        try:
+            get_token_response_content = self._request_result.json()
+        except JSONDecodeError:
             response_text = self._request_result.text
             if response_text == 'Please set mail and password':
                 msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
                 raise AccesDeniedError(msg.format(response_text))
-            return GetTokenResponse(self, {'token': response_text}).as_resto_object()
-        return GetTokenResponse(self, self._request_result.json()).as_resto_object()
+            get_token_response_content = {'token': response_text}
+        return GetTokenResponse(self, get_token_response_content).as_resto_object()
 
 
 class CheckTokenRequest(BaseRequest):
