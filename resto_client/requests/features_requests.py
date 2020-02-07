@@ -143,9 +143,16 @@ class DownloadRequestBase(BaseRequest):
 
         super(DownloadRequestBase, self).__init__(service=service)
         # product specific initialization
-        # FIXME: create a get_url() method and use it from BaseRequest ?
         # FIXME: use something different than getattr
         self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
+        # If there is no file to download
+        if self._url_to_download is None:
+            msg = 'There is no {} to download for product {}.'
+            raise RestoClientUserError(msg.format(self.file_type, self._feature.product_identifier))
+
+        if self.file_type == 'product':
+            if self.parent_service.service_access.protocol == 'theia_version':
+                self._url_to_download += "/?issuerId=theia"
         self._download_directory = download_directory
 
     def run(self) -> Path:
@@ -191,14 +198,6 @@ class DownloadRequestBase(BaseRequest):
         except RestoClientUnsupportedRequest:
             # Nominal case as url for download is contained in the feature
             pass
-        # If there is no file to download
-        if self._url_to_download is None:
-            msg = 'There is no {} to download for product {}.'
-            raise RestoClientUserError(msg.format(self.file_type, self._feature.product_identifier))
-
-        if self.file_type == 'product':
-            if self.parent_service.service_access.protocol == 'theia_version':
-                self._url_to_download += "/?issuerId=theia"
 
     def get_url(self) -> str:
         """
@@ -269,7 +268,6 @@ class DownloadRequestBase(BaseRequest):
         # Download finished. Return the file path where download has been made.
         return full_file_path
 
-    # TODO: move as part of process_request_result
     def download_file(self, file_path: Path, file_size: Optional[int]=None) -> None:
         """
         method called when we know that we have a file to download
