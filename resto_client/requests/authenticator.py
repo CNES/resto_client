@@ -13,18 +13,22 @@
    limitations under the License.
 """
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, TYPE_CHECKING  # @NoMove
+from typing import Optional, TYPE_CHECKING  # @NoMove
 
 from requests.auth import HTTPBasicAuth
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from resto_client.services.authentication_credentials import \
+        AuthorizationDataType  # @UnusedImport
 
 
+# TODO: add a method to retrieve authentication elements for the request
 class Authenticator(ABC):
     """
      Base class for all requests managing the request Authentication
     """
+    # TODO: this property could be defined in the request definition, inside the protocol
     @property
     @abstractmethod
     def authentication_type(self) -> str:
@@ -66,7 +70,7 @@ class Authenticator(ABC):
     @property
     def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
         """
-        :returns: the basic HTTP authorization for the service
+        :returns: the basic HTTP authorization for the request
         """
         if not self.anonymous_request:
             if self.authentication_required:
@@ -74,9 +78,9 @@ class Authenticator(ABC):
         return None
 
     @property
-    def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
+    def authorization_data(self) -> Optional['AuthorizationDataType']:
         """
-        :returns: the authorization data for the service
+        :returns: the authorization data for the request
         """
         if not self.anonymous_request:
             if self.authentication_required:

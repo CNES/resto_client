@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, Dict, TYPE_CHECKING  # @NoMove
+from typing import Optional, TYPE_CHECKING  # @NoMove
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -21,7 +21,7 @@ from resto_client.requests.authentication_requests import (GetTokenRequest, Chec
                                                            RevokeTokenRequest)
 from resto_client.requests.base_request import AccesDeniedError
 
-from .authentication_credentials import AuthenticationCredentials
+from .authentication_credentials import AuthenticationCredentials, AuthorizationDataType
 from .base_service import BaseService
 from .service_access import AuthenticationServiceAccess
 
@@ -93,7 +93,7 @@ class AuthenticationService(BaseService):
         return self._credentials.username_b64
 
     @property
-    def authorization_data(self) -> Dict[str, Optional[str]]:
+    def authorization_data(self) -> AuthorizationDataType:
         """
         :returns: the authorization data for the service
         """
