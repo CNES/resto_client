@@ -28,7 +28,6 @@ from .base_request import BaseRequest
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
-    from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 
 
 class GetCollectionRequest(BaseRequest):
@@ -67,6 +66,7 @@ class SearchCollectionRequest(BaseRequest):
         """
         # initiate request with asking number of total items
         criteria_url = '_rc=true&'
+        # TODO: move as a method of RestoCriteria?
         if criteria is not None:
             for key, value in criteria.items():
                 criteria_url += '{}={}&'.format(key, value)
@@ -99,7 +99,8 @@ class GetCollectionsRequest(BaseRequest):
         try:
             collections_descr = CollectionsDescription(self, self._request_result.json())
         except RestoResponseError:
-            msg = 'URL {} does not point to a valid resto server'
-            raise ValueError(msg.format(self.service_access.base_url))
+            msg = 'Get collections response from {} resto server cannot be understood.'
+            # TOOD: change exception type
+            raise ValueError(msg.format(self.parent_service.parent_server.server_name))
 
         return collections_descr.as_resto_object()
