@@ -29,7 +29,7 @@ from resto_client.responses.sign_license_response import SignLicenseResponse
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest
-from .utils import RestrictedProductError, download_file, get_response
+from .utils import RestrictedProductError, download_file
 
 
 if TYPE_CHECKING:
@@ -138,6 +138,8 @@ class DownloadRequestBase(BaseRequest):
 
         super(DownloadRequestBase, self).__init__(service=service)
         # product specific initialization
+        # FIXME: create a get_url() method and use it from BaseRequest ?
+        # FIXME: use something different than getattr
         self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
         self._download_directory = download_directory
 
@@ -145,6 +147,7 @@ class DownloadRequestBase(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(Path, super(DownloadRequestBase, self).run())
 
+    # TODO: change name to get_file_infos
     def get_filename(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
         Returns filename and full filename according to the content type.
@@ -156,17 +159,17 @@ class DownloadRequestBase(BaseRequest):
         :raises RestoClientDesignError: when extension cannot be guessed from mimetype.
         """
         extension, mimetype, encoding = get_file_properties(content_type.strip())
-
         if extension is None:
             msg_excp = 'cannot guess the file extension from mimetype: {}'
             raise RestoClientDesignError(msg_excp.format(mimetype))
         if extension.lower() == '.jpe':
             extension = '.jpg'
+
+        # TODO: isolate this part in a generic function
         filename = '{}{}{}'.format(self._feature.product_identifier,
                                    self.filename_suffix, extension)
         full_file_path = self._download_directory / filename
 
-        # TODO: isolate this part in a generic function
         if full_file_path.is_file():
             count = 1
             while full_file_path.is_file():
@@ -191,12 +194,10 @@ class DownloadRequestBase(BaseRequest):
         if self.file_type == 'product':
             if self.parent_service.service_access.protocol == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
-        # TODO: comment in order to generate error messages for testing purposes
 
     def run_request(self) -> Response:
-        result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
-                              headers=self.request_headers, stream=True)
-        return result
+        return self.get_response(self._url_to_download,
+                                 'processing {} request'.format(self.file_type), stream=True)
 
     def process_request_result(self) -> Path:
         """

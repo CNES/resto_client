@@ -15,19 +15,10 @@
 from typing import Optional  # @NoMove
 from pathlib import Path
 import requests
-from requests.auth import HTTPBasicAuth
-from requests.exceptions import HTTPError, SSLError
 from tqdm import tqdm
 
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.settings.resto_client_config import resto_client_print
-
-
-# TODO: move somewhere else
-class AccesDeniedError(RestoClientUserError):
-    """
-    Exception corresponding to HTTP Error 403
-    """
 
 
 # TODO: move inside features_requests
@@ -35,31 +26,6 @@ class RestrictedProductError(RestoClientUserError):
     """
     Exception used when a product exist but cannot be downloaded
     """
-
-
-# TODO: move as part of BaseRequest
-def get_response(url: str,
-                 req_type: str,
-                 headers: Optional[dict]=None,
-                 auth: Optional[HTTPBasicAuth]=None,
-                 stream: bool=False) -> requests.Response:
-    """
-     This create and execute a GET request and return the response content
-    """
-    result = None
-    try:
-        result = requests.get(url, headers=headers, auth=auth, stream=stream)
-        result.raise_for_status()
-
-    except (HTTPError, SSLError) as excp:
-        if result is not None:
-            msg = 'Error {} when {} for {}.'.format(result.status_code, req_type, url)
-            if result.status_code == 403:
-                raise AccesDeniedError(msg) from excp
-        else:
-            msg = 'Error when {} for {}.'.format(req_type, url)
-        raise Exception(msg) from excp
-    return result
 
 
 # TODO: move as part of process_request_result

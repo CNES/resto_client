@@ -19,8 +19,7 @@ from requests import Response
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
-from .base_request import BaseRequest, RestoClientEmulatedResponse
-from .utils import AccesDeniedError
+from .base_request import BaseRequest, RestoClientEmulatedResponse, AccesDeniedError
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
@@ -58,6 +57,7 @@ class GetTokenRequest(BaseRequest):
         return cast(str, super(GetTokenRequest, self).run())
 
     def finalize_request(self) -> None:
+        # TODO: test by removing this method
         # No call to update_headers(), in order to avoid recursive calls
         return None
 

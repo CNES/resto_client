@@ -18,21 +18,27 @@ from urllib.parse import urljoin
 from typing import Optional, Union, Dict, TYPE_CHECKING  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
-from requests import post, Response
+import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
 from .authenticator import Authenticator
-from .utils import get_response
 
 
 RestoRequestResult = Union[RestoResponse, Path, str,
-                           bool, RestoCollection, RestoCollections, Response]
+                           bool, RestoCollection, RestoCollections, requests.Response]
+
+
+# TODO: move somewhere else?
+class AccesDeniedError(RestoClientUserError):
+    """
+    Exception corresponding to HTTP Error 403
+    """
 
 
 class RestoClientEmulatedResponse(RestoClientDesignError):
@@ -55,6 +61,7 @@ class BaseRequest(Authenticator):
         :returns: the action performed by this request.
         """
 
+    # FIXME: remove url parameters from constructor and make a special method for doing it
     def __init__(self, service: BaseService, **url_kwargs: str) -> None:
         """
         Constructor
@@ -76,7 +83,7 @@ class BaseRequest(Authenticator):
                                                           self.service_access.base_url)
                 print(Fore.CYAN + msg + Style.RESET_ALL)
         self.request_headers: Dict[str, str] = {}
-        self._request_result: Response
+        self._request_result: requests.Response
         self._url_kwargs = url_kwargs
         Authenticator.__init__(self, self.parent_service.auth_service)
 
@@ -126,7 +133,7 @@ class BaseRequest(Authenticator):
         self.update_headers()
         self.get_route()  # Will trigger an exception if the route is undefined
 
-    def run_request(self) -> Response:
+    def run_request(self) -> requests.Response:
         # Default is submitting a get request, requesting json response.
         return self.get_response_as_json()
 
@@ -143,29 +150,51 @@ class BaseRequest(Authenticator):
         result = self.get_response_as_json()
         return result.json()
 
-    def get_response_as_json(self) -> Response:
+    def get_response_as_json(self) -> requests.Response:
         """
          This create and execute a GET request imposing json response
         """
         self.update_headers(dict_input={'Accept': 'application/json'})
-        return get_response(self.get_url(), self.request_action,
-                            headers=self.request_headers, auth=self.http_basic_auth)
+        return self.get_response(self.get_url(), self.request_action, auth=self.http_basic_auth)
 
-    def post(self, stream: bool=False) -> Response:
+    def post(self, stream: bool=False) -> requests.Response:
         """
          This create and execute a POST request and return the response content
         """
 
         try:
             if 'Authorization' in self.request_headers:
-                result = post(self.get_url(), headers=self.request_headers,
-                              stream=stream)
+                result = requests.post(self.get_url(), headers=self.request_headers,
+                                       stream=stream)
             else:
-                result = post(self.get_url(), headers=self.request_headers, stream=stream,
-                              auth=self.http_basic_auth, data=self.authorization_data)
+                result = requests.post(self.get_url(), headers=self.request_headers, stream=stream,
+                                       auth=self.http_basic_auth, data=self.authorization_data)
             result.raise_for_status()
         except (HTTPError, SSLError) as excp:
             msg = 'Error {} when {} {}.'
             raise Exception(msg.format(result.status_code, self.request_action,
                                        self.get_url())) from excp
+        return result
+
+    # FIXME: use authorization from self?
+    def get_response(self, url: str,
+                     req_type: str,
+                     auth: Optional[requests.auth.HTTPBasicAuth]=None,
+                     stream: bool=False) -> requests.Response:
+        """
+         This create and execute a GET request and return the response content
+        """
+        result = None
+        try:
+            result = requests.get(url, headers=self.request_headers, auth=auth, stream=stream)
+            result.raise_for_status()
+
+        except (HTTPError, SSLError) as excp:
+            if result is not None:
+                msg = 'Error {} when {} for {}.'.format(result.status_code, req_type, url)
+                if result.status_code == 403:
+                    raise AccesDeniedError(msg) from excp
+            else:
+                msg = 'Error when {} for {}.'.format(req_type, url)
+            raise Exception(msg) from excp
         return result

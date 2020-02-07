@@ -19,7 +19,7 @@ from requests.auth import HTTPBasicAuth
 
 from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
                                                            RevokeTokenRequest)
-from resto_client.requests.utils import AccesDeniedError
+from resto_client.requests.base_request import AccesDeniedError
 
 from .authentication_credentials import AuthenticationCredentials
 from .base_service import BaseService
