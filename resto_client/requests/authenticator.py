@@ -13,17 +13,16 @@
    limitations under the License.
 """
 from abc import ABC, abstractmethod
-from typing import Optional, TYPE_CHECKING  # @NoMove
+from typing import Optional, Tuple, TYPE_CHECKING  # @NoMove
 
-from requests.auth import HTTPBasicAuth
+import requests
+
+from resto_client.services.authentication_credentials import AuthorizationDataType
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
-    from resto_client.services.authentication_credentials import \
-        AuthorizationDataType  # @UnusedImport
 
 
-# TODO: add a method to retrieve authentication elements for the request
 class Authenticator(ABC):
     """
      Base class for all requests managing the request Authentication
@@ -67,8 +66,17 @@ class Authenticator(ABC):
                 self.authentication_required)
             request_header.update(authorization_header)
 
+    def _get_authentication_arguments(self, request_headers: dict) -> \
+            Tuple[Optional[requests.auth.HTTPBasicAuth], Optional[AuthorizationDataType]]:
+        """
+         This create and execute a POST request and store the response content
+        """
+        if 'Authorization' in request_headers:
+            return None, None
+        return self.http_basic_auth, self.authorization_data
+
     @property
-    def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
+    def http_basic_auth(self) -> Optional[requests.auth.HTTPBasicAuth]:
         """
         :returns: the basic HTTP authorization for the request
         """
