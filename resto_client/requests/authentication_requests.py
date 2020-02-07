@@ -23,7 +23,6 @@ from resto_client.services.service_access import RestoClientUnsupportedRequest
 from .base_request import BaseRequest, RestoClientEmulatedResponse, AccesDeniedError
 
 if TYPE_CHECKING:
-    from resto_client.services.resto_service import RestoService  # @UnusedImport
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 

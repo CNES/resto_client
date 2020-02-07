@@ -138,17 +138,13 @@ class DownloadRequestBase(BaseRequest):
         :param service: resto service
         :param  feature: resto feature
         :param download_directory: an existing directory path where download will occur
+        :raises RestoClientUserError: when there is no such file type to download for the feature.
         """
         self._feature = feature
 
         super(DownloadRequestBase, self).__init__(service=service)
         # product specific initialization
-        # FIXME: use something different than getattr
-        self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
-        # If there is no file to download
-        if self._url_to_download is None:
-            msg = 'There is no {} to download for product {}.'
-            raise RestoClientUserError(msg.format(self.file_type, self._feature.product_identifier))
+        self._url_to_download = self._feature.get_download_url(self.file_type)
 
         if self.file_type == 'product':
             if self.parent_service.service_access.protocol == 'theia_version':
@@ -159,10 +155,9 @@ class DownloadRequestBase(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(Path, super(DownloadRequestBase, self).run())
 
-    # TODO: change name to get_file_infos
-    def get_filename(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
+    def get_file_infos(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
-        Returns filename and full filename according to the content type.
+        Returns filename, full filename, mimetype and encoding according to the content type.
 
         :param content_type: mimetype of the file to download
         :returns: filename and full file path of the file to record
@@ -238,7 +233,7 @@ class DownloadRequestBase(BaseRequest):
         if content_type is None:
             raise RestoResponseError('Cannot infer file extension with None content-type')
 
-        file_name, full_file_path, file_mimetype, _ = self.get_filename(content_type)
+        file_name, full_file_path, file_mimetype, _ = self.get_file_infos(content_type)
 
         if file_mimetype in ('image/jpeg', 'text/html', 'image/png'):
             # If it's a product on tape

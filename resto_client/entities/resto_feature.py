@@ -15,11 +15,14 @@
 import json
 from typing import Optional  # @NoMove
 
-
 import geojson
 from prettytable import PrettyTable
 
+from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
+
 from .resto_license import RestoFeatureLicense
+
+KNOWN_FILES_TYPES = ['product', 'quicklook', 'thumbnail', 'annexes']
 
 
 class RestoFeature(geojson.Feature):
@@ -40,6 +43,24 @@ class RestoFeature(geojson.Feature):
                                            geometry=feature_descr['geometry'],
                                            properties=feature_descr['properties'])
         self.license = RestoFeatureLicense(feature_descr['properties'])
+
+    def get_download_url(self, file_type: str) -> str:
+        if file_type not in KNOWN_FILES_TYPES:
+            msg = 'Unsupported file type: {}. Must be one of: {}.'
+            raise RestoClientDesignError(msg.format(file_type, KNOWN_FILES_TYPES))
+        url_to_download = None
+        if file_type == 'quicklook':
+            url_to_download = self.download_quicklook_url
+        if file_type == 'thumbnail':
+            url_to_download = self.download_thumbnail_url
+        if file_type == 'product':
+            url_to_download = self.download_product_url
+        if file_type == 'annexes':
+            url_to_download = self.download_annexes_url
+        if url_to_download is None:
+            msg = 'There is no {} to download for product {}.'
+            raise RestoClientUserError(msg.format(file_type, self.product_identifier))
+        return url_to_download
 
     @property
     def download_quicklook_url(self) -> str:

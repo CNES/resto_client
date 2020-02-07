@@ -15,7 +15,7 @@
 from abc import abstractmethod
 from pathlib import Path
 from urllib.parse import urljoin
-from typing import Tuple, Optional, Union, Dict, TYPE_CHECKING, Callable  # @UnusedImport @NoMove
+from typing import Optional, Union, Dict, Callable  # @NoMove @UnusedImport
 
 from colorama import Fore, Style, colorama_text
 import requests
