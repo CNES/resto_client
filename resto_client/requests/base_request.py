@@ -48,7 +48,7 @@ class RestoClientEmulatedResponse(RestoClientDesignError):
     result: RestoRequestResult
 
 
-# TODO: make request result an attribute of the request runner
+# TODO: extract a RequestRunner side class?
 class BaseRequest(Authenticator):
     """
      Base class for all service Requests
@@ -138,7 +138,7 @@ class BaseRequest(Authenticator):
         Default is submitting a get request, requesting json response.
         """
         self.update_headers(dict_input={'Accept': 'application/json'})
-        self.get_response(self.get_url(), self.request_action, auth=self.http_basic_auth)
+        self.get_response(self.get_url(), self.request_action)
 
     @abstractmethod
     def process_request_result(self) -> RestoRequestResult:
@@ -146,7 +146,7 @@ class BaseRequest(Authenticator):
 
     def post(self, stream: bool=False) -> None:
         """
-         This create and execute a POST request and return the response content
+         This create and execute a POST request and store the response content
         """
 
         try:
@@ -163,17 +163,22 @@ class BaseRequest(Authenticator):
                                        self.get_url())) from excp
         self._request_result = result
 
-    # FIXME: use authorization from self?
+    # FIXME: factorize post() and get_response()
+    # FIXME: use request_action ?
     def get_response(self, url: str,
                      req_type: str,
-                     auth: Optional[requests.auth.HTTPBasicAuth]=None,
                      stream: bool=False) -> None:
         """
          This create and execute a GET request and store the response content
         """
         result = None
         try:
-            result = requests.get(url, headers=self.request_headers, auth=auth, stream=stream)
+            if 'Authorization' in self.request_headers:
+                result = requests.get(url, headers=self.request_headers,
+                                      auth=None, stream=stream)
+            else:
+                result = requests.get(url, headers=self.request_headers,
+                                      auth=self.http_basic_auth, stream=stream)
             result.raise_for_status()
 
         except (HTTPError, SSLError) as excp:
