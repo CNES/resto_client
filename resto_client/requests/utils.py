@@ -17,15 +17,7 @@ from pathlib import Path
 import requests
 from tqdm import tqdm
 
-from resto_client.base_exceptions import RestoClientUserError
 from resto_client.settings.resto_client_config import resto_client_print
-
-
-# TODO: move inside features_requests
-class RestrictedProductError(RestoClientUserError):
-    """
-    Exception used when a product exist but cannot be downloaded
-    """
 
 
 # TODO: move as part of process_request_result

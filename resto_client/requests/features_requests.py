@@ -27,11 +27,17 @@ from resto_client.responses.sign_license_response import SignLicenseResponse
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest
-from .utils import RestrictedProductError, download_file
+from .utils import download_file
 
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
+
+
+class RestrictedProductError(RestoClientUserError):
+    """
+    Exception used when a product exist but cannot be downloaded
+    """
 
 
 class LicenseSignatureRequested(RestoResponseError):
