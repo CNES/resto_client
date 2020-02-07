@@ -138,7 +138,7 @@ class BaseRequest(Authenticator):
         Default is submitting a get request, requesting json response.
         """
         self.update_headers(dict_input={'Accept': 'application/json'})
-        self.get_response(self.get_url(), self.request_action)
+        self.get_response(self.get_url())
 
     @abstractmethod
     def process_request_result(self) -> RestoRequestResult:
@@ -166,7 +166,6 @@ class BaseRequest(Authenticator):
     # FIXME: factorize post() and get_response()
     # FIXME: use request_action ?
     def get_response(self, url: str,
-                     req_type: str,
                      stream: bool=False) -> None:
         """
          This create and execute a GET request and store the response content
@@ -184,10 +183,11 @@ class BaseRequest(Authenticator):
         except (HTTPError, SSLError) as excp:
             if result is not None:
                 self._request_result = result
-                msg = 'Error {} when {} for {}.'.format(result.status_code, req_type, url)
+                msg = 'Error {} when {} for {}.'.format(result.status_code, self.request_action,
+                                                        url)
                 if result.status_code == 403:
                     raise AccesDeniedError(msg) from excp
             else:
-                msg = 'Error when {} for {}.'.format(req_type, url)
+                msg = 'Error when {} for {}.'.format(self.request_action, url)
             raise Exception(msg) from excp
         self._request_result = result

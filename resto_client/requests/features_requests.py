@@ -193,8 +193,7 @@ class DownloadRequestBase(BaseRequest):
                 self._url_to_download += "/?issuerId=theia"
 
     def run_request(self) -> None:
-        self.get_response(self._url_to_download,
-                          'processing {} request'.format(self.file_type), stream=True)
+        self.get_response(self._url_to_download, stream=True)
 
     def process_request_result(self) -> Path:
         """
