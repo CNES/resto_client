@@ -51,8 +51,8 @@ class RestoResponse(ABC):
         """
         :returns: the protocol of this response
         """
-        return self._parent_request.service_access.detected_protocol
+        return self._parent_request.parent_service.service_access.detected_protocol
 
     @detected_protocol.setter
     def detected_protocol(self, protocol: Optional[str]) -> None:
-        self._parent_request.service_access.detected_protocol = protocol
+        self._parent_request.parent_service.service_access.detected_protocol = protocol

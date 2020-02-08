@@ -73,7 +73,6 @@ class BaseRequest(Authenticator):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
         self.parent_service = service
-        self.service_access = self.parent_service.service_access
         if self.parent_service.parent_server.debug_server:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
@@ -88,7 +87,7 @@ class BaseRequest(Authenticator):
         """
         :returns: The route pattern of this request
         """
-        return self.service_access.get_route_pattern(self)
+        return self.parent_service.service_access.get_route_pattern(self)
 
     def get_protocol(self) -> str:
         """
