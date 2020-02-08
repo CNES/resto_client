@@ -56,11 +56,6 @@ class GetTokenRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(str, super(GetTokenRequest, self).run())
 
-    def finalize_request(self) -> None:
-        # TODO: test by removing this method
-        # No call to update_headers(), in order to avoid recursive calls
-        return None
-
     def run_request(self) -> None:
         if self.service_access.protocol in ['sso_dotcloud', 'sso_theia']:
             self.run_request_post()
@@ -104,7 +99,8 @@ class CheckTokenRequest(BaseRequest):
         try:
             super(CheckTokenRequest, self).finalize_request()
         except RestoClientUnsupportedRequest:
-            print('emulating unsupported CheckTokenRequest')
+            if self.parent_service.parent_server.debug_server:
+                print('emulating unsupported CheckTokenRequest')
             emulated_response = RestoClientEmulatedResponse()
             emulated_json = {'status': 'error', 'message': 'user not connected'}
             emulated_response.result = CheckTokenResponse(self, emulated_json).as_resto_object()
