@@ -78,10 +78,12 @@ class AuthenticationToken():
         """
         authorization_header = {}
         if authentication_required:
-            self.token_value = 'A fake token value to trigger get_token()'
+            if self._unvalidated_token:
+                self.token_value = 'A fake token value to trigger get_token()'
         else:
             if username_defined:
-                self.token_value = 'A fake token value to trigger get_token()'
+                if self._unvalidated_token:
+                    self.token_value = 'A fake token value to trigger get_token()'
         if self.token_value is not None:
             authorization_header['Authorization'] = 'Bearer ' + self.token_value
         return authorization_header
