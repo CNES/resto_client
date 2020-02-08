@@ -68,3 +68,9 @@ class BaseService(ABC):
         :returns: the base URL of the service.
         """
         return self.service_access.base_url
+
+    def get_protocol(self) -> str:
+        """
+        :returns: the protocol of the service.
+        """
+        return self.service_access.protocol

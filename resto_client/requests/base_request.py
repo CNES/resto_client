@@ -90,6 +90,12 @@ class BaseRequest(Authenticator):
         """
         return self.service_access.get_route_pattern(self)
 
+    def get_protocol(self) -> str:
+        """
+        :returns: The protocol of this request
+        """
+        return self.parent_service.get_protocol()
+
     def get_url(self) -> str:
         """
         :returns: full url for this request

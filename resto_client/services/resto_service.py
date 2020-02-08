@@ -109,7 +109,7 @@ class RestoService(BaseService):
         """
         :returns: the supported criteria definition
         """
-        return get_criteria_for_protocol(self.service_access.protocol)
+        return get_criteria_for_protocol(self.get_protocol())
 
 # ++++++++ From here we have the requests supported by the service ++++++++++++
 
@@ -148,7 +148,7 @@ class RestoService(BaseService):
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        resto_criteria = RestoCriteria(self.service_access.protocol, **criteria)
+        resto_criteria = RestoCriteria(self.get_protocol(), **criteria)
         return SearchCollectionRequest(self, collection_name, criteria=resto_criteria).run()
 
     def get_feature_by_id(self,
@@ -166,7 +166,7 @@ class RestoService(BaseService):
                             incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
+        criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)
 
         feature_collection = \
             SearchCollectionRequest(self, collection_name, criteria=criteria).run()

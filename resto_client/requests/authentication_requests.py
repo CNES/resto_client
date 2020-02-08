@@ -57,7 +57,7 @@ class GetTokenRequest(BaseRequest):
         return cast(str, super(GetTokenRequest, self).run())
 
     def run_request(self) -> None:
-        if self.service_access.protocol in ['sso_dotcloud', 'sso_theia']:
+        if self.parent_service.get_protocol() in ['sso_dotcloud', 'sso_theia']:
             self.run_request_post()
         else:
             super(GetTokenRequest, self).run_request()

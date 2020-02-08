@@ -45,6 +45,15 @@ class RestoFeature(geojson.Feature):
         self.license = RestoFeatureLicense(feature_descr['properties'])
 
     def get_download_url(self, file_type: str) -> str:
+        """
+        Return the URL for downloading a file type associated to the feature.
+
+        :param file_type: code of the file type: must belong to KNOWN_FILES_TYPES
+        :returns: the URL for downloading this file type, as defined in the feature properties
+        :raises RestoClientDesignError: when file_type is unsupported
+        :raises RestoClientUserError: when no URL defined in the feature properties for the
+                                      requested file type.
+        """
         if file_type not in KNOWN_FILES_TYPES:
             msg = 'Unsupported file type: {}. Must be one of: {}.'
             raise RestoClientDesignError(msg.format(file_type, KNOWN_FILES_TYPES))

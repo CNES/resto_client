@@ -14,7 +14,7 @@
 """
 from abc import ABC, abstractmethod
 
-from typing import Any, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from resto_client.requests.base_request import BaseRequest  # @UnusedImport
@@ -45,3 +45,14 @@ class RestoResponse(ABC):
         """
         :returns: the response expressed as a Resto object
         """
+
+    @property
+    def detected_protocol(self) -> Optional[str]:
+        """
+        :returns: the protocol of this response
+        """
+        return self._parent_request.service_access.detected_protocol
+
+    @detected_protocol.setter
+    def detected_protocol(self, protocol: Optional[str]) -> None:
+        self._parent_request.service_access.detected_protocol = protocol

@@ -147,7 +147,7 @@ class DownloadRequestBase(BaseRequest):
         self._url_to_download = self._feature.get_download_url(self.file_type)
 
         if self.file_type == 'product':
-            if self.parent_service.service_access.protocol == 'theia_version':
+            if self.parent_service.get_protocol() == 'theia_version':
                 self._url_to_download += "/?issuerId=theia"
         self._download_directory = download_directory
 
