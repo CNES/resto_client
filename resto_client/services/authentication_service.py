@@ -123,7 +123,7 @@ class AuthenticationService(BaseService):
             self._credentials.reset()
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, credentials were reset.'
-            raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp
+            raise AccesDeniedError(msg.format(self.get_base_url())) from excp
         return new_token
 
     def check_token(self, token: str) -> bool:

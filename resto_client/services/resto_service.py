@@ -99,8 +99,7 @@ class RestoService(BaseService):
         :returns: The server description as a tabulated listing
         :param  with_stats: if True the collections statistics are shown.
         """
-        out_fmt = 'Server URL: {}\n'
-        out_str = out_fmt.format(self.service_access.base_url)
+        out_str = 'Server URL: {}\n'.format(self.get_base_url())
         out_str += str(self._collections_mgr)
         if with_stats:
             out_str += self._collections_mgr.str_statistics()

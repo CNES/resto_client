@@ -62,3 +62,9 @@ class BaseService(ABC):
         else:
             result += '    associated authentication service : {}'.format(self.auth_service)
         return result
+
+    def get_base_url(self) -> str:
+        """
+        :returns: the base URL of the service.
+        """
+        return self.service_access.base_url

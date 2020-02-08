@@ -69,8 +69,6 @@ class BaseRequest(Authenticator):
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
         :raises TypeError: if the service argument is not derived from :class:`BaseService`.
         """
-        # FIXME: Could it be better to check that the route is supported at creation time?
-        # Problem: routes for DOnwloadRequests are not parameterized, but come from json response
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
@@ -79,7 +77,7 @@ class BaseRequest(Authenticator):
         if self.parent_service.parent_server.debug_server:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
-                                                          self.service_access.base_url)
+                                                          self.parent_service.get_base_url())
                 print(Fore.CYAN + msg + Style.RESET_ALL)
         self._request_headers: Dict[str, str] = {}
         self._request_result: requests.Response
@@ -98,7 +96,7 @@ class BaseRequest(Authenticator):
         :raises RestoClientDesignError: when the request is unsupported by the service
         """
         url_extension = self.get_route()
-        return urljoin(self.service_access.base_url,
+        return urljoin(self.parent_service.get_base_url(),
                        url_extension.format(**self._url_kwargs))
 
     def update_headers(self, dict_input: Optional[dict]=None) -> None:

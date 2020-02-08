@@ -168,18 +168,18 @@ class URLType():  # pylint: disable=too-few-public-methods
     A class to make sure input is an url
     """
 
-    def __init__(self, base_url: str, url_purpose: Optional[str]="Unknown") -> None:
+    def __init__(self, url: str, url_purpose: Optional[str]="Unknown") -> None:
         """
-        Test the input in order to have a proper url
+        Test the input in order to have a proper URL
 
-        :param base_url: url in str format to test
-        :param url_purpose: purpose of the url
-        :raises RestoClientDesignError: if base_url is not a proper url
+        :param url: URL in str format to test
+        :param url_purpose: purpose of the URL
+        :raises RestoClientDesignError: if url is not a proper URL
         """
         try:
-            result = urlparse(base_url)
+            result = urlparse(url)
             if not all([result.scheme, result.netloc]):
                 raise ValueError()
         except ValueError:
             error_msg = 'Given url for {} is not a valid URL: {}.'
-            raise RestoClientDesignError(error_msg.format(url_purpose, base_url))
+            raise RestoClientDesignError(error_msg.format(url_purpose, url))
