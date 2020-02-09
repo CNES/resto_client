@@ -39,7 +39,7 @@ class RevokeTokenRequest(BaseRequest):
         return cast(Response, super(RevokeTokenRequest, self).run())
 
     def run_request(self) -> None:
-        self.run_request_post()
+        self._run_request_post()
 
     def process_request_result(self) -> Response:
         return self._request_result
@@ -58,7 +58,7 @@ class GetTokenRequest(BaseRequest):
 
     def run_request(self) -> None:
         if self.parent_service.get_protocol() in ['sso_dotcloud', 'sso_theia']:
-            self.run_request_post()
+            self._run_request_post()
         else:
             super(GetTokenRequest, self).run_request()
 
@@ -67,6 +67,7 @@ class GetTokenRequest(BaseRequest):
             get_token_response_content = self._request_result.json()
         except JSONDecodeError:
             response_text = self._request_result.text
+            # FIXME:For the sake of homogeneity, exception should be raised by GetTokenResponse,
             if response_text == 'Please set mail and password':
                 msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
                 raise AccesDeniedError(msg.format(response_text))

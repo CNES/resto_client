@@ -33,12 +33,11 @@ class DescribeRequest(BaseRequest):
         return cast(RestoCollections, super(DescribeRequest, self).run())
 
     def process_request_result(self) -> RestoCollections:
-        # FIXME: same code than GetCollectionsRequest
         try:
             collections_descr = CollectionsDescription(self, self._request_result.json())
         except RestoResponseError:
             msg = 'Collections description response from {} resto server cannot be understood.'
-            # TOOD: change exception type
+            # TOOD: change exception type and move into CollectionsDescription
             raise ValueError(msg.format(self.parent_service.parent_server.server_name))
 
         return collections_descr.as_resto_object()
