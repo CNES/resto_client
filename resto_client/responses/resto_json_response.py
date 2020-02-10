@@ -18,7 +18,6 @@ from typing import Dict, List, Any, Optional  # @UnusedImport
 import warnings
 
 from resto_client.requests.base_request import BaseRequest
-from resto_client.settings.resto_client_parameters import RestoClientParameters
 
 from .resto_response import RestoResponse
 from .resto_response_error import RestoResponseError
@@ -94,6 +93,6 @@ class RestoJsonResponseSimple(RestoJsonResponse):
         # Check that no other entries are contained in the response. Issue a warning if not.
         for field in self.needed_fields:
             response.pop(field)
-        if response.keys() and RestoClientParameters.is_debug():
+        if response.keys() and self._parent_request.parent_service.parent_server.debug_server:
             msg = '{} response contains unknown entries: {}.'
             warnings.warn(msg.format(self.request_name, response))

@@ -12,19 +12,21 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-import time
-from warnings import warn
 from pathlib import Path
-from typing import Optional, Dict, Type
+import time
+from typing import Optional, Dict, Type, Any, TYPE_CHECKING
+from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
-from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
+from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.entities.resto_criteria import RestoCriteria
+from resto_client.entities.resto_criteria_definition import (get_criteria_for_protocol,
+                                                             CriteriaDictType)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.resto_criteria import RestoCriteria
 from resto_client.requests.collections_requests import (GetCollectionsRequest, GetCollectionRequest,
                                                         SearchCollectionRequest)
 from resto_client.requests.features_requests import (DownloadAnnexesRequest,
@@ -36,12 +38,14 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
-from resto_client.settings.servers_database import DB_SERVERS
 
 from .authentication_service import AuthenticationService
 from .base_service import BaseService
 from .resto_collections_manager import RestoCollectionsManager
 from .service_access import RestoServiceAccess
+
+if TYPE_CHECKING:
+    from .resto_server import RestoServer  # @UnusedImport
 
 
 class RestoService(BaseService):
@@ -51,25 +55,19 @@ class RestoService(BaseService):
 
     def __init__(self,
                  resto_access: RestoServiceAccess,
-                 auth_service: AuthenticationService) -> None:
+                 auth_service: AuthenticationService,
+                 parent_server: 'RestoServer') -> None:
         """
         Constructor
 
         :param resto_access: access to resto service.
-        :param auth_service: access to the Authentication service associated to this resto service.
+        :param auth_service: Authentication service associated to this resto service.
+        :param parent_server: Server which uses this service.
         """
-        super(RestoService, self).__init__(service_access=resto_access)
-        # Collections manager and associated authentication service need to exist before
-        # calling update_after_url_change
-        self._collections_mgr = RestoCollectionsManager(self)
-        self._auth_service = auth_service
-        self.update_after_url_change()
-
-    def reset(self) -> None:
+        super(RestoService, self).__init__(resto_access, auth_service, parent_server)
         self.service_access.detected_protocol = None
-        self._collections_mgr.reset()
-        self.auth_service.reset()
-        super(RestoService, self).reset()
+        self._collections_mgr = RestoCollectionsManager()
+        self._collections_mgr.collections_set = self.get_collections()
 
     def set_collection_mgr(self, collection_mgr: RestoCollectionsManager) -> None:
         """
@@ -78,59 +76,6 @@ class RestoService(BaseService):
         :param collection_mgr: the collection manager
         """
         self._collections_mgr = collection_mgr
-
-    @property
-    def auth_service(self) -> AuthenticationService:
-        """
-        :returns: the authentication service associated to this RestoService.
-        """
-        return self._auth_service
-
-    @classmethod
-    def from_name(cls,
-                  server_name: str,
-                  username: Optional[str]= None,
-                  password: Optional[str]=None) -> 'RestoService':
-        """
-        Build a resto service from the database of servers
-
-        :param server_name: the name of the server to use in the database
-        :param username: name of the account on the server
-        :param password: user password
-        :returns: a resto service corresponding to the server_name
-        """
-        server_description = DB_SERVERS.get_server(server_name)
-        auth_service = AuthenticationService.from_name(server_name,
-                                                       username=username, password=password)
-        resto_service = cls(resto_access=server_description.resto_access, auth_service=auth_service)
-        return resto_service
-
-    @classmethod
-    def persisted(cls) -> 'RestoService':
-        """
-        :returns: a resto service from the persisted authentication access description.
-        """
-        # Retrieve persisted authentication service
-        auth_service = AuthenticationService.persisted()
-        # Retrieve persisted access to the resto service
-        resto_service_access = RestoServiceAccess.get_persisted_access()
-        resto_service = cls(resto_access=resto_service_access, auth_service=auth_service)
-        persisted_coll_manager = RestoCollectionsManager.persisted(resto_service)
-        resto_service.set_collection_mgr(persisted_coll_manager)
-        return resto_service
-
-    def update_after_url_change(self) -> None:
-        """
-        Callback method to update service after base URL was possibly changed.
-        """
-        # Recreate the collections manager
-        self._collections_mgr = RestoCollectionsManager(self)
-        if self.service_access.base_url is not None:
-            self._collections_mgr.retrieve_collections()
-        else:
-            self._collections_mgr.current_collection = None  # type: ignore
-        # Reset the detected server type
-        self.service_access.detected_protocol = None
 
     @property
     def current_collection(self) -> Optional[str]:
@@ -146,7 +91,7 @@ class RestoService(BaseService):
         :param collection_name: collection to use
         :raises ValueError: when given collection not in server
         """
-        self._collections_mgr.current_collection = collection_name  # type: ignore
+        self._collections_mgr.current_collection = collection_name
 
     def show(self, with_stats: bool=True) -> str:
         """
@@ -160,7 +105,13 @@ class RestoService(BaseService):
             out_str += self._collections_mgr.str_statistics()
         return out_str
 
-# ++++++++ From here we have the supported request to the service ++++++++++++
+    def get_supported_criteria(self) -> CriteriaDictType:
+        """
+        :returns: the supported criteria definition
+        """
+        return get_criteria_for_protocol(self.service_access.protocol)
+
+# ++++++++ From here we have the requests supported by the service ++++++++++++
 
     def describe(self) -> RestoCollections:
         """
@@ -182,12 +133,12 @@ class RestoService(BaseService):
         :returns: the requested collection or the current one.
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        collection = self._ensure_collection(collection)
-        return GetCollectionRequest(self, collection=collection).run()
+        collection_name = self._collections_mgr.ensure_collection(collection)
+        return GetCollectionRequest(self, collection=collection_name).run()
 
-    def search_collection(self,
-                          criteria: RestoCriteria,
-                          collection: Optional[str]=None) -> RestoFeatureCollection:
+    def search_by_criteria(self,
+                           criteria: Dict[str, Any],
+                           collection: Optional[str]=None) -> RestoFeatureCollection:
         """
         Search a collection using criteria.
 
@@ -196,8 +147,9 @@ class RestoService(BaseService):
         :returns: the result of the search
         :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        collection = self._ensure_collection(collection)
-        return SearchCollectionRequest(self, criteria, collection=collection).run()
+        collection_name = self._collections_mgr.ensure_collection(collection)
+        resto_criteria = RestoCriteria(self.service_access.protocol, **criteria)
+        return SearchCollectionRequest(self, collection_name, criteria=resto_criteria).run()
 
     def get_feature_by_id(self,
                           feature_id: str,
@@ -213,10 +165,11 @@ class RestoService(BaseService):
         :raises ValueError: when the retrieved feature has not the right id (case where uuid
                             incorrectly provided as argument)
         """
-        collection = self._ensure_collection(collection)
+        collection_name = self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
 
-        feature_collection = SearchCollectionRequest(self, criteria, collection=collection).run()
+        feature_collection = \
+            SearchCollectionRequest(self, collection_name, criteria=criteria).run()
 
         if len(feature_collection['features']) > 1:
             raise IndexError('Several results found for id {}'.format(feature_id))
@@ -289,18 +242,3 @@ class RestoService(BaseService):
             # Retry file download after product staging
             downloaded_filename = self.download_feature_file(redo_feature, file_type, download_dir)
         return downloaded_filename
-
-    def _ensure_collection(self, collection: Optional[str]=None) -> str:
-        """
-        Change the current_collection if a collection is specified and returns the collection to
-        use for the request.
-
-        :param collection: the collection name to record.
-        :returns: the collection name to use for the request.
-        :raises RestoClientUserError: when no current collection can be defined.
-        """
-        if collection is not None:
-            self.current_collection = collection
-        if self.current_collection is None:
-            raise RestoClientUserError('No collection name defined')
-        return self.current_collection

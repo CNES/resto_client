@@ -12,9 +12,9 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-USERNAME_KEY = 'username'
-DOWNLOAD_DIR_KEY = 'download_dir'
-TOKEN_KEY = 'token'
-VERBOSITY_KEY = 'verbosity'
-REGION_KEY = 'region'
-COLLECTION_KEY = 'current_collection'
+from resto_client.generic.user_dirs import user_config_dir
+
+RESTO_CLIENT_APP_NAME = 'resto_client'
+RESTO_CLIENT_APP_AUTHOR = 'CNES'
+RESTO_CLIENT_CONFIG_DIR = user_config_dir(app_author=RESTO_CLIENT_APP_AUTHOR,
+                                          app_name=RESTO_CLIENT_APP_NAME)

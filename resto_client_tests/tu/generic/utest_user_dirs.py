@@ -17,7 +17,7 @@ import shutil
 import unittest
 
 from resto_client.generic.user_dirs import (user_config_dir, user_download_dir, user_dir,
-                                            MSWINDOWS, KNOWN_USER_DIRS)
+                                            MSWINDOWS, USER_DIRS_XDG, USER_DIRS_WINDOWS)
 
 
 class UTestUserConfigDir(unittest.TestCase):
@@ -67,50 +67,84 @@ class UTestUserConfigDir(unittest.TestCase):
         self.assertTrue(home in config_path.parents)
 
 
-class UTestUserDir(unittest.TestCase):
+class UTestUserDirCommon(unittest.TestCase):
     """
-    Unit Tests of the user_dir() function and its derivatives
+    Unit Tests of the user_dir() function and its derivatives on the Windows platform
     """
 
     def test_n_user_download_dir(self) -> None:
         """
         Unit test of user_download_dir() in nominal cases
         """
-        # Directory is set by the system and must exist
-        download_path = user_download_dir()
-        self.assertTrue(download_path.is_dir())
-        # Verify that it is inside the user name space (is it really mandatory ?)
-        self.assertTrue(Path.home() in download_path.parents)
+        # Directory is set by the system and does not exist
+        download_path = user_download_dir(app_name='fake_download_dir_for_tests')
+        print(download_path)
+        self.assertIsNotNone(download_path)
+        self.assertFalse(download_path.is_dir())
 
-    def test_n_user_dir(self) -> None:
-        """
-        Unit test of user_dir() in nominal cases
-        """
-        for dir_key in KNOWN_USER_DIRS.keys():
-            # Warning: follwing lists depend on the account under which tests are run
-            if MSWINDOWS:
-                defined_dirs = ['Contacts', 'Downloads', 'Libraries', 'Links', 'LocalAppDataLow',
-                                'RoamingTiles', 'SavedGames', 'SavedSearches']
-            else:
-                defined_dirs = ['Desktop', 'Documents', 'Downloads', 'Music', 'Pictures',
-                                'PublicShare', 'Templates', 'Videos']
-            if dir_key in defined_dirs:
-                user_dir_path = user_dir(dir_key)
-                self.assertTrue(user_dir_path.is_dir())
-            else:
-                self.assertRaises(FileNotFoundError)
+        download_path = user_download_dir(app_name='fake_download_dir_for_tests',
+                                          ensure_exists=True)
+        print(download_path)
+        self.assertIsNotNone(download_path)
+        self.assertTrue(download_path.is_dir())
+        shutil.rmtree(download_path)
 
     def test_d_user_dir(self) -> None:
         """
         Unit test of user_dir() in degraded cases
         """
-        # Unexisting directory key, on any system
-        with self.assertRaises(IndexError):
-            _ = user_dir('fake')
+        # Unexisting directory type, on any system
+        with self.assertRaises(KeyError):
+            _ = user_dir('fake_dir_type', app_name='fake_app')
+        with self.assertRaises(KeyError):
+            _ = user_dir('fake_dir_type', app_name='fake_app', ensure_exists=True)
+        with self.assertRaises(KeyError):
+            _ = user_dir('fake_dir_type', ensure_exists=True)
 
-        # Non existing directory on the current system
-        with self.assertRaises(NotADirectoryError):
-            if MSWINDOWS:
-                _ = user_dir('PublicShare')
+
+@unittest.skipIf(not MSWINDOWS, 'These tests run only on Windows platform')
+class UTestUserDirWindows(unittest.TestCase):
+    """
+    Unit Tests of the user_dir() function and its derivatives on the Windows platform
+    """
+
+    def test_n_user_dir(self) -> None:
+        """
+        Unit test of user_dir() in nominal cases
+        """
+        # Warning: following lists depend on the account under which tests are run
+        defined_dirs = ['Contacts', 'Downloads', 'Libraries', 'Links', 'LocalAppDataLow',
+                        'RoamingTiles', 'SavedGames', 'SavedSearches']
+        for dir_key in USER_DIRS_WINDOWS:
+            if dir_key in defined_dirs:
+                user_dir_path = user_dir(dir_key, app_name='fake_app')
+                self.assertFalse(user_dir_path.is_dir())
+                user_dir_path = user_dir(dir_key, app_name='fake_app', ensure_exists=True)
+                self.assertTrue(user_dir_path.is_dir())
+                shutil.rmtree(user_dir_path)
             else:
-                _ = user_dir('Favorites')
+                self.assertRaises(FileNotFoundError)
+
+
+@unittest.skipIf(MSWINDOWS, 'These tests run only on Linux platform')
+class UTestUserDirLinux(unittest.TestCase):
+    """
+    Unit Tests of the user_dir() function and its derivatives on Linux platforms
+    """
+
+    def test_n_user_dir(self) -> None:
+        """
+        Unit test of user_dir() in nominal cases
+        """
+        # Warning: following lists depend on the account under which tests are run
+        defined_dirs = ['Desktop', 'Documents', 'Downloads', 'Music', 'Pictures',
+                        'PublicShare', 'Templates', 'Videos']
+        for dir_key in USER_DIRS_XDG:
+            if dir_key in defined_dirs:
+                user_dir_path = user_dir(dir_key, app_name='fake_app')
+                self.assertFalse(user_dir_path.is_dir())
+                user_dir_path = user_dir(dir_key, app_name='fake_app', ensure_exists=True)
+                self.assertTrue(user_dir_path.is_dir())
+                shutil.rmtree(user_dir_path)
+            else:
+                self.assertRaises(FileNotFoundError)

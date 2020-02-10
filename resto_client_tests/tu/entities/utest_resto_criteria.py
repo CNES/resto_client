@@ -15,7 +15,8 @@
 import unittest
 
 from resto_client.base_exceptions import RestoClientUserError
-from resto_client.functions.resto_criteria import RestoCriteria, test_criterion
+from resto_client.entities.resto_criteria import RestoCriteria
+from resto_client.entities.resto_criteria_definition import test_criterion
 from resto_client.generic.basic_types import GeometryWKT
 
 
@@ -62,18 +63,7 @@ class UTestRestoCriteria(unittest.TestCase):
         Unit test of class construction
         """
         resto_criteria = RestoCriteria('dotcloud', identifier='2010')
-        self.assertTrue(hasattr(resto_criteria, 'criteria_keys'))
         self.assertDictEqual(resto_criteria, {'identifier': '2010'})
-
-    def test_d_init_of_resto_criteria(self) -> None:
-        """
-        Unit test of class construction in degraded cases
-        """
-        with self.assertRaises(RestoClientUserError) as context:
-            RestoCriteria('wrong_protocol')
-        expected_msg = \
-            'specific criteria type of "wrong_protocol" protocol not supported by resto_client'
-        self.assertEqual(expected_msg, str(context.exception))
 
     def test_n_setitem_standard(self) -> None:
         """

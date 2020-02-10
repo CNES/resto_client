@@ -26,7 +26,6 @@ from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.services.base_service import BaseService
-from resto_client.settings.resto_client_parameters import RestoClientParameters
 
 from .utils import AccesDeniedError, get_response
 
@@ -55,29 +54,46 @@ class BaseRequest(ABC):
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
         :raises TypeError: if the service argument is not derived from :class:`BaseService`.
         """
+        # FIXME: Could it be better to check that the route is supported at creation time?
+        # Problem: routes for DOnwloadRequests are not parameterized, but come from json response
         self.headers: Dict[str, str] = {}
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
-        self.auth_service = service.auth_service
-        self.service_access = service.service_access
+        self.parent_service = service
+        self.service_access = self.parent_service.service_access
+        self.auth_service = self.parent_service.auth_service
         self._url_kwargs = url_kwargs
-        if RestoClientParameters.is_debug():
+        if self.parent_service.parent_server.debug_server:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
                                                           self.service_access.base_url)
                 print(Fore.CYAN + msg + Style.RESET_ALL)
 
+    def get_route(self) -> Optional[str]:
+        """
+        :returns: True if this request type is supported by the service, False otherwise.
+        """
+        return self.service_access.get_route_pattern(self)
+
+    def supported_by_service(self) -> bool:
+        """
+        :returns: True if this request type is supported by the service, False otherwise.
+        """
+        return self.get_route() is not None
+
     def get_url(self) -> str:
-        """ create url with service url and extension """
-        url_extension = self.service_access.get_route_pattern(self)
+        """
+        :returns: full url for this request
+        :raises RestoClientDesignError: when the request is unsupported by the service
+        """
+        url_extension = self.get_route()
         if url_extension is None:
-            msg_fmt = 'Trying to a build an URL for a route declared as None for {}'
+            msg_fmt = 'Trying to build an URL for {} request, unsupported by the service.'
             raise RestoClientDesignError(msg_fmt.format(type(self).__name__))
         return urljoin(self.service_access.base_url,
                        url_extension.format(**self._url_kwargs))
 
-    @abstractmethod
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """
         Set headers with dic_input
@@ -98,15 +114,15 @@ class BaseRequest(ABC):
         """
 
     @property
-    def authorization(self) -> HTTPBasicAuth:
+    def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
         """
-        :returns: None, the default authorization for the service
+        The default basic HTTP authorization for the service (None)
         """
 
     @property
-    def authorization_data(self) -> Dict[str, Optional[str]]:
+    def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
         """
-        :returns: None, data input to get authorization for the service
+        The default authorization data for the service (None)
         """
 
     def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
@@ -119,7 +135,7 @@ class BaseRequest(ABC):
             headers_with_json.update(self.headers)
         headers_with_json.update({'Accept': 'application/json'})
         result = get_response(self.get_url(), self.request_action,
-                              headers=headers_with_json, auth=self.authorization)
+                              headers=headers_with_json, auth=self.http_basic_auth)
         return result.json()
 
     def post_as_text(self, stream: bool=False) -> Optional[str]:
@@ -144,7 +160,7 @@ class BaseRequest(ABC):
                 result = post(self.get_url(), headers=self.headers,
                               stream=stream)
             else:
-                result = post(self.get_url(), headers=self.headers, auth=self.authorization,
+                result = post(self.get_url(), headers=self.headers, auth=self.http_basic_auth,
                               stream=stream, data=self.authorization_data)
             result.raise_for_status()
         except (HTTPError, SSLError) as excp:

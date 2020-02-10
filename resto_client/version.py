@@ -20,5 +20,5 @@ systematic version computation, even when no access to __version__ or __updated_
 
 Those needing access to these symbols shall import this module on their own.
 """
-__version__ = "v0.3.0"
-__updated__ = "09.01.2020"
+__version__ = "v0.4.0"
+__updated__ = "10.02.2020"

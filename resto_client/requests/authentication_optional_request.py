@@ -14,7 +14,6 @@
 """
 from abc import abstractmethod
 from typing import Optional, Union  # @NoMove
-
 from requests import Response
 
 from resto_client.responses.resto_response import RestoResponse
@@ -26,16 +25,18 @@ class AuthenticationOptionalRequest(BaseRequest):
     """
      Base class for several Resto Requests which can request Authentication
     """
-    token_required = False
+    authentication_required = False
 
     def set_headers(self, dict_input: Optional[dict]=None) -> None:
         """
-        Set headers because parent's abstract method
+        Override BaseRequest.set_headers() to add authorization_header when availablke or required.
 
         :param dict_input: entries to add in headers
         """
         super(AuthenticationOptionalRequest, self).set_headers(dict_input)
-        self.auth_service.update_authorization_header(self.headers, self.token_required)
+        authorization_header = self.auth_service.get_authorization_header(
+            self.authentication_required)
+        self.headers.update(authorization_header)
 
     @abstractmethod
     def run(self) -> Union[RestoResponse, bool, str, None, Response]:
