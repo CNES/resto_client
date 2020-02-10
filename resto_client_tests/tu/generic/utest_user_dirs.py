@@ -78,13 +78,11 @@ class UTestUserDirCommon(unittest.TestCase):
         """
         # Directory is set by the system and does not exist
         download_path = user_download_dir(app_name='fake_download_dir_for_tests')
-        print(download_path)
         self.assertIsNotNone(download_path)
         self.assertFalse(download_path.is_dir())
 
         download_path = user_download_dir(app_name='fake_download_dir_for_tests',
                                           ensure_exists=True)
-        print(download_path)
         self.assertIsNotNone(download_path)
         self.assertTrue(download_path.is_dir())
         shutil.rmtree(download_path)

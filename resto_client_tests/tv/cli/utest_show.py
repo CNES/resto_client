@@ -12,9 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from contextlib import redirect_stdout
-import io
-
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
@@ -29,36 +27,31 @@ class UTestCliShow(TestRestoClientCli):
         Unit test of show server in nominal cases
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
-        with redirect_stdout(io.StringIO()) as out_string_io1:
-            resto_client_run(arguments=['show', 'server'])
-        output1 = out_string_io1.getvalue().strip()  # type: ignore
-        with redirect_stdout(io.StringIO()) as out_string_io2:
-            resto_client_run(arguments=['show', 'server', 'kalideos'])
-        output2 = out_string_io2.getvalue().strip()  # type: ignore
+        output1 = self.get_command_output(['show', 'server'])
+        output2 = self.get_command_output(['show', 'server', 'kalideos'])
         # verify integrity betwen show server X and show current server
         self.assertEqual(output1, output2)
         # Test on first phrase of print only
-        first_line = out_string_io2.getvalue().splitlines()[0]  # type: ignore
+        first_line = output2.splitlines()[0]
         self.assertEqual(first_line, 'Server URL: https://www.kalideos.fr/resto2/')
 
     def test_n_show_server_stats(self) -> None:
         """
         Unit test of show server in nominal cases
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'server', 'kalideos', '--stats'])
+        output = self.get_command_output(['show', 'server', 'kalideos', '--stats'])
         expect_out = (['No statistics available for KALCNES',
                        'No statistics available for KALHAITI',
                        'STATISTICS for all collections'])
-        self.assertEqual(out_string_io.getvalue().splitlines()[7:10], expect_out)  # type: ignore
+        self.assertEqual(output.splitlines()[7:10], expect_out)
 
     def test_n_show_collection(self) -> None:
         """
         Unit test of show collection in nominal cases: nothing persisted
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'collection', 'KALHAITI', '--server=kalideos'])
-        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
+        output = self.get_command_output(['show', 'collection',
+                                          'KALHAITI', '--server=kalideos'])
+        second_line = output.splitlines()[1]
         self.assertEqual(second_line[1:-1].strip(), "Collection's Characteristics")
 
     def test_n_show_current_collection(self) -> None:
@@ -67,9 +60,8 @@ class UTestCliShow(TestRestoClientCli):
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'collection'])
-        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
+        output = self.get_command_output(['show', 'collection'])
+        second_line = output.splitlines()[1]
         self.assertEqual(second_line[1:-1].strip(), "Collection's Characteristics")
 
     def test_n_show_other_collection(self) -> None:
@@ -78,18 +70,16 @@ class UTestCliShow(TestRestoClientCli):
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'collection', 'KALHAITI'])
-        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
+        output = self.get_command_output(['show', 'collection', 'KALHAITI'])
+        second_line = output.splitlines()[1]
         self.assertEqual(second_line[1:-1].strip(), "Collection's Characteristics")
 
     def test_n_show_settings(self) -> None:
         """
         Unit test of show settings in nominal cases
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'settings'])
-        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
+        output = self.get_command_output(['show', 'settings'])
+        second_line = output.splitlines()[1]
         self.assertEqual(second_line[1:-1].strip(), 'Settings from : resto_client_settings.json')
 
     def test_n_show_feature(self) -> None:
@@ -97,35 +87,32 @@ class UTestCliShow(TestRestoClientCli):
         Unit test of show feature in nominal cases
         With Kalideos and Creodias
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'feature', '1363714904970542',
-                                        '--collection=KALCNES', '--server=kalideos'])
-        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
-        self.assertEqual(second_line, 'Metadata available for product 1363714904970542')
+        output = self.get_command_output(['show', 'feature', '1363714904970542',
+                                          '--collection=KALCNES', '--server=kalideos'])
+        first_line = output.splitlines()[0]
+        self.assertEqual(first_line, 'Metadata available for product 1363714904970542')
 
         id_prod = ('/eodata/Envisat/Meris/FRS/2012/04/08/' +
                    'MER_FRS_1PPEPA20120408_105857_000005063113_00267_52867_0978.N1')
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['show', 'feature', id_prod, '--collection=Envisat',
-                                        '--server=creodias'])
-        second_line = out_string_io.getvalue().splitlines()[1]  # type: ignore
-        self.assertEqual(second_line, 'Metadata available for product {}'.format(id_prod))
+        output = self.get_command_output(['show', 'feature', id_prod, '--collection=Envisat',
+                                          '--server=creodias'])
+        first_line = output.splitlines()[0]
+        self.assertEqual(first_line, 'Metadata available for product {}'.format(id_prod))
 
     def test_d_show_server(self) -> None:
         """
         Unit test of show server in degraded cases (no result found)
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
+        with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['show', 'server'])
-        output = out_string_io.getvalue()  # type: ignore
         expected_msg = 'No persisted server and None is not a valid server name.'
-        self.assertIn(expected_msg, output)
+        self.assertEqual(expected_msg, str(ctxt.exception))
 
     def test_d_show_collection(self) -> None:
         """
         Unit test of show collection in degraded cases (no result found)
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
+        with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['show', 'collection', 'oups', '--server=kalideos'])
-        output = out_string_io.getvalue()  # type: ignore
-        self.assertIn('No collection found with name oups', output)
+        expected_msg = 'No collection found with name oups'
+        self.assertEqual(expected_msg, str(ctxt.exception))

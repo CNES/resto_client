@@ -17,6 +17,7 @@ import argparse
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
+from resto_client.settings.resto_client_config import resto_client_print
 
 from .parser_common import (features_ids_argument_parser, credentials_options_parser,
                             EPILOG_FEATURES, server_option_parser, CliFunctionReturnType)
@@ -32,7 +33,7 @@ def cli_show_settings(args: argparse.Namespace) -> CliFunctionReturnType:
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     _ = args  # to avoid pylint warning
-    print(RESTO_CLIENT_SETTINGS)
+    resto_client_print(RESTO_CLIENT_SETTINGS)
     return None, None
 
 
@@ -47,9 +48,9 @@ def cli_show_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     resto_server = RestoServerPersisted.build_from_argparse(
         args, debug_server=RestoClientParameters.is_debug())
     collection = resto_server.get_collection()
-    print(collection)
+    resto_client_print(collection)
     if not getattr(args, NO_STATS_ARGNAME):
-        print(collection.statistics)
+        resto_client_print(collection.statistics)
     return None, resto_server
 
 
@@ -64,7 +65,7 @@ def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
     resto_server = RestoServerPersisted.build_from_argparse(
         args, debug_server=RestoClientParameters.is_debug())
     server_description = resto_server.show_server(with_stats=getattr(args, WITH_STATS_ARGNAME))
-    print(server_description)
+    resto_client_print(server_description)
     return None, resto_server
 
 
@@ -79,7 +80,7 @@ def cli_show_features(args: argparse.Namespace) -> CliFunctionReturnType:
         args, debug_server=RestoClientParameters.is_debug())
     features = resto_server.get_features_from_ids(getattr(args, FEATURES_IDS_ARGNAME))
     for feature in features:
-        print(feature)
+        resto_client_print(feature)
     return None, resto_server
 
 

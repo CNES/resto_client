@@ -38,6 +38,7 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
+from resto_client.settings.resto_client_config import resto_client_print
 
 from .authentication_service import AuthenticationService
 from .base_service import BaseService
@@ -194,8 +195,8 @@ class RestoService(BaseService):
 
         if signature:
             with colorama_text():
-                print(Fore.BLUE + Style.BRIGHT +
-                      'license {} signed successfully'.format(license_id) + Style.RESET_ALL)
+                msg = 'license {} signed successfully'.format(license_id)
+                resto_client_print(Fore.BLUE + Style.BRIGHT + msg + Style.RESET_ALL)
         return signature
 
     DOWNLOAD_REQUEST_CLASSES: Dict[str, Type[DownloadRequestBase]]

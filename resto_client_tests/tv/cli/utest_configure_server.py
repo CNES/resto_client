@@ -12,14 +12,12 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from contextlib import redirect_stdout
-import io
-
 from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.settings.servers_database import (DB_SERVERS,
                                                     RESTO_URL_KEY, RESTO_PROTOCOL_KEY,
                                                     AUTH_URL_KEY, AUTH_PROTOCOL_KEY)
+
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
@@ -33,9 +31,7 @@ class UTestCliConfigureServer(TestRestoClientCli):
         """
         Unit test of config_server show in nominal cases
         """
-        with redirect_stdout(io.StringIO()) as out_string_io:
-            resto_client_run(arguments=['configure_server', 'show'])
-        output = out_string_io.getvalue()  # type: ignore
+        output = self.get_command_output(['configure_server', 'show'])
         self.assertIn('Settings from : resto_client_server_settings.json', output)
 
     def test_n_config_server_create_del(self) -> None:
