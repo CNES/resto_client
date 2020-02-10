@@ -171,12 +171,8 @@ class AuthenticationServiceAccess(ServiceAccess):
                                        'CheckTokenRequest': 'api/users/checkToken?_tk={token}'
                                        },
                            'sso_theia': {'GetTokenRequest': '',
-                                         'RevokeTokenRequest': None,
-                                         'CheckTokenRequest': None
                                          },
                            'sso_dotcloud': {'GetTokenRequest': '',
-                                            'RevokeTokenRequest': None,
-                                            'CheckTokenRequest': None
                                             }
                            }
         return routes_patterns
@@ -207,6 +203,7 @@ class RestoServiceAccess(ServiceAccess):
                                         }
                            }
         routes_patterns['peps_version'] = copy.deepcopy(routes_patterns['dotcloud'])
-        routes_patterns['peps_version']['SignLicenseRequest'] = None
+        # FIXME: No SignLicenseRequest in peps and theia?
+        del routes_patterns['peps_version']['SignLicenseRequest']
         routes_patterns['theia_version'] = copy.deepcopy(routes_patterns['peps_version'])
         return routes_patterns
