@@ -92,6 +92,6 @@ class RestoJsonResponseSimple(RestoJsonResponse):
         # Check that no other entries are contained in the response. Issue a warning if not.
         for field in self.needed_fields:
             response.pop(field)
-        if response.keys() and self._parent_request.parent_service.parent_server.debug_server:
+        if response.keys() and self._parent_request.debug:
             msg = '{} response contains unknown entries: {}.'
             warnings.warn(msg.format(self.request_name, response))

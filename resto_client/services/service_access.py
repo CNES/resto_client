@@ -97,13 +97,11 @@ class ServiceAccess(ABC):
         except KeyError:
             msg = '{} request is undefined in route patterns for {} server.'
             raise RestoClientUnsupportedRequest(
-                msg.format(type(request).__name__,
-                           request.parent_service.parent_server.server_name))
+                msg.format(type(request).__name__, request.get_server_name()))
         if route is None:
             msg = '{} request is declared as None in route patterns for {} server.'
             raise RestoClientUnsupportedRequest(
-                msg.format(type(request).__name__,
-                           request.parent_service.parent_server.server_name))
+                msg.format(type(request).__name__, request.get_server_name()))
         return route
 
     @property

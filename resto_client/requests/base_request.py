@@ -72,7 +72,8 @@ class BaseRequest(Authenticator):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
         self.parent_service = service
-        if self.parent_service.parent_server.debug_server:
+        self.debug = self.parent_service.parent_server.debug_server
+        if self.debug:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
                                                           self.parent_service.get_base_url())
@@ -81,6 +82,12 @@ class BaseRequest(Authenticator):
         self._request_result: requests.Response
         self._url_kwargs = url_kwargs
         Authenticator.__init__(self, self.parent_service.auth_service)
+
+    def get_server_name(self) -> Optional[str]:
+        """
+        :returns: the name of the server which uses this request.
+        """
+        return self.parent_service.parent_server.server_name
 
     def get_route(self) -> str:
         """

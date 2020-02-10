@@ -101,6 +101,6 @@ class GetCollectionsRequest(BaseRequest):
         except RestoResponseError:
             msg = 'Get collections response from {} resto server cannot be understood.'
             # TOOD: change exception type and move into CollectionsDescription
-            raise ValueError(msg.format(self.parent_service.parent_server.server_name))
+            raise ValueError(msg.format(self.get_server_name()))
 
         return collections_descr.as_resto_object()

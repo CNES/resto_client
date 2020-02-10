@@ -100,7 +100,7 @@ class CheckTokenRequest(BaseRequest):
         try:
             super(CheckTokenRequest, self).finalize_request()
         except RestoClientUnsupportedRequest:
-            if self.parent_service.parent_server.debug_server:
+            if self.debug:
                 print('emulating unsupported CheckTokenRequest')
             emulated_response = RestoClientEmulatedResponse()
             emulated_json = {'status': 'error', 'message': 'user not connected'}
