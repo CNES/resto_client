@@ -165,8 +165,8 @@ class UTestPropertyDecoration(unittest.TestCase):
         self.assertFalse(hasattr(type(instance), 'properties_storage'))
         # and populated with defaults
         # pylint: disable= no-member
-        self.assertEqual(sorted(list(instance.properties_storage.keys())), [
-                         'prop_with_default'])
+        keys = instance.properties_storage.keys()  # type:ignore
+        self.assertEqual(sorted(list(keys)), ['prop_with_default'])
 
     def test_n_init_with_instance_attrs(self) -> None:
         """
@@ -230,10 +230,10 @@ class UTestPropertyDecoration(unittest.TestCase):
         self.assertEqual(instance.properties_storage['header_prop_with_default'], 10)
 
         # Set properties values
-        instance.prop_with_default = 'abcde'
-        instance.prop_without_default = 36
-        instance.prop_with_checker = 'AbCdEfG'
-        instance.prop_with_checker_method = 'nopqrsT'
+        instance.prop_with_default = 'abcde'  # type:ignore
+        instance.prop_without_default = 36  # type:ignore
+        instance.prop_with_checker = 'AbCdEfG'  # type:ignore
+        instance.prop_with_checker_method = 'nopqrsT'  # type:ignore
         # Verify that properties storage has been updated with the properties values
         self.assertEqual(sorted(list(instance.properties_storage.keys())),
                          ['an_initial_key', 'header_prop_with_checker',
@@ -251,10 +251,10 @@ class UTestPropertyDecoration(unittest.TestCase):
         self.assertEqual(instance.prop_with_checker_method, 'NOPQRST')
 
         # Reset properties to None or to their default value if a default is defined
-        instance.prop_with_default = None
-        instance.prop_without_default = None
-        instance.prop_with_checker = None
-        instance.prop_with_checker_method = None
+        instance.prop_with_default = None  # type:ignore
+        instance.prop_without_default = None  # type:ignore
+        instance.prop_with_checker = None  # type:ignore
+        instance.prop_with_checker_method = None  # type:ignore
         # Verify that properties storage has been cleaned
         self.assertEqual(sorted(list(instance.properties_storage.keys())), ['an_initial_key'])
         self.assertEqual(instance.properties_storage['an_initial_key'], 100)
