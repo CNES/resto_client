@@ -60,6 +60,13 @@ class BaseRequest(Authenticator):
         :returns: the action performed by this request.
         """
 
+    @property
+    def authentication_type(self) -> str:
+        """
+        :returns: the authentication type of this request (NEVER or ALWAYS or OPPORTUNITY)
+        """
+        return self.parent_service.service_access.get_authentication(self)
+
     def __init__(self, service: BaseService, **url_kwargs: str) -> None:
         """
         Constructor

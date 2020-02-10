@@ -26,7 +26,6 @@ class DescribeRequest(BaseRequest):
      Request to retrieve the service description
     """
     request_action = 'getting service description'
-    authentication_type = 'NEVER'
 
     def run(self) -> RestoCollections:
         # overidding BaseRequest method, in order to specify the right type returned by this request

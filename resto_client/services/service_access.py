@@ -88,10 +88,8 @@ class ServiceAccess(ABC):
 
         :param request: the request instance for which route must be found.
         :returns: the route pattern
-        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
         """
-        route_descr = self._get_route_description(request)
-        return route_descr['rel_url']
+        return self._get_route_description_item(request, 'rel_url')
 
     def get_method(self, request: 'BaseRequest') -> str:
         """
@@ -99,10 +97,8 @@ class ServiceAccess(ABC):
 
         :param request: the request instance for which method must be found.
         :returns: the method
-        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
         """
-        route_descr = self._get_route_description(request)
-        return route_descr['method']
+        return self._get_route_description_item(request, 'method')
 
     def get_accept(self, request: 'BaseRequest') -> str:
         """
@@ -110,10 +106,36 @@ class ServiceAccess(ABC):
 
         :param request: the request instance for which response format must be found.
         :returns: the response format
-        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
+        """
+        return self._get_route_description_item(request, 'accept')
+
+    def get_authentication(self, request: 'BaseRequest') -> str:
+        """
+        Returns the authentication type used by a request. Can be one of 'NEVER', 'ALWAYS',
+        'OPPORTUNITY'.
+
+        :param request: the request instance for which authentication type must be found.
+        :returns: the authentication type
+        """
+        return self._get_route_description_item(request, 'authentication')
+
+    def _get_route_description_item(self, request: 'BaseRequest', item: str) -> str:
+        """
+        Returns an item of the route description for a request
+
+        :param request: the request instance for which route description must be found.
+        :param item: name of the item to retrieve in  the route description.
+        :returns: the item value
+        :raises RestoClientUnsupportedRequest: when the item is not found in the route description.
         """
         route_descr = self._get_route_description(request)
-        return route_descr['accept']
+        try:
+            item_value = route_descr[item]
+        except KeyError:
+            msg = 'Item {} for {} request is undefined in route patterns for {} server.'
+            raise RestoClientUnsupportedRequest(
+                msg.format(item, type(request).__name__, request.get_server_name()))
+        return item_value
 
     def _get_route_description(self, request: 'BaseRequest') -> Dict[str, str]:
         """
@@ -199,27 +221,32 @@ class AuthenticationServiceAccess(ServiceAccess):
                 'GetTokenRequest': {
                     'rel_url': 'api/users/connect',
                     'method': 'get',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'ALWAYS'},
                 'RevokeTokenRequest': {
                     'rel_url': 'api/users/disconnect',
                     'method': 'post',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'ALWAYS'},
                 'CheckTokenRequest': {
                     'rel_url': 'api/users/checkToken?_tk={token}',
                     'method': 'get',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
             },
             'sso_theia': {
                 'GetTokenRequest': {
                     'rel_url': '',
                     'method': 'post',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'ALWAYS'},
             },
             'sso_dotcloud': {
                 'GetTokenRequest': {
                     'rel_url': '',
                     'method': 'post',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'ALWAYS'},
             }
         }
         return routes_patterns
@@ -243,27 +270,44 @@ class RestoServiceAccess(ServiceAccess):
                 'DescribeRequest': {
                     'rel_url': 'api/collections/describe.json',
                     'method': 'get',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
                 'GetCollectionsRequest': {
                     'rel_url': 'collections',
                     'method': 'get',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
                 'GetCollectionRequest': {
                     'rel_url': 'collections/{collection}',
                     'method': 'get',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
                 'SearchCollectionRequest': {
                     'rel_url': 'api/collections/{collection}/search.json?{criteria_url}',
                     'method': 'get',
-                    'accept': 'json'},
-                'GetFeatureByIDRequest': {
-                    'rel_url': 'api/collections/{collection}/search.json?{criteria_url}',
-                    'method': 'get',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'OPPORTUNITY'},
                 'SignLicenseRequest': {
                     'rel_url': 'api/users/{user}/signatures/{license_id}/',
                     'method': 'post',
-                    'accept': 'json'},
+                    'accept': 'json',
+                    'authentication': 'ALWAYS'},
+                'DownloadProductRequest': {  # No rel_url as URL in in the feature
+                    'method': 'get',
+                    'accept': 'json',
+                    'authentication': 'ALWAYS'},
+                'DownloadQuicklookRequest': {  # No rel_url as URL in in the feature
+                    'method': 'get',
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
+                'DownloadThumbnailRequest': {  # No rel_url as URL in in the feature
+                    'method': 'get',
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
+                'DownloadAnnexesRequest': {  # No rel_url as URL in in the feature
+                    'method': 'get',
+                    'accept': 'json',
+                    'authentication': 'NEVER'},
             }
         }
         routes_patterns['peps_version'] = copy.deepcopy(routes_patterns['dotcloud'])

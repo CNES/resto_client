@@ -36,7 +36,6 @@ class GetCollectionRequest(BaseRequest):
     """
 
     request_action = 'getting collection'
-    authentication_type = 'NEVER'
 
     def run(self) -> RestoCollection:
         # overidding BaseRequest method, in order to specify the right type returned by this request
@@ -53,7 +52,6 @@ class SearchCollectionRequest(BaseRequest):
     """
 
     request_action = 'searching'
-    authentication_type = 'OPPORTUNITY'
 
     def __init__(self, service: 'RestoService',
                  collection: str, criteria: Optional[RestoCriteria] = None) -> None:
@@ -89,7 +87,6 @@ class GetCollectionsRequest(BaseRequest):
     """
 
     request_action = 'listing collections'
-    authentication_type = 'NEVER'
 
     def run(self) -> RestoCollections:
         # overidding BaseRequest method, in order to specify the right type returned by this request

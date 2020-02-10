@@ -32,7 +32,6 @@ class RevokeTokenRequest(BaseRequest):
     """
 
     request_action = 'revoking token'
-    authentication_type = 'ALWAYS'
 
     def run(self) -> Response:
         # overidding BaseRequest method, in order to specify the right type returned by this request
@@ -47,7 +46,6 @@ class GetTokenRequest(BaseRequest):
      Request to retrieve the token associated to the user
     """
     request_action = 'getting token'
-    authentication_type = 'ALWAYS'
 
     def run(self) -> str:
         # overidding BaseRequest method, in order to specify the right type returned by this request
@@ -71,7 +69,6 @@ class CheckTokenRequest(BaseRequest):
      Request to check a service token.
     """
     request_action = 'checking token'
-    authentication_type = 'NEVER'
 
     def __init__(self, service: 'AuthenticationService', token: str) -> None:
         """

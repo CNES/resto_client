@@ -75,7 +75,6 @@ class SignLicenseRequest(BaseRequest):
      Requests for signing a license
     """
     request_action = 'signing license'
-    authentication_type = 'ALWAYS'
 
     def __init__(self, service: 'RestoService', license_id: str) -> None:
         """
@@ -286,28 +285,6 @@ class DownloadProductRequest(DownloadRequestBase):
     file_type = 'product'
     filename_suffix = ''
     request_action = 'downloading product'
-    authentication_type = 'ALWAYS'
-
-
-class AnonymousDownloadRequest(DownloadRequestBase):
-    """
-     Abstract class for downloading files anonymously
-    """
-    authentication_type = 'NEVER'
-
-    @property
-    @abstractmethod
-    def filename_suffix(self) -> str:
-        """
-        :returns: a file type specific suffix to add before the extension in the filename.
-        """
-
-    @property
-    @abstractmethod
-    def file_type(self) -> str:
-        """
-        :returns: file type: one of 'product', 'quicklook', 'thumbnail' or 'annexes'
-        """
 
 
 class DownloadQuicklookRequest(DownloadRequestBase):
@@ -317,24 +294,21 @@ class DownloadQuicklookRequest(DownloadRequestBase):
     file_type = 'quicklook'
     filename_suffix = '_ql'
     request_action = 'downloading quicklook'
-    authentication_type = 'NEVER'
 
 
-class DownloadThumbnailRequest(AnonymousDownloadRequest):
+class DownloadThumbnailRequest(DownloadRequestBase):
     """
      Request for downloading the thumbnail file
     """
     file_type = 'thumbnail'
     filename_suffix = '_th'
     request_action = 'downloading thumbnail'
-    authentication_type = 'NEVER'
 
 
-class DownloadAnnexesRequest(AnonymousDownloadRequest):
+class DownloadAnnexesRequest(DownloadRequestBase):
     """
      Request for downloading the annexes file
     """
     file_type = 'annexes'
     filename_suffix = '_ann'
     request_action = 'downloading annexes'
-    authentication_type = 'NEVER'
