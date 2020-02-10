@@ -96,9 +96,6 @@ class SignLicenseRequest(BaseRequest):
     def finalize_request(self) -> None:
         self.update_headers(dict_input={'Accept': 'application/json'})
 
-    def run_request(self) -> None:
-        self._run_request_post()
-
     def process_request_result(self) -> bool:
         response = SignLicenseResponse(self, self._request_result.json())
 

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 SA = TypeVar('SA', bound='ServiceAccess')
 
-RoutesPatternsType = Dict[str, Dict[str, Union[str, None]]]
+RoutesPatternsType = Dict[str, Dict[str, Dict[str, str]]]
 """
 Routes patterns for a service are described in a dictionary whose key is the service protocol
 and the value is another dictionary. This second dictionary has the request class name as its key,
@@ -88,18 +88,46 @@ class ServiceAccess(ABC):
 
         :param request: the request instance for which route must be found.
         :returns: the route pattern
-        :raises RestoClientUnsupportedRequest: when the request has no associated route in this
-                                               service access.
+        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
+        """
+        route_descr = self._get_route_description(request)
+        return route_descr['rel_url']
+
+    def get_method(self, request: 'BaseRequest') -> str:
+        """
+        Returns the sending method for a request
+
+        :param request: the request instance for which method must be found.
+        :returns: the method
+        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
+        """
+        route_descr = self._get_route_description(request)
+        return route_descr['method']
+
+    def get_accept(self, request: 'BaseRequest') -> str:
+        """
+        Returns the response format accepted by a request
+
+        :param request: the request instance for which response format must be found.
+        :returns: the response format
+        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
+        """
+        route_descr = self._get_route_description(request)
+        return route_descr['accept']
+
+    def _get_route_description(self, request: 'BaseRequest') -> Dict[str, str]:
+        """
+        Returns the route description for a request
+
+        :param request: the request instance for which route description must be found.
+        :returns: the route description
+        :raises RestoClientUnsupportedRequest: when the request is not found in this service access.
         """
         routes = self.routes_patterns()[self.protocol]
         try:
             route = routes[type(request).__name__]
         except KeyError:
             msg = '{} request is undefined in route patterns for {} server.'
-            raise RestoClientUnsupportedRequest(
-                msg.format(type(request).__name__, request.get_server_name()))
-        if route is None:
-            msg = '{} request is declared as None in route patterns for {} server.'
             raise RestoClientUnsupportedRequest(
                 msg.format(type(request).__name__, request.get_server_name()))
         return route
@@ -166,15 +194,34 @@ class AuthenticationServiceAccess(ServiceAccess):
     def routes_patterns(cls) -> RoutesPatternsType:
         # Route patterns for an authentication service
         routes_patterns: RoutesPatternsType
-        routes_patterns = {'default': {'GetTokenRequest': 'api/users/connect',
-                                       'RevokeTokenRequest': 'api/users/disconnect',
-                                       'CheckTokenRequest': 'api/users/checkToken?_tk={token}'
-                                       },
-                           'sso_theia': {'GetTokenRequest': '',
-                                         },
-                           'sso_dotcloud': {'GetTokenRequest': '',
-                                            }
-                           }
+        routes_patterns = {
+            'default': {
+                'GetTokenRequest': {
+                    'rel_url': 'api/users/connect',
+                    'method': 'get',
+                    'accept': 'json'},
+                'RevokeTokenRequest': {
+                    'rel_url': 'api/users/disconnect',
+                    'method': 'post',
+                    'accept': 'json'},
+                'CheckTokenRequest': {
+                    'rel_url': 'api/users/checkToken?_tk={token}',
+                    'method': 'get',
+                    'accept': 'json'},
+            },
+            'sso_theia': {
+                'GetTokenRequest': {
+                    'rel_url': '',
+                    'method': 'post',
+                    'accept': 'json'},
+            },
+            'sso_dotcloud': {
+                'GetTokenRequest': {
+                    'rel_url': '',
+                    'method': 'post',
+                    'accept': 'json'},
+            }
+        }
         return routes_patterns
 
 
@@ -191,17 +238,34 @@ class RestoServiceAccess(ServiceAccess):
     def routes_patterns(cls) -> RoutesPatternsType:
         # Route patterns for a resto service
         routes_patterns: RoutesPatternsType
-        routes_patterns = {'dotcloud': {'DescribeRequest': 'api/collections/describe.json',
-                                        'GetCollectionsRequest': 'collections',
-                                        'GetCollectionRequest': 'collections/{collection}',
-                                        'SearchCollectionRequest':
-                                        'api/collections/{collection}/search.json?{criteria_url}',
-                                        'GetFeatureByIDRequest':
-                                        'api/collections/{collection}/search.json?{criteria_url}',
-                                        'SignLicenseRequest':
-                                        'api/users/{user}/signatures/{license_id}/'
-                                        }
-                           }
+        routes_patterns = {
+            'dotcloud': {
+                'DescribeRequest': {
+                    'rel_url': 'api/collections/describe.json',
+                    'method': 'get',
+                    'accept': 'json'},
+                'GetCollectionsRequest': {
+                    'rel_url': 'collections',
+                    'method': 'get',
+                    'accept': 'json'},
+                'GetCollectionRequest': {
+                    'rel_url': 'collections/{collection}',
+                    'method': 'get',
+                    'accept': 'json'},
+                'SearchCollectionRequest': {
+                    'rel_url': 'api/collections/{collection}/search.json?{criteria_url}',
+                    'method': 'get',
+                    'accept': 'json'},
+                'GetFeatureByIDRequest': {
+                    'rel_url': 'api/collections/{collection}/search.json?{criteria_url}',
+                    'method': 'get',
+                    'accept': 'json'},
+                'SignLicenseRequest': {
+                    'rel_url': 'api/users/{user}/signatures/{license_id}/',
+                    'method': 'post',
+                    'accept': 'json'},
+            }
+        }
         routes_patterns['peps_version'] = copy.deepcopy(routes_patterns['dotcloud'])
         # FIXME: No SignLicenseRequest in peps and theia?
         del routes_patterns['peps_version']['SignLicenseRequest']

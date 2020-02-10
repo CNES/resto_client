@@ -38,9 +38,6 @@ class RevokeTokenRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(Response, super(RevokeTokenRequest, self).run())
 
-    def run_request(self) -> None:
-        self._run_request_post()
-
     def process_request_result(self) -> Response:
         return self._request_result
 
@@ -55,12 +52,6 @@ class GetTokenRequest(BaseRequest):
     def run(self) -> str:
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(str, super(GetTokenRequest, self).run())
-
-    def run_request(self) -> None:
-        if self.parent_service.get_protocol() in ['sso_dotcloud', 'sso_theia']:
-            self._run_request_post()
-        else:
-            super(GetTokenRequest, self).run_request()
 
     def process_request_result(self) -> str:
         try:
