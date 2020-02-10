@@ -114,6 +114,12 @@ class BaseRequest(Authenticator):
         """
         return self.parent_service.service_access.get_accept(self)
 
+    def get_streamed(self) -> bool:
+        """
+        :returns: The stream flag to be used for sending this request
+        """
+        return self.parent_service.service_access.get_streamed(self)
+
     def get_protocol(self) -> str:
         """
         :returns: The protocol of this request
@@ -188,14 +194,15 @@ class BaseRequest(Authenticator):
         Run the requests. This method may be overidden by client classes to select the method that
         suit their needs. Default is submitting a get request, requesting json response.
         """
+        streamed = self.get_streamed()
         if self.get_method() == 'post':
             if self.get_accept() == 'json':
                 self.update_headers(dict_input={'Accept': 'application/json'})
-            self._run_request_post()
+            self._run_request_post(stream=streamed)
         else:
             if self.get_accept() == 'json':
                 self.update_headers(dict_input={'Accept': 'application/json'})
-            self._run_request_get()
+            self._run_request_get(stream=streamed)
 
     @abstractmethod
     def process_request_result(self) -> RestoRequestResult:

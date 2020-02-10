@@ -195,9 +195,6 @@ class DownloadRequestBase(BaseRequest):
         """
         return self._url_to_download
 
-    def run_request(self) -> None:
-        self._run_request_get(stream=True)
-
     def process_request_result(self) -> Path:
         """
          Download one of the different files available for a feature.
@@ -206,6 +203,7 @@ class DownloadRequestBase(BaseRequest):
         :raises RestoResponseError: when the response does not have one of the expected contents.
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
+        :raises FeatureOnTape: when the feature file is on tape and not available for download
         """
         content_type = self._request_result.headers.get('content-type')
 

@@ -119,6 +119,16 @@ class ServiceAccess(ABC):
         """
         return self._get_route_description_item(request, 'authentication')
 
+    def get_streamed(self, request: 'BaseRequest') -> bool:
+        """
+        Returns the stream flag used by a request.
+
+        :param request: the request instance for which stream flag must be found.
+        :returns: the stream flag
+        """
+        stream_flag = self._get_route_description_item(request, 'streamed')
+        return stream_flag == 'YES'
+
     def _get_route_description_item(self, request: 'BaseRequest', item: str) -> str:
         """
         Returns an item of the route description for a request
@@ -222,31 +232,36 @@ class AuthenticationServiceAccess(ServiceAccess):
                     'rel_url': 'api/users/connect',
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'ALWAYS'},
+                    'authentication': 'ALWAYS',
+                    'streamed': 'NO'},
                 'RevokeTokenRequest': {
                     'rel_url': 'api/users/disconnect',
                     'method': 'post',
                     'accept': 'json',
-                    'authentication': 'ALWAYS'},
+                    'authentication': 'ALWAYS',
+                    'streamed': 'NO'},
                 'CheckTokenRequest': {
                     'rel_url': 'api/users/checkToken?_tk={token}',
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'NO'},
             },
             'sso_theia': {
                 'GetTokenRequest': {
                     'rel_url': '',
                     'method': 'post',
                     'accept': 'json',
-                    'authentication': 'ALWAYS'},
+                    'authentication': 'ALWAYS',
+                    'streamed': 'NO'},
             },
             'sso_dotcloud': {
                 'GetTokenRequest': {
                     'rel_url': '',
                     'method': 'post',
                     'accept': 'json',
-                    'authentication': 'ALWAYS'},
+                    'authentication': 'ALWAYS',
+                    'streamed': 'NO'},
             }
         }
         return routes_patterns
@@ -271,43 +286,52 @@ class RestoServiceAccess(ServiceAccess):
                     'rel_url': 'api/collections/describe.json',
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'NO'},
                 'GetCollectionsRequest': {
                     'rel_url': 'collections',
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'NO'},
                 'GetCollectionRequest': {
                     'rel_url': 'collections/{collection}',
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'NO'},
                 'SearchCollectionRequest': {
                     'rel_url': 'api/collections/{collection}/search.json?{criteria_url}',
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'OPPORTUNITY'},
+                    'authentication': 'OPPORTUNITY',
+                    'streamed': 'NO'},
                 'SignLicenseRequest': {
                     'rel_url': 'api/users/{user}/signatures/{license_id}/',
                     'method': 'post',
                     'accept': 'json',
-                    'authentication': 'ALWAYS'},
+                    'authentication': 'ALWAYS',
+                    'streamed': 'NO'},
                 'DownloadProductRequest': {  # No rel_url as URL in in the feature
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'ALWAYS'},
+                    'authentication': 'ALWAYS',
+                    'streamed': 'YES'},
                 'DownloadQuicklookRequest': {  # No rel_url as URL in in the feature
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'YES'},
                 'DownloadThumbnailRequest': {  # No rel_url as URL in in the feature
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'YES'},
                 'DownloadAnnexesRequest': {  # No rel_url as URL in in the feature
                     'method': 'get',
                     'accept': 'json',
-                    'authentication': 'NEVER'},
+                    'authentication': 'NEVER',
+                    'streamed': 'YES'},
             }
         }
         routes_patterns['peps_version'] = copy.deepcopy(routes_patterns['dotcloud'])
