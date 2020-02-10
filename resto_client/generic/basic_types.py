@@ -157,7 +157,6 @@ class Polarisation(TestList):  # pylint: disable=too-few-public-methods
         Constructor
 
         :param str str_input: input to test
-        :raises ValueError: if format not respected
         """
         accpt_tuple = ('HH', 'VV', 'HH HV', 'VV VH')
         super(Polarisation, self).__init__(str_input=str_input, accepted=accpt_tuple)

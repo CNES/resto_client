@@ -56,7 +56,7 @@ def cli_edit_server(args: argparse.Namespace) -> CliFunctionReturnType:
     CLI adapter to edit the server characteristics
 
     :param args: arguments parsed by the CLI parser
-    :raises RestoClientDesignError: unconditionaly, as this function is not implemented yet
+    :raises RestoClientDesignError: unconditionally, as this function is not implemented yet
     """
     raise RestoClientDesignError('Edit server unimplemented')
 

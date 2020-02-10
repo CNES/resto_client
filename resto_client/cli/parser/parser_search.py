@@ -41,7 +41,6 @@ from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNA
 def get_table_help_criteria() -> str:
     """
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
-    :raises RestoClientUserError: when the resto service is not initialized
     """
     persisted_server_name = RestoServerPersisted.get_persisted_server_name()
     if persisted_server_name is None:
@@ -83,8 +82,6 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
     :param page: page criterion args
 
     :returns: criteria dict which fit correctly the API
-    :raises RestoClientUserError: if no latitude and longitude present when required
-    :raises RestoClientUserError: if radius without latitude and longitude
     :raises RestoClientUserError: if no value is given for a criterion key
     """
     criteria_dict: Dict[str, Any] = {}

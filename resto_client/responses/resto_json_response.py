@@ -34,7 +34,6 @@ class RestoJsonResponse(RestoResponse):
 
         :param request: the parent request of this response
         :param response: the response received from the server and structured as a dict.
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
         """
         super(RestoJsonResponse, self).__init__(request)
 

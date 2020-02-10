@@ -113,7 +113,6 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         :param args: arguments as parsed by argparse
         :raises RestoClientNoPersistedServer: when no server is found in the persisted parameters
                                               and no server name defined.
-        :raises RestoClientUserError: when arguments are inconsistent with persisted parameters.
         :param debug_server: When True debugging information on server and requests is printed out.
         :returns: a RestoServer instance suitable for further processing in CLI context
         """

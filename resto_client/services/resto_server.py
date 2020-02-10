@@ -30,6 +30,15 @@ from .resto_service import RestoService
 RestoServerType = TypeVar('RestoServerType', bound='RestoServer')
 
 
+class RestoClientNoRestoService(RestoClientUserError):
+    """
+    Execption raised by RestoServer when resto service is undefined is undefined
+    """
+
+    def __init__(self) -> None:
+        super(RestoClientNoRestoService, self).__init__('No resto service currently defined.')
+
+
 class RestoServer():
     """
         A Resto Server, i.e. a valid resto accessible server or an empty one
@@ -171,10 +180,10 @@ class RestoServer():
         :param criteria: searching criteria
         :param collection_name: name of the collection to use. Default to the current collection.
         :returns: a collection of resto features
-        :raises RestoClientUserError: when the resto service is not initialized
+        :raises RestoClientNoRestoService: when the resto service is not initialized
         """
         if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
+            raise RestoClientNoRestoService()
         return self._resto_service.search_by_criteria(criteria, collection_name)
 
     def get_features_from_ids(self, features_ids: Union[str, List[str]],
@@ -185,10 +194,10 @@ class RestoServer():
         :param features_ids: Feature(s) identifier(s)
         :param collection_name: name of the collection to use. Default to the current collection.
         :returns: a list of Resto features
-        :raises RestoClientUserError: when the resto service is not initialized
+        :raises RestoClientNoRestoService: when the resto service is not initialized
         """
         if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
+            raise RestoClientNoRestoService()
         features_list = []
         if not isinstance(features_ids, list):
             features_ids = [features_ids]
@@ -208,10 +217,10 @@ class RestoServer():
         :param download_dir: the path to the directory where download must be done.
         :param file_type: type of file to download: product, quicklook, thumbnail or annexes
         :returns: the path of the downloaded file
-        :raises RestoClientUserError: when the resto service is not initialized
+        :raises RestoClientNoRestoService: when the resto service is not initialized
         """
         if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
+            raise RestoClientNoRestoService()
         return self._resto_service.download_feature_file(
             feature, file_type, self._ensure_server_directory(download_dir))
 
@@ -256,10 +265,10 @@ class RestoServer():
         """
         :param  with_stats: if True the collections statistics are shown.
         :returns: The server description as a tabulated listing
-        :raises RestoClientUserError: when the resto service is not initialized
+        :raises RestoClientNoRestoService: when the resto service is not initialized
         """
         if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
+            raise RestoClientNoRestoService()
         return self._resto_service.show(with_stats=with_stats)
 
     def get_collection(self, collection: Optional[str]=None) -> RestoCollection:
@@ -268,10 +277,10 @@ class RestoServer():
 
         :param collection: the name of the collection to retrieve
         :returns: the requested collection or the current one.
-        :raises RestoClientUserError: if collection is None and no current collection defined.
+        :raises RestoClientNoRestoService: when the resto service is not initialized.
         """
         if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
+            raise RestoClientNoRestoService()
         return self._resto_service.get_collection(collection=collection)
 
     def __str__(self) -> str:

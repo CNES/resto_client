@@ -90,7 +90,6 @@ class RestoService(BaseService):
         """
         Set the current collection
         :param collection_name: collection to use
-        :raises ValueError: when given collection not in server
         """
         self._collections_mgr.current_collection = collection_name
 
@@ -131,7 +130,6 @@ class RestoService(BaseService):
 
         :param collection: the name of the collection to retrieve
         :returns: the requested collection or the current one.
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         return GetCollectionRequest(self, collection=collection_name).run()
@@ -145,7 +143,6 @@ class RestoService(BaseService):
         :param criteria: the criteria to use for the search
         :param collection: the name of the collection to search
         :returns: the result of the search
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         resto_criteria = RestoCriteria(self.get_protocol(), **criteria)
@@ -160,7 +157,6 @@ class RestoService(BaseService):
         :param feature_id: the feature id (not uuid) to search for
         :param collection: the name of the collection to search
         :returns: the requested feature
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         :raises IndexError: when the feature collection does not contain exactly one feature.
         :raises ValueError: when the retrieved feature has not the right id (case where uuid
                             incorrectly provided as argument)

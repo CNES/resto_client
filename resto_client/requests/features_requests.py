@@ -138,7 +138,6 @@ class DownloadRequestBase(BaseRequest):
         :param service: resto service
         :param  feature: resto feature
         :param download_directory: an existing directory path where download will occur
-        :raises RestoClientUserError: when there is no such file type to download for the feature.
         """
         self._feature = feature
 

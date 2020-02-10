@@ -97,7 +97,6 @@ class BaseRequest(Authenticator):
     def get_url(self) -> str:
         """
         :returns: full url for this request
-        :raises RestoClientDesignError: when the request is unsupported by the service
         """
         url_extension = self.get_route()
         return urljoin(self.parent_service.get_base_url(),

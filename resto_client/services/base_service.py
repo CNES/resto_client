@@ -38,7 +38,6 @@ class BaseService(ABC):
         :param service_access: Service access.
         :param auth_service: Authentication service associated to this service.
         :param parent_server: The server which uses this service.
-        :raises RestoClientDesignError: when service_access is not of the right type
         """
         self.service_access = service_access
         self._auth_service = auth_service
