@@ -17,6 +17,7 @@ from typing import List, Optional  # @NoMove
 import geojson
 
 from .resto_feature import RestoFeature
+from prettytable.prettytable import PrettyTable
 
 
 class RestoFeatureCollection(geojson.FeatureCollection):
@@ -75,3 +76,21 @@ class RestoFeatureCollection(geojson.FeatureCollection):
         :returns: the identifiers of all features in this feature collection
         """
         return [feature.product_identifier for feature in self.features]
+
+    def __str__(self) -> str:
+
+        if self.properties is not None:
+            result = '\nProperties available for the FeatureCollection\n'
+            feat_table = PrettyTable()
+            feat_table.field_names = ['Property', 'Value']
+            feat_table.align['Value'] = 'l'
+            feat_table.align['Property'] = 'l'
+
+            for product_property in self.properties:
+                show_param: Optional[str] = str(self.properties[product_property])
+                feat_table.add_row([product_property, show_param])
+            
+            feat_table.add_row(["all_id", str(self.all_id)])
+            result += feat_table.get_string()
+            result += '\n'
+        return result
