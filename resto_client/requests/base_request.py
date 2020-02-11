@@ -195,13 +195,10 @@ class BaseRequest(Authenticator):
         suit their needs. Default is submitting a get request, requesting json response.
         """
         streamed = self.get_streamed()
+        self.update_headers(dict_input={'Accept': self.get_accept()})
         if self.get_method() == 'post':
-            if self.get_accept() == 'json':
-                self.update_headers(dict_input={'Accept': 'application/json'})
             self._run_request_post(stream=streamed)
         else:
-            if self.get_accept() == 'json':
-                self.update_headers(dict_input={'Accept': 'application/json'})
             self._run_request_get(stream=streamed)
 
     @abstractmethod
