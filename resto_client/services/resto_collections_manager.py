@@ -70,6 +70,12 @@ class RestoCollectionsManager():
 
     @current_collection.setter
     def current_collection(self, collection_name: Optional[str] = None) -> None:
+        """
+        Set the current collection
+
+        :param collection_name: the name of the collection to set as current or None to deselect it.
+        :raises RestoClientDesignError: when the set of collections is undefined
+        """
         if collection_name is not None:
             if self.collections_set is None:
                 msg = 'Cannot set a current collection when there is no collections set'
