@@ -12,34 +12,31 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import cast
+from typing import cast  # @NoMove
 
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.collections_description import (CollectionsDescription,
                                                             RestoResponseError)
 
-from .anonymous_request import AnonymousRequest
+from .base_request import BaseRequest
 
 
-class DescribeRequest(AnonymousRequest):
+class DescribeRequest(BaseRequest):
     """
      Request to retrieve the service description
     """
     request_action = 'getting service description'
 
     def run(self) -> RestoCollections:
-        """
-        Send a 'describe collections' request to the server
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoCollections, super(DescribeRequest, self).run())
 
-        :returns: the server collections description
-        :raises ValueError: when the service URL does not point to a valid Resto server
-        """
-        self.set_headers()
-        json_response = cast(dict, self.get_as_json())
+    def process_request_result(self) -> RestoCollections:
         try:
-            collections_descr = CollectionsDescription(self, json_response)
+            collections_descr = CollectionsDescription(self, self._request_result.json())
         except RestoResponseError:
-            msg = 'URL {} does not point to a valid resto server'
-            raise ValueError(msg.format(self.service_access.base_url))
+            msg = 'Collections description response from {} resto server cannot be understood.'
+            # TOOD: change exception type and move into CollectionsDescription
+            raise ValueError(msg.format(self.get_server_name()))
 
         return collections_descr.as_resto_object()

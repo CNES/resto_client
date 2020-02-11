@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import TYPE_CHECKING, cast, Optional
+from typing import TYPE_CHECKING, Optional, cast  # @NoMove
 
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
@@ -23,15 +23,14 @@ from resto_client.responses.collections_description import CollectionsDescriptio
 from resto_client.responses.feature_collection_response import FeatureCollectionResponse
 from resto_client.responses.resto_response_error import RestoResponseError
 
-from .anonymous_request import AnonymousRequest
-from .authentication_optional_request import AuthenticationOptionalRequest
+from .base_request import BaseRequest
 
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
-class GetCollectionRequest(AnonymousRequest):
+class GetCollectionRequest(BaseRequest):
     """
      Request accessing a single collection
     """
@@ -39,19 +38,15 @@ class GetCollectionRequest(AnonymousRequest):
     request_action = 'getting collection'
 
     def run(self) -> RestoCollection:
-        """
-         Execute the request to list a collection
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoCollection, super(GetCollectionRequest, self).run())
 
-        :returns: collection descriptor
-        :raises ValueError: when no collection is currently defined
-        """
-        self.set_headers()
-        json_response = cast(dict, self.get_as_json())
-        collection_response = CollectionDescription(self, json_response)
+    def process_request_result(self) -> RestoCollection:
+        collection_response = CollectionDescription(self, self._request_result.json())
         return collection_response.as_resto_object()
 
 
-class SearchCollectionRequest(AuthenticationOptionalRequest):
+class SearchCollectionRequest(BaseRequest):
     """
      Request searching a single collection
     """
@@ -69,6 +64,7 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
         """
         # initiate request with asking number of total items
         criteria_url = '_rc=true&'
+        # TODO: move as a method of RestoCriteria?
         if criteria is not None:
             for key, value in criteria.items():
                 criteria_url += '{}={}&'.format(key, value)
@@ -77,19 +73,15 @@ class SearchCollectionRequest(AuthenticationOptionalRequest):
                                                       criteria_url=criteria_url)
 
     def run(self) -> RestoFeatureCollection:
-        """
-        Launch a search for given parameters in a collection
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoFeatureCollection, super(SearchCollectionRequest, self).run())
 
-        :returns: the result of the search
-        """
-
-        self.set_headers()
-        json_response = cast(dict, self.get_as_json())
-        feature_collection_response = FeatureCollectionResponse(self, json_response)
+    def process_request_result(self) -> RestoFeatureCollection:
+        feature_collection_response = FeatureCollectionResponse(self, self._request_result.json())
         return feature_collection_response.as_resto_object()
 
 
-class GetCollectionsRequest(AnonymousRequest):
+class GetCollectionsRequest(BaseRequest):
     """
      Request retrieving all the service collections
     """
@@ -97,18 +89,15 @@ class GetCollectionsRequest(AnonymousRequest):
     request_action = 'listing collections'
 
     def run(self) -> RestoCollections:
-        """
-         Execute the request to list all collections
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoCollections, super(GetCollectionsRequest, self).run())
 
-        :returns: the set of collections as well as the server synthesis
-        :raises ValueError: when the service  URL does not point to a valid Resto server
-        """
-        self.set_headers()
-        json_response = cast(dict, self.get_as_json())
+    def process_request_result(self) -> RestoCollections:
         try:
-            collections_descr = CollectionsDescription(self, json_response)
+            collections_descr = CollectionsDescription(self, self._request_result.json())
         except RestoResponseError:
-            msg = 'URL {} does not point to a valid resto server'
-            raise ValueError(msg.format(self.service_access.base_url))
+            msg = 'Get collections response from {} resto server cannot be understood.'
+            # TOOD: change exception type and move into CollectionsDescription
+            raise ValueError(msg.format(self.get_server_name()))
 
         return collections_descr.as_resto_object()

@@ -29,11 +29,11 @@ class RestoFeatureCollection(geojson.FeatureCollection):
         Constructor
 
         :param feature_coll_descr: Feature collection description
-        :raises ValueError: When type in descriptor is different from 'FeatureCollection'
+        :raises TypeError: When type in descriptor is different from 'FeatureCollection'
         """
         if feature_coll_descr['type'] != 'FeatureCollection':
             msg = 'Cannot create a feature collection whose type is not FeatureCollection'
-            raise ValueError(msg)
+            raise TypeError(msg)
 
         resto_features = [RestoFeature(desc) for desc in feature_coll_descr['features']]
         super(RestoFeatureCollection, self).__init__(properties=feature_coll_descr['properties'],

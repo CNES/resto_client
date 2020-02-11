@@ -90,7 +90,6 @@ class RestoService(BaseService):
         """
         Set the current collection
         :param collection_name: collection to use
-        :raises ValueError: when given collection not in server
         """
         self._collections_mgr.current_collection = collection_name
 
@@ -99,8 +98,7 @@ class RestoService(BaseService):
         :returns: The server description as a tabulated listing
         :param  with_stats: if True the collections statistics are shown.
         """
-        out_fmt = 'Server URL: {}\n'
-        out_str = out_fmt.format(self.service_access.base_url)
+        out_str = 'Server URL: {}\n'.format(self.get_base_url())
         out_str += str(self._collections_mgr)
         if with_stats:
             out_str += self._collections_mgr.str_statistics()
@@ -110,7 +108,7 @@ class RestoService(BaseService):
         """
         :returns: the supported criteria definition
         """
-        return get_criteria_for_protocol(self.service_access.protocol)
+        return get_criteria_for_protocol(self.get_protocol())
 
 # ++++++++ From here we have the requests supported by the service ++++++++++++
 
@@ -132,7 +130,6 @@ class RestoService(BaseService):
 
         :param collection: the name of the collection to retrieve
         :returns: the requested collection or the current one.
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         return GetCollectionRequest(self, collection=collection_name).run()
@@ -146,10 +143,9 @@ class RestoService(BaseService):
         :param criteria: the criteria to use for the search
         :param collection: the name of the collection to search
         :returns: the result of the search
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        resto_criteria = RestoCriteria(self.service_access.protocol, **criteria)
+        resto_criteria = RestoCriteria(self.get_protocol(), **criteria)
         return SearchCollectionRequest(self, collection_name, criteria=resto_criteria).run()
 
     def get_feature_by_id(self,
@@ -161,13 +157,12 @@ class RestoService(BaseService):
         :param feature_id: the feature id (not uuid) to search for
         :param collection: the name of the collection to search
         :returns: the requested feature
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         :raises IndexError: when the feature collection does not contain exactly one feature.
         :raises ValueError: when the retrieved feature has not the right id (case where uuid
                             incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
+        criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)
 
         feature_collection = \
             SearchCollectionRequest(self, collection_name, criteria=criteria).run()
@@ -208,7 +203,7 @@ class RestoService(BaseService):
     def download_feature_file(self,
                               feature: RestoFeature,
                               file_type: str,
-                              download_dir: Path) -> Optional[str]:
+                              download_dir: Path) -> Path:
         """
         Download one of the files associated to a feature : product, quicklook, thumbnail, annexes.
 
@@ -216,7 +211,7 @@ class RestoService(BaseService):
         :param file_type: the type of the file to donwload. Can be one of  'product', 'quicklook',
                           'thumbnail', 'annexes'.
         :param download_dir: the directory where downloaded file must be recorded.
-        :returns: the path to the download file.
+        :returns: the path to the downloaded file.
         :raises RestoClientDesignError: when the file_type is not supported.
         """
         if file_type not in self.DOWNLOAD_REQUEST_CLASSES:
@@ -228,12 +223,12 @@ class RestoService(BaseService):
         download_req = download_req_cls(self, feature, download_directory=download_dir)
         # Do download
         try:
-            downloaded_filename = download_req.run()
+            downloaded_file_path = download_req.run()
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)
             # Retry file download after license signature
-            downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
+            downloaded_file_path = self.download_feature_file(feature, file_type, download_dir)
         except FeatureOnTape as excp:
             # Redo_feature to update the storage status
             redo_feature = self.get_feature_by_id(feature.product_identifier)
@@ -241,5 +236,5 @@ class RestoService(BaseService):
             # Wait 60 second
             time.sleep(60)
             # Retry file download after product staging
-            downloaded_filename = self.download_feature_file(redo_feature, file_type, download_dir)
-        return downloaded_filename
+            downloaded_file_path = self.download_feature_file(redo_feature, file_type, download_dir)
+        return downloaded_file_path

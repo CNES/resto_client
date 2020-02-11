@@ -26,6 +26,7 @@ from resto_client.cli.cli_utils import get_from_args
 from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
+from resto_client.entities.resto_feature import KNOWN_FILES_TYPES
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.settings.resto_client_config import resto_client_print
 from resto_client.settings.servers_database import DB_SERVERS
@@ -40,7 +41,6 @@ from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNA
 def get_table_help_criteria() -> str:
     """
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
-    :raises RestoClientUserError: when the resto service is not initialized
     """
     persisted_server_name = RestoServerPersisted.get_persisted_server_name()
     if persisted_server_name is None:
@@ -82,8 +82,6 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
     :param page: page criterion args
 
     :returns: criteria dict which fit correctly the API
-    :raises RestoClientUserError: if no latitude and longitude present when required
-    :raises RestoClientUserError: if radius without latitude and longitude
     :raises RestoClientUserError: if no value is given for a criterion key
     """
     criteria_dict: Dict[str, Any] = {}
@@ -190,7 +188,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     parser_search.add_argument('--page', dest=PAGE_ARGNAME, type=int,
                                help='the number of the page to display')
     parser_search.add_argument('--download', dest=DOWNLOAD_ARGNAME, nargs='?', default=False,
-                               choices=['product', 'quicklook', 'annexes', 'thumbnail'],
+                               choices=KNOWN_FILES_TYPES,
                                const='product',
                                help='download files corresponding to found features, by default'
                                ' product will be downloaded')

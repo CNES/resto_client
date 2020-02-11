@@ -42,7 +42,6 @@ def cli_show_collection(args: argparse.Namespace) -> CliFunctionReturnType:
     CLI adapter to list_collection function
 
     :param args: arguments parsed by the CLI parser
-    :raises RestoClientUserError: when the resto service is not initialized
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     resto_server = RestoServerPersisted.build_from_argparse(
@@ -59,7 +58,6 @@ def cli_show_server(args: argparse.Namespace) -> CliFunctionReturnType:
     CLI adapter to display server information: name, collections and statistics
 
     :param args: arguments parsed by the CLI parser
-    :raises RestoClientUserError: when no current server defined.
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     resto_server = RestoServerPersisted.build_from_argparse(

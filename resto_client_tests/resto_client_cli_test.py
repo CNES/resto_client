@@ -88,7 +88,6 @@ class TestRestoClientCli(unittest.TestCase):
 
         :param base_filename: base file name
         :returns: the path to the file
-        :raises RestoClientError: when the download directory is not set.
         """
         return (Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]) /
                 RESTO_CLIENT_SETTINGS[SERVER_KEY] / base_filename)

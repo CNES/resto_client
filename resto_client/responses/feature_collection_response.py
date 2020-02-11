@@ -19,7 +19,7 @@ from .resto_response_error import RestoResponseError
 
 class FeatureCollectionResponse(RestoJsonResponseSimple):
     """
-     Response received from SearchCollectionRequest and GetFeatureByIDRequest.
+     Response received from SearchCollectionRequest.
     """
 
     needed_fields = ['type', 'features', 'properties']

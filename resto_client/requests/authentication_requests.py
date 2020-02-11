@@ -12,63 +12,59 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import cast, TYPE_CHECKING  # @NoMove
-import warnings
+from typing import TYPE_CHECKING, cast  # @NoMove
+from json.decoder import JSONDecodeError
 
-import requests
+from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
+from resto_client.services.service_access import RestoClientUnsupportedRequest
 
-from .anonymous_request import AnonymousRequest
-from .authentication_required_request import AuthenticationRequiredRequest
-
+from .base_request import BaseRequest, RestoClientEmulatedResponse, AccesDeniedError
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
-class RevokeTokenRequest(AuthenticationRequiredRequest):
+class RevokeTokenRequest(BaseRequest):
     """
      Request to revoke a token, and thus disconnecting the user.
     """
 
     request_action = 'revoking token'
 
-    def run(self) -> requests.Response:
-        """
-        Close a user session with resto
+    def run(self) -> Response:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(Response, super(RevokeTokenRequest, self).run())
 
-        :returns: unknown result at the moment (not working)
-        """
-        # closing of user session impossible for now because of resto incapability
-        self.set_headers()
-        result = self.post()
-        return result
+    def process_request_result(self) -> Response:
+        return self._request_result
 
 
-class GetTokenRequest(AuthenticationRequiredRequest):
+class GetTokenRequest(BaseRequest):
     """
      Request to retrieve the token associated to the user
     """
     request_action = 'getting token'
 
     def run(self) -> str:
-        """
-        :returns: the resto token associated to the user account
-        """
-        if self.service_access.protocol == 'sso_dotcloud':
-            response_post = self.post().json()
-            response_json = cast(dict, response_post)
-        elif self.service_access.protocol == 'sso_theia':
-            response_text = self.post_as_text()
-            response_json = {'token': response_text}
-        else:
-            response_json = cast(dict, self.get_as_json())
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(str, super(GetTokenRequest, self).run())
 
-        return GetTokenResponse(self, response_json).as_resto_object()
+    def process_request_result(self) -> str:
+        try:
+            get_token_response_content = self._request_result.json()
+        except JSONDecodeError:
+            response_text = self._request_result.text
+            # FIXME:For the sake of homogeneity, exception should be raised by GetTokenResponse,
+            if response_text == 'Please set mail and password':
+                msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
+                raise AccesDeniedError(msg.format(response_text))
+            get_token_response_content = {'token': response_text}
+        return GetTokenResponse(self, get_token_response_content).as_resto_object()
 
 
-class CheckTokenRequest(AnonymousRequest):
+class CheckTokenRequest(BaseRequest):
     """
      Request to check a service token.
     """
@@ -85,16 +81,19 @@ class CheckTokenRequest(AnonymousRequest):
         super(CheckTokenRequest, self).__init__(service, token=token)
 
     def run(self) -> bool:
-        """
-        :returns: True if the token is still valid
-        """
-        if not self.supported_by_service():
-            # CheckTokenRequest not supported by the service
-            if self.parent_service.parent_server.debug_server:
-                msg = 'Launched a CheckTokenRequest whereas {} does not support it.'
-                warnings.warn(msg.format(self.auth_service.parent_server.server_name))
-            response_json = {'status': 'error', 'message': 'user not connected'}
-        else:
-            self.set_headers()
-            response_json = cast(dict, self.get_as_json())
-        return CheckTokenResponse(self, response_json).as_resto_object()
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(bool, super(CheckTokenRequest, self).run())
+
+    def finalize_request(self) -> None:
+        try:
+            super(CheckTokenRequest, self).finalize_request()
+        except RestoClientUnsupportedRequest:
+            if self.debug:
+                print('emulating unsupported CheckTokenRequest')
+            emulated_response = RestoClientEmulatedResponse()
+            emulated_json = {'status': 'error', 'message': 'user not connected'}
+            emulated_response.result = CheckTokenResponse(self, emulated_json).as_resto_object()
+            raise emulated_response
+
+    def process_request_result(self) -> bool:
+        return CheckTokenResponse(self, self._request_result.json()).as_resto_object()

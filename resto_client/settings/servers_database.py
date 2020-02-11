@@ -189,7 +189,6 @@ class ServersDatabase():
         Delete a server definition corresponding to the specified name.
 
         :param server_name: name of the server to delete in the database
-        :raises RestoClientUnexistingServer: when the server is unknown in the database.
         """
         canonical_server_name = self.check_server_name(server_name)
         if canonical_server_name is not None:

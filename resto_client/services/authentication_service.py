@@ -12,16 +12,16 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, Dict, TYPE_CHECKING  # @NoMove
+from typing import Optional, TYPE_CHECKING  # @NoMove
 
 import requests
 from requests.auth import HTTPBasicAuth
 
 from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
                                                            RevokeTokenRequest)
-from resto_client.requests.utils import AccesDeniedError
+from resto_client.requests.base_request import AccesDeniedError
 
-from .authentication_credentials import AuthenticationCredentials
+from .authentication_credentials import AuthenticationCredentials, AuthorizationDataType
 from .base_service import BaseService
 from .service_access import AuthenticationServiceAccess
 
@@ -93,7 +93,7 @@ class AuthenticationService(BaseService):
         return self._credentials.username_b64
 
     @property
-    def authorization_data(self) -> Dict[str, Optional[str]]:
+    def authorization_data(self) -> AuthorizationDataType:
         """
         :returns: the authorization data for the service
         """
@@ -123,7 +123,7 @@ class AuthenticationService(BaseService):
             self._credentials.reset()
             msg = 'Access Denied : (username, password) does not fit the server : {}'
             msg += '\nFollowing denied access, credentials were reset.'
-            raise AccesDeniedError(msg.format(self.service_access.base_url)) from excp
+            raise AccesDeniedError(msg.format(self.get_base_url())) from excp
         return new_token
 
     def check_token(self, token: str) -> bool:

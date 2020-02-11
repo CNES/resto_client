@@ -87,22 +87,22 @@ class CollectionsDescription(RestoJsonResponse):
                     if 'facets' in statistics_desc and 'count' in statistics_desc:
                         detected_protocol = 'theia_version'
 
-        self._parent_request.service_access.detected_protocol = detected_protocol
+        self.detected_protocol = detected_protocol
         if detected_protocol is None:
             raise RestoResponseError('Dictionary does not contain a valid Resto response')
-        if self._parent_request.service_access.protocol != detected_protocol:
-            msg = 'Detected a {} response while waiting for a {} response.'
-            protocol = self._parent_request.service_access.protocol
-            raise RestoResponseError(msg.format(detected_protocol, protocol))
+        if self._parent_request.get_protocol() != detected_protocol:
+            msg_fmt = 'Detected a {} response while waiting for a {} response.'
+            msg = msg_fmt.format(detected_protocol, self._parent_request.get_protocol())
+            raise RestoResponseError(msg)
 
     def normalize_response(self) -> None:
         """
         Normalize the original response in a response whose structure does not depend on the server.
         """
         result = None
-        if self._parent_request.service_access.detected_protocol == 'theia_version':
+        if self.detected_protocol == 'theia_version':
             result = copy.deepcopy(self._original_response)
-        elif self._parent_request.service_access.detected_protocol == 'peps_version':
+        elif self.detected_protocol == 'peps_version':
             result = {'collections': self._original_response['collections'],
                       'synthesis': {'name': '*',
                                     'osDescription': None,

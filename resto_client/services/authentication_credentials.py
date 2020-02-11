@@ -26,6 +26,8 @@ from .authentication_token import AuthenticationToken
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
+AuthorizationDataType = Dict[str, Optional[str]]
+
 
 class AuthenticationCredentials():
     """
@@ -140,7 +142,7 @@ class AuthenticationCredentials():
             self.set(password=AuthenticationCredentials.asking_input['hidden'](msg))
 
     @property
-    def authorization_data(self) -> Dict[str, Optional[str]]:
+    def authorization_data(self) -> AuthorizationDataType:
         """
         :returns: the authorization data for the service
         """
