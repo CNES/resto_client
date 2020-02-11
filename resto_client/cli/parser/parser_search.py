@@ -192,5 +192,6 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                const='product',
                                help='download files corresponding to found features, by default'
                                ' product will be downloaded')
+    parser_search.add_argument('--json', help="download json request's response")
 
     parser_search.set_defaults(func=cli_search_collection)
