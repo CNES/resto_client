@@ -92,9 +92,6 @@ class SignLicenseRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(bool, super(SignLicenseRequest, self).run())
 
-    def finalize_request(self) -> None:
-        self.update_headers(dict_input={'Accept': 'application/json'})
-
     def process_request_result(self) -> bool:
         response = SignLicenseResponse(self, self._request_result.json())
 
