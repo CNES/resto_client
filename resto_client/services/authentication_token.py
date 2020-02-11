@@ -50,10 +50,7 @@ class AuthenticationToken():
             if self._unvalidated_token:
                 self._unvalidated_token = not self.parent_credentials.check_token(self._token_value)
                 if self._unvalidated_token:
-                    self._being_renewed = True
-                    self._token_value = self.parent_credentials.get_token()
-                    self._being_renewed = False
-                    self._unvalidated_token = self._token_value is None
+                    self._renew()
         return self._token_value
 
     @token_value.setter
@@ -67,6 +64,15 @@ class AuthenticationToken():
         """
         self._unvalidated_token = token_value is None or token_value != self.token_value
         self._token_value = token_value
+
+    def _renew(self) -> None:
+        """
+        Renew the current token by getting a new value from the server
+        """
+        self._being_renewed = True
+        self._token_value = self.parent_credentials.get_token()
+        self._being_renewed = False
+        self._unvalidated_token = self._token_value is None
 
     def get_authorization_header(self,
                                  authentication_required: bool,

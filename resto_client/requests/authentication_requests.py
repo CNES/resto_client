@@ -91,8 +91,8 @@ class CheckTokenRequest(BaseRequest):
             if self.debug:
                 print('emulating unsupported CheckTokenRequest')
             emulated_response = RestoClientEmulatedResponse()
-            emulated_json = {'status': 'error', 'message': 'user not connected'}
-            emulated_response.result = CheckTokenResponse(self, emulated_json).as_resto_object()
+            emulated_dict = {'status': 'error', 'message': 'user not connected'}
+            emulated_response.result = CheckTokenResponse(self, emulated_dict).as_resto_object()
             raise emulated_response
 
     def process_request_result(self) -> bool:
