@@ -35,17 +35,21 @@ class AuthenticationToken():
         self._unvalidated_token = True
         self._being_renewed = False
 
+    def __str__(self) -> str:
+        result_fmt = 'Token status :\nunvalidated: {}  being_renewed: {} value: {}'
+        return result_fmt.format(self._unvalidated_token, self._being_renewed, self._token_value)
+
     @property
     def token_value(self) -> Optional[str]:
         """
         :returns: The current token, either None or a validated value.
         """
+        if self._being_renewed:
+            return None
         if self._token_value is not None:
             if self._unvalidated_token:
                 self._unvalidated_token = not self.parent_credentials.check_token(self._token_value)
                 if self._unvalidated_token:
-                    if self._being_renewed:
-                        return None
                     self._being_renewed = True
                     self._token_value = self.parent_credentials.get_token()
                     self._being_renewed = False
