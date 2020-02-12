@@ -110,7 +110,7 @@ class RestoLicense(dict):
                 license_table.add_row([property_field1, value1])
         return license_table.get_string()
 
-     
+
 class RestoCollectionLicense(RestoLicense):
     """
      Class representing a license associated to a collection.

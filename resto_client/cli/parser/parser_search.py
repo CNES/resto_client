@@ -129,7 +129,6 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
         args, debug_server=RestoClientParameters.is_debug())
     features_collection = resto_server.search_by_criteria(criteria_dict)
 
-        
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
         search_feature_id = None
