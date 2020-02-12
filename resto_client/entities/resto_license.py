@@ -85,7 +85,7 @@ class RestoLicense(dict):
         :returns: the license identifier
         """
         return self._license_infos['licenseId']
-    
+
     def __str__(self) -> str:
         license_table = PrettyTable()
         if isinstance(self, RestoCollectionLicense):
