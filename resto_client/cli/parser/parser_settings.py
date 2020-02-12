@@ -43,6 +43,7 @@ CRITERIA_ARGNAME = 'criteria'
 MAXRECORDS_ARGNAME = 'maxrecords'
 PAGE_ARGNAME = 'page'
 DOWNLOAD_ARGNAME = 'download'
+JSON_ARGNAME = 'json'
 
 # Arguments for download
 DOWNLOAD_TYPE_ARGNAME = 'download_type'

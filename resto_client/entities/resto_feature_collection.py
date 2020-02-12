@@ -18,6 +18,8 @@ import geojson
 
 from .resto_feature import RestoFeature
 from prettytable.prettytable import PrettyTable
+import json
+from pathlib import Path
 
 
 class RestoFeatureCollection(geojson.FeatureCollection):
@@ -76,6 +78,11 @@ class RestoFeatureCollection(geojson.FeatureCollection):
         :returns: the identifiers of all features in this feature collection
         """
         return [feature.product_identifier for feature in self.features]
+
+    def get_json(self, file_path: Path) -> None:
+        json_name = 'request_{}.json'.format(self.identifier)
+        with open(file_path / json_name, 'w') as stream:
+            json.dump(self, stream, indent=2)
 
     def __str__(self) -> str:
 

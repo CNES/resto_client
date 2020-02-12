@@ -36,6 +36,7 @@ from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
                             collection_option_parser, CliFunctionReturnType)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME)
+from resto_client.cli.parser.parser_settings import JSON_ARGNAME
 
 
 def get_table_help_criteria() -> str:
@@ -128,8 +129,6 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
         args, debug_server=RestoClientParameters.is_debug())
     features_collection = resto_server.search_by_criteria(criteria_dict)
 
-    print("feature_collection entitites")
-    print(features_collection)
         
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
     with colorama_text():
@@ -155,10 +154,17 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
                                                  features_collection.start_index))
         resto_client_print(Style.RESET_ALL)
 
+    download_dir = Path(client_params.download_dir)
+    download_json = get_from_args(JSON_ARGNAME, args)
+    if download_json is not None:
+        features_collection.get_json(download_dir)
+        msg_json = 'Request response {} write in json file in {}'
+        resto_client_print(msg_json.format(features_collection.identifier, download_dir))
+
     download = get_from_args(DOWNLOAD_ARGNAME, args)
     if download and search_feature_id is not None:
         resto_server.download_features_file_from_ids(search_feature_id, download,
-                                                     Path(client_params.download_dir))
+                                                     download_dir)
     return client_params, resto_server
 
 
@@ -195,6 +201,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                const='product',
                                help='download files corresponding to found features, by default'
                                ' product will be downloaded')
-    parser_search.add_argument('--json', help="download json request's response")
+    parser_search.add_argument('-j', '--json', action="store_true", 
+                               help="download json request's response")
 
     parser_search.set_defaults(func=cli_search_collection)
