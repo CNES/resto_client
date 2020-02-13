@@ -157,7 +157,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     download_json = get_from_args(JSON_ARGNAME, args)
     if download_json is not None:
         features_collection.get_json(download_dir)
-        msg_json = 'Request response {} write in json file in {}'
+        msg_json = 'Request response_{}.json saved in {}'
         resto_client_print(msg_json.format(features_collection.identifier, download_dir))
 
     download = get_from_args(DOWNLOAD_ARGNAME, args)
