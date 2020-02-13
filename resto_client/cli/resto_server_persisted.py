@@ -45,6 +45,71 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
 
     persisted_attributes = [COLLECTION_KEY, SERVER_KEY, TOKEN_KEY, USERNAME_KEY]
 
+    def __init__(self,
+                 server_name: str,
+                 current_collection: Optional[str] = None,
+                 username: Optional[str] = None,
+                 password: Optional[str] = None,
+                 token: Optional[str] = None,
+                 debug_server: bool = False) -> None:
+        """
+        Build a new RestoServer instance from arguments and database.
+
+        :param server_name: the name of the server to use in the database
+        :param current_collection: name of the collection to use
+        :param username: account to use on this server
+        :param password: account password on the server
+        :param token: an existing token associated to this account (will be checked prior its use)
+        :param debug_server: When True debugging information on server and requests is printed out.
+        """
+        super(RestoServerPersisted, self).__init__(server_name,
+                                                   current_collection=current_collection,
+                                                   username=username,
+                                                   password=password,
+                                                   token=token,
+                                                   debug_server=debug_server)
+        self.server_on = True
+
+    def switch_off(self) -> None:
+        """
+        Switch off the server. After calling this method the persisted fields are reset to None.
+        """
+        self.server_on = False
+
+# +++++++++++++++++++++++ persisted server properties section ++++++++++++++++++++++++++++++++++++
+
+    @property
+    def server_name(self) -> Optional[str]:  # type:ignore
+        """
+        :returns: the name of the server
+        """
+        return self._server_name if self.server_on else None
+
+    @property
+    def current_collection(self) -> Optional[str]:
+        """
+        :returns: the current collection
+        """
+        return self._resto_service.current_collection if self.server_on else None
+
+    @current_collection.setter
+    def current_collection(self, collection_name: Optional[str]) -> None:
+        self._resto_service.current_collection = collection_name
+
+    @property
+    def username(self) -> Optional[str]:
+        """
+        :returns: the username to use with this server
+        """
+        return self._authentication_service.username if self.server_on else None
+
+    @property
+    def token(self) -> Optional[str]:
+        """
+        :return: the token value currently active on this server, or None.
+        """
+        return self._authentication_service.token if self.server_on else None
+
     @classmethod
     def build_from_defaults(cls,
                             default_params: dict,
