@@ -35,8 +35,7 @@ from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
                             download_dir_option_parser, EPILOG_DOWNLOAD_DIR,
                             collection_option_parser, CliFunctionReturnType)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
-                              PAGE_ARGNAME, DOWNLOAD_ARGNAME)
-from resto_client.cli.parser.parser_settings import JSON_ARGNAME
+                              PAGE_ARGNAME, DOWNLOAD_ARGNAME, JSON_ARGNAME)
 
 
 def get_table_help_criteria() -> str:
@@ -154,8 +153,8 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
         resto_client_print(Style.RESET_ALL)
 
     download_dir = Path(client_params.download_dir)
-    download_json = get_from_args(JSON_ARGNAME, args)
-    if download_json is not None:
+    record_json = get_from_args(JSON_ARGNAME, args)
+    if record_json:
         features_collection.get_json(download_dir)
         msg_json = 'Request response_{}.json saved in {}'
         resto_client_print(msg_json.format(features_collection.identifier, download_dir))
@@ -200,7 +199,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                const='product',
                                help='download files corresponding to found features, by default'
                                ' product will be downloaded')
-    parser_search.add_argument('-j', '--json', action="store_true", 
-                               help="download json request's response")
+    parser_search.add_argument('-j', '--save_json', action="store_true", 
+                               help="save search's response in a json")
 
     parser_search.set_defaults(func=cli_search_collection)
