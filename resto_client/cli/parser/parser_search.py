@@ -158,7 +158,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
         json_path = download_dir / resto_server.server_name
         # FIXME Call to protected member
         resto_server._ensure_server_directory(json_path)
-        json_search_file = features_collection.get_json(json_path)
+        json_search_file = features_collection.write_json(json_path)
         resto_client_print('Search saved in {}'.format(json_search_file))
 
     download = get_from_args(DOWNLOAD_ARGNAME, args)
