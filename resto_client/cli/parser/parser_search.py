@@ -154,10 +154,12 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
 
     download_dir = Path(client_params.download_dir)
     record_json = get_from_args(JSON_ARGNAME, args)
-    if record_json:
-        features_collection.get_json(download_dir)
-        msg_json = 'Request response_{}.json saved in {}'
-        resto_client_print(msg_json.format(features_collection.identifier, download_dir))
+    if record_json and resto_server.server_name is not None:
+        json_path = download_dir / resto_server.server_name
+        # FIXME Call to protected member
+        resto_server._ensure_server_directory(json_path)
+        json_search_file = features_collection.get_json(json_path)
+        resto_client_print('Search saved in {}'.format(json_search_file))
 
     download = get_from_args(DOWNLOAD_ARGNAME, args)
     if download and search_feature_id is not None:

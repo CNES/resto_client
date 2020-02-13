@@ -79,10 +79,11 @@ class RestoFeatureCollection(geojson.FeatureCollection):
         """
         return [feature.product_identifier for feature in self.features]
 
-    def get_json(self, file_path: Path) -> None:
+    def get_json(self, file_path: Path) -> Path:
         json_name = 'request_{}.json'.format(self.identifier)
         with open(file_path / json_name, 'w') as stream:
             json.dump(self, stream, indent=2)
+        return file_path / json_name
 
     def __str__(self) -> str:
 
