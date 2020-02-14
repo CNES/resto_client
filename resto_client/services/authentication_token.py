@@ -48,7 +48,7 @@ class AuthenticationToken():
             return None
         if self._should_be_valid:
             return self._token_value
-        self._should_be_valid = self._check_token()
+        self._should_be_valid = self.parent_credentials.check_token(self._token_value)
         if not self._should_be_valid:
             self._token_value = None
             self._force_renew()
@@ -69,8 +69,7 @@ class AuthenticationToken():
         """
         Renew the current token if it may be invalid, by getting a new value from the server
         """
-        if not self._should_be_valid:
-            self._force_renew()
+        self._should_be_valid = False
 
     def _force_renew(self) -> None:
         """
@@ -78,7 +77,7 @@ class AuthenticationToken():
         """
         if not self._being_renewed:
             self._being_renewed = True
-            self.token_value = self._get_token()
+            self.token_value = self.parent_credentials.get_token()
             self._being_renewed = False
 
     def get_authorization_header(self,
@@ -103,10 +102,3 @@ class AuthenticationToken():
         if tok_value is not None:
             authorization_header['Authorization'] = 'Bearer ' + tok_value
         return authorization_header
-
-# ------------- isolated callback methods in order to allow class mocking ---------.
-    def _check_token(self) -> bool:
-        return self.parent_credentials.check_token(self._token_value)
-
-    def _get_token(self) -> str:
-        return self.parent_credentials.get_token()
