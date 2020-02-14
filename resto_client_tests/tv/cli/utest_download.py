@@ -109,7 +109,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_d_down_prod_with_license(self) -> None:
         """
-        Unit test of download product when wonrg username/password given
+        Unit test of download product when wrong username/password given
         """
         command = ['download', 'product', '715640488937144',
                    '--username=wrong_username', '--password=wrong_password',
