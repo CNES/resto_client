@@ -44,12 +44,14 @@ class AuthenticationToken():
         """
         :returns: The current token, either None or a validated value.
         """
-        if self._being_renewed:
+        if self._being_renewed or self._token_value is None:
             return None
-        if self._token_value is not None:
-            if not self._should_be_valid:
-                self._should_be_valid = self.parent_credentials.check_token(self._token_value)
-                self._renew()
+        if self._should_be_valid:
+            return self._token_value
+        self._should_be_valid = self._check_token()
+        if not self._should_be_valid:
+            self._token_value = None
+            self._force_renew()
         return self._token_value
 
     @token_value.setter
@@ -76,7 +78,7 @@ class AuthenticationToken():
         """
         if not self._being_renewed:
             self._being_renewed = True
-            self.token_value = self.parent_credentials.get_token()
+            self.token_value = self._get_token()
             self._being_renewed = False
 
     def get_authorization_header(self,
@@ -91,14 +93,20 @@ class AuthenticationToken():
         :param username_defined: True if a username is defined in the service credentials.
         :returns: the authorization header
         """
+        print('in get_authorization_header')
         authorization_header = {}
-        if authentication_required:
+        if authentication_required or username_defined:
             self._renew()
-        else:
-            if username_defined:
-                self._renew()
         # Get token_value only once in order to avoid unnecessary getter call.
         tok_value = self.token_value
+        print(tok_value)
         if tok_value is not None:
             authorization_header['Authorization'] = 'Bearer ' + tok_value
         return authorization_header
+
+# ------------- isolated callback methods in order to allow class mocking ---------.
+    def _check_token(self) -> bool:
+        return self.parent_credentials.check_token(self._token_value)
+
+    def _get_token(self) -> str:
+        return self.parent_credentials.get_token()
