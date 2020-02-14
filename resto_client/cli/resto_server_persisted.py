@@ -20,7 +20,7 @@ from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.parser.parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME,
                                                      PASSWORD_ARGNAME, COLLECTION_ARGNAME)
 from resto_client.services.resto_server import RestoServer
-from resto_client.settings.servers_database import DB_SERVERS
+from resto_client.settings.servers_database import DB_SERVERS, RestoClientUnexistingServer
 
 from .cli_utils import get_from_args
 from .persistence import PersistedAttributes
@@ -131,10 +131,16 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         :raises KeyError: when no server name can be found in the defaults or the arguments
         """
         if server_name is not None:
-            server_name = DB_SERVERS.check_server_name(server_name)
+            try:
+                server_name = DB_SERVERS.check_server_name(server_name)
+            except RestoClientUnexistingServer:
+                server_name = None
         default_server_name = default_params.get(SERVER_KEY)
         if default_server_name is not None:
-            default_server_name = DB_SERVERS.check_server_name(default_server_name)
+            try:
+                default_server_name = DB_SERVERS.check_server_name(default_server_name)
+            except RestoClientUnexistingServer:
+                default_server_name = None
         if server_name is None and default_server_name is None:
             raise KeyError('Requested server name is None and no default server specified')
 

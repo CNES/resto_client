@@ -50,32 +50,18 @@ class RestoServer():
         :param debug_server: When True debugging information on server and requests is printed out.
         """
         self.debug_server = debug_server
-        self._authentication_service: AuthenticationService
-        self._resto_service: RestoService
-        self._server_name = ''
 
-        # set server_name which triggers server creation from the database if not None.
-        self._init_server(server_name)
+        # initialize the services
+        self._server_name = DB_SERVERS.check_server_name(server_name)
+        server_description = DB_SERVERS.get_server(self._server_name)
+        self._authentication_service = AuthenticationService(server_description.auth_access,
+                                                             self)
+        self._resto_service = RestoService(server_description.resto_access,
+                                           self._authentication_service, self)
 
-        self._resto_service.current_collection = current_collection
+        # set services parameters
+        self.current_collection = current_collection
         self.set_credentials(username=username, password=password, token_value=token)
-
-    def _init_server(self, server_name: str) -> None:
-        """
-        Initialize or reinitialize the server from the servers database
-
-        :param server_name: name of the server to retrieve in the database
-        """
-        canonical_server_name = DB_SERVERS.check_server_name(server_name)
-        if canonical_server_name is not None:
-            server_description = DB_SERVERS.get_server(canonical_server_name)
-            self._authentication_service = AuthenticationService(server_description.auth_access,
-                                                                 self)
-            self._resto_service = RestoService(server_description.resto_access,
-                                               self._authentication_service, self)
-            self._server_name = canonical_server_name
-            self._resto_service.current_collection = None  # Not None in case of a single collection
-            self.reset_credentials()
 
     def set_credentials(self,
                         username: Optional[str]=None,
