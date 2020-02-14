@@ -29,7 +29,7 @@ def cli_unset_server(args: argparse.Namespace) -> CliFunctionReturnType:
     """
     resto_server = RestoServerPersisted.build_from_argparse(
         args, debug_server=RestoClientParameters.is_debug())
-    resto_server.server_name = None
+    resto_server.switch_off()
     return None, resto_server
 
 

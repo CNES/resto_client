@@ -90,7 +90,7 @@ class BaseRequest(Authenticator):
         self._url_kwargs = url_kwargs
         Authenticator.__init__(self, self.parent_service.auth_service)
 
-    def get_server_name(self) -> Optional[str]:
+    def get_server_name(self) -> str:
         """
         :returns: the name of the server which uses this request.
         """
