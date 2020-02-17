@@ -17,17 +17,18 @@ from typing import Optional, Tuple, TYPE_CHECKING  # @NoMove
 
 import requests
 
-from resto_client.services.authentication_credentials import AuthorizationDataType
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from resto_client.services.authentication_credentials import \
+        AuthorizationDataType  # @UnusedImport
 
 
 class Authenticator(ABC):
     """
      Base class for all requests managing the request Authentication
     """
-    # TODO: this property could be defined in the request definition, inside the protocol
+
     @property
     @abstractmethod
     def authentication_type(self) -> str:
@@ -36,14 +37,14 @@ class Authenticator(ABC):
         """
 
     @property
-    def authentication_required(self) -> bool:
+    def _authentication_required(self) -> bool:
         """
         :returns: a flag telling if the request requires authentication or not.
         """
         return self.authentication_type == 'ALWAYS'
 
     @property
-    def anonymous_request(self) -> bool:
+    def _anonymous_request(self) -> bool:
         """
         :returns: a flag telling if the request does not require authentication.
         """
@@ -61,13 +62,20 @@ class Authenticator(ABC):
         """
         :param request_header: the request headers to update with the authorization part
         """
-        if not self.anonymous_request:
+        if self._authentication_required:
             authorization_header = self.auth_service.get_authorization_header(
-                self.authentication_required)
+                self._authentication_required)
             request_header.update(authorization_header)
+            return
+        if self.authentication_type == 'OPPORTUNITY':
+            if self.auth_service._credentials.account_defined:
+                authorization_header = self.auth_service.get_authorization_header(
+                    self._authentication_required)
+                request_header.update(authorization_header)
+                return
 
     def _get_authentication_arguments(self, request_headers: dict) -> \
-            Tuple[Optional[requests.auth.HTTPBasicAuth], Optional[AuthorizationDataType]]:
+            Tuple[Optional[requests.auth.HTTPBasicAuth], Optional['AuthorizationDataType']]:
         """
          This create and execute a POST request and store the response content
         """
@@ -80,8 +88,8 @@ class Authenticator(ABC):
         """
         :returns: the basic HTTP authorization for the request
         """
-        if not self.anonymous_request:
-            if self.authentication_required:
+        if not self._anonymous_request:
+            if self._authentication_required:
                 return self.auth_service.http_basic_auth
         return None
 
@@ -90,7 +98,7 @@ class Authenticator(ABC):
         """
         :returns: the authorization data for the request
         """
-        if not self.anonymous_request:
-            if self.authentication_required:
+        if not self._anonymous_request:
+            if self._authentication_required:
                 return self.auth_service.authorization_data
         return None
