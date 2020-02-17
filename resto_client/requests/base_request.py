@@ -247,7 +247,7 @@ class BaseRequest(Authenticator):
         except (HTTPError, SSLError) as excp:
             if result is not None:
                 self._request_result = result
-                # FIXME: Processing to be made by process_request_result ofclient classes
+                # FIXME: Processing to be made by process_request_result of client classes
                 msg = 'Error {} when {} for {}.'.format(self._request_result.status_code,
                                                         self.request_action, self.get_url())
                 if self._request_result.status_code == 403:
