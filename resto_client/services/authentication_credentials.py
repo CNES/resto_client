@@ -19,8 +19,9 @@ from getpass import getpass
 from requests.auth import HTTPBasicAuth
 
 from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.requests.base_request import AccesDeniedError
 
-from .authentication_token import AuthenticationToken
+from .authentication_token import AuthenticationToken, RestoClientTokenRenewed
 
 
 if TYPE_CHECKING:
@@ -42,6 +43,7 @@ class AuthenticationCredentials():
         :param authentication_service: authentication service onto which these credentials are valid
         """
         self.parent_service = authentication_service
+        self.parent_server_name = authentication_service.parent_server.server_name
 
         self._username: Optional[str] = None
         self._password: Optional[str] = None
@@ -79,13 +81,19 @@ class AuthenticationCredentials():
             # We already have a username and want to set/change password or token.
             if password is not None:
                 self._password = password
-            self._authentication_token.token_value = token_value
+            if token_value is None:
+                self._authentication_token.reset()
+            else:
+                self._authentication_token.token_value = token_value
 
         else:
             # Take the new username definition, either with a password or with a token
             self._username = username.lower()  # resto server imposes lowercase account
             self._password = password
-            self._authentication_token.token_value = token_value
+            if token_value is None:
+                self._authentication_token.reset()
+            else:
+                self._authentication_token.token_value = token_value
 
     def reset(self) -> None:
         """
@@ -93,14 +101,14 @@ class AuthenticationCredentials():
         """
         self._username = None
         self._password = None
-        self._authentication_token.token_value = None
+        self._authentication_token.reset()
 
     @property
     def token(self) -> Optional[str]:
         """
         :return: the token value associated to these credentials, or None if not available.
         """
-        return self._authentication_token.token_value
+        return self._authentication_token.get_current_token_value()
 
     @property
     def username(self) -> Optional[str]:
@@ -115,6 +123,13 @@ class AuthenticationCredentials():
         :returns: the password
         """
         return self._password
+
+    @property
+    def account_defined(self) -> bool:
+        """
+        :returns: True if username and password are defined, but not necessarily valid.
+        """
+        return self.username is not None and self.password is not None
 
     @property
     def username_b64(self) -> str:
@@ -133,12 +148,11 @@ class AuthenticationCredentials():
         Verify that both username and password are defined, and request their values if it
         is not the case
         """
-        server_name = self.parent_service.parent_server.server_name
         if self.username is None:
-            msg = "Please enter your username for {} server: ".format(server_name)
+            msg = "Please enter your username for {} server: ".format(self.parent_server_name)
             self.set(username=AuthenticationCredentials.asking_input['shown'](msg))
         if self.password is None:
-            msg = "Please enter your password for {} server: ".format(server_name)
+            msg = "Please enter your password for {} server: ".format(self.parent_server_name)
             self.set(password=AuthenticationCredentials.asking_input['hidden'](msg))
 
     @property
@@ -176,23 +190,19 @@ class AuthenticationCredentials():
         :returns: the authorization header
         """
         username_defined = self.username is not None
-        return self._authentication_token.get_authorization_header(authentication_required,
-                                                                   username_defined)
-
-    def check_token(self, token: str) -> bool:
-        """
-        Callback to the parent service to run a check token request.
-
-        :param token: the token value to check
-        :returns: True if the token is valid, False otherwise
-        """
-        return self.parent_service.check_token(token)
-
-    def get_token(self) -> str:
-        """
-        Callback to the parent service to run a get token request.
-        """
-        return self.parent_service.get_token()
+        if authentication_required or username_defined:
+            self._authentication_token.reset()
+        # Get token_value only once in order to avoid unnecessary getter call.
+        try:
+            return {'Authorization': 'Bearer ' + self._authentication_token.token_value}
+        except RestoClientTokenRenewed:
+            return {}
+        except AccesDeniedError as excp:
+            self.reset()
+            msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
+            msg_fmt += '\nFollowing denied access, credentials were reset.'
+            msg = msg_fmt.format(self.parent_server_name)
+            raise AccesDeniedError(msg) from excp
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,

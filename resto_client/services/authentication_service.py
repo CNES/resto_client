@@ -14,12 +14,7 @@
 """
 from typing import Optional, TYPE_CHECKING  # @NoMove
 
-import requests
 from requests.auth import HTTPBasicAuth
-
-from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
-                                                           RevokeTokenRequest)
-from resto_client.requests.base_request import AccesDeniedError
 
 from .authentication_credentials import AuthenticationCredentials, AuthorizationDataType
 from .base_service import BaseService
@@ -109,38 +104,6 @@ class AuthenticationService(BaseService):
         :returns: the authorization header
         """
         return self._credentials.get_authorization_header(authentication_required)
-
-# ++++++++ From here we have the requests supported by the service ++++++++++++
-
-    def get_token(self) -> str:
-        """
-        :returns: a new token to use
-        :raises AccesDeniedError: when credentials are not valid for the service.
-        """
-        try:
-            new_token = GetTokenRequest(self).run()
-        except AccesDeniedError as excp:
-            self._credentials.reset()
-            msg = 'Access Denied : (username, password) does not fit the server : {}'
-            msg += '\nFollowing denied access, credentials were reset.'
-            raise AccesDeniedError(msg.format(self.get_base_url())) from excp
-        return new_token
-
-    def check_token(self, token: str) -> bool:
-        """
-        :returns: True if the token is still valid
-        """
-        return CheckTokenRequest(self, token).run()
-
-    def revoke_token(self) -> Optional[requests.Response]:
-        """
-        Revoke the currently defined token.
-
-        :returns: unknown result at the moment (not working)
-        """
-        if self._credentials.token is not None:
-            return RevokeTokenRequest(self).run()
-        return None
 
     def __str__(self) -> str:
         return super(AuthenticationService, self).__str__() + '\n' + str(self._credentials)

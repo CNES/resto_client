@@ -14,9 +14,27 @@
 """
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
+from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
+                                                           RevokeTokenRequest)
+from resto_client.requests.base_request import AccesDeniedError
+from resto_client.services.service_access import RestoClientUnsupportedRequest
+
 
 if TYPE_CHECKING:
     from .authentication_credentials import AuthenticationCredentials  # @UnusedImport
+
+
+class RestoClientTokenRenewed(RestoClientDesignError):
+    """
+    Exception raised when trying to get token value while its renewal is ongoing
+    """
+
+
+class RestoClientNoToken(RestoClientDesignError):
+    """
+    Exception raised when no token is available and can be retrieved
+    """
 
 
 class AuthenticationToken():
@@ -30,75 +48,108 @@ class AuthenticationToken():
 
         :param parent_credentials: parent credentials of this token.
         """
+        # FIXME: replace parent_credentials by parent_service (credentiass are not needed here)
         self.parent_credentials = parent_credentials
         self._token_value: Optional[str] = None
-        self._should_be_valid = False
         self._being_renewed = False
+        self._being_revoked = False
 
-    def __str__(self) -> str:
-        result_fmt = 'Token status :\nshould_be_valid: {}  being_renewed: {} value: {}'
-        return result_fmt.format(self._should_be_valid, self._being_renewed, self._token_value)
+    def get_current_token_value(self) -> Optional[str]:
+        """
+
+        :returns: the current token value, without trying to update it.
+        """
+        return self._token_value
 
     @property
-    def token_value(self) -> Optional[str]:
+    def token_value(self) -> str:
         """
-        :returns: The current token, either None or a validated value.
+        :returns: the current token value or a renewed value if the current token is invalid.
+        :raises RestoClientTokenRenewed: when trying to get the token while its renewal is ongoing
         """
-        if self._being_renewed or self._token_value is None:
-            return None
-        if self._should_be_valid:
+        if self._being_renewed or self._being_revoked:
+            raise RestoClientTokenRenewed('cannot provide a token while renewal/revoke is ongoing')
+        if self._token_value is not None:
             return self._token_value
-        self._should_be_valid = self.parent_credentials.check_token(self._token_value)
-        if not self._should_be_valid:
-            self._token_value = None
-            self._force_renew()
+#         check_ok: bool = self.parent_credentials.check_token(self._token_value)
+#         if not check_ok:
+        try:
+            self.renew()
+        except AccesDeniedError:
+            self._being_renewed = False
+            self._being_revoked = False
+            raise
+        if self._token_value is None:
+            raise RestoClientNoToken('No token available and unable to retrieve one')
         return self._token_value
 
     @token_value.setter
-    def token_value(self, token_value: Optional[str]) -> None:
+    def token_value(self, token_value: str) -> None:
         """
         Set the token value.
 
-        :param token_value: If None, reset the token. Otherwise store the token assuming that it is
-                            valid.
+        :param token_value: Store the token assuming that it is  valid.
         """
         self._token_value = token_value
-        self._should_be_valid = token_value is not None
 
-    def _renew(self) -> None:
+    def ensure(self) -> None:
         """
-        Renew the current token if it may be invalid, by getting a new value from the server
+        Ensure that we have a valid current token. If we have no current token or if the
+        current token is rejected by the service, get a new token.
         """
-        self._should_be_valid = False
+        if self._token_value is None or not self._check_token(self._token_value):
+            self.renew()
 
-    def _force_renew(self) -> None:
+    def renew(self) -> None:
         """
-        Renew the current token unconditionaly, by getting a new value from the server
+        Renew the current token unconditionally, by getting a new value from the server
         """
+        # FIXME: decide if renewal management must be kept or not.
         if not self._being_renewed:
             self._being_renewed = True
-            self.token_value = self.parent_credentials.get_token()
+            self.reset()
+            self.token_value = self._get_token()
             self._being_renewed = False
 
-    def get_authorization_header(self,
-                                 authentication_required: bool,
-                                 username_defined: bool) -> dict:
+    def reset(self) -> None:
         """
-        Build the Authorization header if the token is not None or if it is required.
+        Forget the currently defined token, if any.
+        """
+        if self._token_value is not None:
+            if not self._being_revoked:
+                self._being_revoked = True
+                self._revoke_token()
+                self._being_revoked = False
+            self._token_value = None
 
-        :param authentication_required: If True ensure to retrieve an Authorization header,
-                                        otherwise provide it only if a valid token can be
-                                        retrieved silently.
-        :param username_defined: True if a username is defined in the service credentials.
-        :returns: the authorization header
+# ++++++++ From here we have the calls to the requests handling tokens on the service ++++++++++++
+    def _revoke_token(self) -> None:
         """
-        print('in get_authorization_header')
-        authorization_header = {}
-        if authentication_required or username_defined:
-            self._renew()
-        # Get token_value only once in order to avoid unnecessary getter call.
-        tok_value = self.token_value
-        print(tok_value)
-        if tok_value is not None:
-            authorization_header['Authorization'] = 'Bearer ' + tok_value
-        return authorization_header
+        Revoke the currently defined token.
+        """
+        # FIXME: it is surprising that the token value is not passed as an argument.
+        try:
+            RevokeTokenRequest(self.parent_credentials.parent_service).run()
+        except RestoClientUnsupportedRequest:
+            # We have done our best, but some resto servers does not support RevokeToken.
+            # Consider that token was revoked.
+            pass
+
+    def _check_token(self, token: str) -> bool:
+        """
+        Run a check token request.
+
+        :returns: True if the token is valid, False otherwise
+        """
+        return CheckTokenRequest(self.parent_credentials.parent_service, token).run()
+
+    def _get_token(self) -> str:
+        """
+        :returns: a new token to use
+        :raises AccesDeniedError: when credentials are not valid for the service.
+        """
+        return GetTokenRequest(self.parent_credentials.parent_service).run()
+
+    def __str__(self) -> str:
+        result_fmt = 'Token status : being_renewed: {} value: {}'
+        return result_fmt.format(self._being_renewed, self._token_value)
