@@ -48,21 +48,19 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.token = AuthenticationToken(parent_credentials=self.credentials)
         setattr(self.token, '_get_token', MagicMock(return_value='abcdefghijklmnop'))
         setattr(self.token, '_check_token', MagicMock(return_value=False))
+        setattr(self.token, '_revoke_token', MagicMock(return_value=None))
 
-    def assert_get_chek_calls(self, nb_check_calls: int, nb_get_calls: int) -> None:
+    def assert_requests_calls(self, nb_check_calls: int=0,
+                              nb_get_calls: int=0, nb_revoke_calls: int=0) -> None:
         # pylint: disable=no-member, protected-access
-        if nb_get_calls == 0:
-            self.token._get_token.assert_not_called()  # type: ignore
-        else:
-            self.token._get_token.assert_called_once()  # type: ignore
 
-        if nb_check_calls == 0:
-            self.token._check_token.assert_not_called()  # type: ignore
-        else:
-            self.token._check_token.assert_called_once()  # type: ignore
+        self.assertEqual(len(self.token._check_token.mock_calls), nb_check_calls)  # type: ignore
+        self.assertEqual(len(self.token._get_token.mock_calls), nb_get_calls)  # type: ignore
+        self.assertEqual(len(self.token._revoke_token.mock_calls), nb_revoke_calls)  # type: ignore
 
         self.token._check_token.reset_mock()  # type: ignore
         self.token._get_token.reset_mock()  # type: ignore
+        self.token._revoke_token.reset_mock()  # type: ignore
 
     def test_n_token_getter_setter(self) -> None:
 
@@ -72,48 +70,48 @@ class UTestAuthenticationToken(unittest.TestCase):
         # accessing through its getter will trigger a check_token and then a get_token
         self.assertEqual(self.token.token_value, 'abcdefghijklmnop')
         # and retrieving it does not trigger any request.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=1)
+        self.assert_requests_calls(nb_get_calls=1)
 
         # When we set a value in it, this value is supposed to be valid and returned as is.
         self.token.token_value = 'a token which will be supposed to be valid'
         self.assertEqual(self.token.token_value, 'a token which will be supposed to be valid')
         # and retrieving it does not trigger any request.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
 
         # Now we force token renewal
         self.token.renew()
-        # which emit a get_token only
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=1)
+        # which emit a revoke_token and a get_token
+        self.assert_requests_calls(nb_get_calls=1, nb_revoke_calls=1)
 
         # The token value is now returned after issuing a get_token
         self.assertEqual(self.token.token_value, 'abcdefghijklmnop')
         # and retrieving it does not trigger any request.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
 
         # change the value returned by get_token and renew token again.
         setattr(self.token, '_get_token', MagicMock(return_value='=============='))
         self.token.renew()
-        # a get_token request was emitted
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=1)
+        # a revoke_token and a get_token requests were emitted
+        self.assert_requests_calls(nb_get_calls=1, nb_revoke_calls=1)
         self.assertEqual(self.token.token_value, '==============')
         # and retrieving it does not trigger any request.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
 
         # Set the token value to another predefined value.
         self.token.token_value = 'another token which will be supposed to be valid'
         # setting it did not trigger more requests.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
         self.assertEqual(self.token.token_value, 'another token which will be supposed to be valid')
         # and retrieving it does not trigger any request.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
 
         # Reset the token.
         self.token.token_value = None  # type: ignore
         # does not trigger more requests.
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
         # But retrieving it trigger check and get requests.
         retrieved_token = self.token.token_value
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=1)
+        self.assert_requests_calls(nb_get_calls=1)
         self.assertEqual(retrieved_token, '==============')
 
     def test_n_token_setter(self) -> None:
@@ -127,11 +125,11 @@ class UTestAuthenticationToken(unittest.TestCase):
         # If we set a value, gotten from elsewhere (persisted for instance)
         self.token.token_value = 'a token which will be supposed to be valid'
         # no request is sent
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
         # and this value is retrieved
         self.assertEqual(self.token.token_value, 'a token which will be supposed to be valid')
         # without sending requests
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
 
     def test_n_token_reset(self) -> None:
         """
@@ -144,14 +142,14 @@ class UTestAuthenticationToken(unittest.TestCase):
         # If we reset the token
         self.token.token_value = None  # type: ignore
         # no request is sent
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
         # but retrieving the token
         retrieved_token = self.token.token_value
         # emit a get_token request
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=1)
+        self.assert_requests_calls(nb_get_calls=1)
         self.assertEqual(retrieved_token, 'abcdefghijklmnop')
 
         # retrieving the token again does not change its value
         self.assertEqual(self.token.token_value, 'abcdefghijklmnop')
         # and does not emit more requests
-        self.assert_get_chek_calls(nb_check_calls=0, nb_get_calls=0)
+        self.assert_requests_calls()
