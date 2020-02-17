@@ -12,6 +12,10 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import List  # @UnusedImport
+
+from resto_client.requests.base_request import AccesDeniedError
+
 from .resto_json_response import RestoJsonResponseSimple
 
 
@@ -19,7 +23,8 @@ class GetTokenResponse(RestoJsonResponseSimple):
     """
      Response received from GetTokenRequest.
     """
-    needed_fields = ['token']
+    needed_fields: List[str] = []
+    optional_fields = ['success', 'token', 'message']
 
     def as_resto_object(self) -> str:
         """
@@ -34,6 +39,7 @@ class CheckTokenResponse(RestoJsonResponseSimple):
     """
 
     needed_fields = ['status', 'message']
+    optional_fields: List[str] = []
 
     @property
     def is_valid(self) -> bool:
