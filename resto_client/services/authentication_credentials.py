@@ -189,20 +189,18 @@ class AuthenticationCredentials():
                                         retrieved silently.
         :returns: the authorization header
         """
-        username_defined = self.username is not None
-        if authentication_required or username_defined:
-            self._authentication_token.reset()
-        # Get token_value only once in order to avoid unnecessary getter call.
-        try:
-            return {'Authorization': 'Bearer ' + self._authentication_token.token_value}
-        except RestoClientTokenRenewed:
-            return {}
-        except AccesDeniedError as excp:
-            self.reset()
-            msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
-            msg_fmt += '\nFollowing denied access, credentials were reset.'
-            msg = msg_fmt.format(self.parent_server_name)
-            raise AccesDeniedError(msg) from excp
+        if authentication_required or self._authentication_token.available:
+            try:
+                return {'Authorization': 'Bearer ' + self._authentication_token.token_value}
+            except RestoClientTokenRenewed:
+                pass
+            except AccesDeniedError as excp:
+                self.reset()
+                msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
+                msg_fmt += '\nFollowing denied access, credentials were reset.'
+                msg = msg_fmt.format(self.parent_server_name)
+                raise AccesDeniedError(msg) from excp
+        return {}
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,

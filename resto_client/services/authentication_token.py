@@ -61,6 +61,13 @@ class AuthenticationToken():
         """
         return self._token_value
 
+    def available(self) -> bool:
+        """
+
+        :returns: True if a current token value exists.
+        """
+        return self._token_value is not None
+
     @property
     def token_value(self) -> str:
         """
@@ -86,6 +93,7 @@ class AuthenticationToken():
         Set the token value.
 
         :param token_value: Store the token assuming that it is  valid.
+        :raises TypeError: when trying to set the token to None
         """
         if token_value is None:
             raise TypeError('use AuthenticationToken.reset() if you want to reset a token')
