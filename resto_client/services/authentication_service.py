@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 class AuthenticationService(BaseService):
     """
-        An authentication Service able to provide tokens, given credentials.
+    An authentication Service able to provide tokens, given credentials.
     """
 
     def __init__(self, auth_access: AuthenticationServiceAccess,
@@ -73,7 +73,7 @@ class AuthenticationService(BaseService):
         """
         Reset the credentials used by this authentication service.
         """
-        self._credentials.reset()
+        self._credentials.reset_credentials()
 
     def set_credentials(self,
                         username: Optional[str]=None,

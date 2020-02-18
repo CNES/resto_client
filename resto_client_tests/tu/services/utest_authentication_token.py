@@ -35,7 +35,7 @@ class UTestAuthenticationToken(unittest.TestCase):
     def setUpClass(cls) -> None:
         super(UTestAuthenticationToken, cls).setUpClass()
         # We need to instantiate a RestoServer in order to retrieve a well-formed
-        # AuthenticationCredentials
+        # AuthenticationService
         server = RestoServer('kalideos', debug_server=True)
         # pylint: disable=protected-access
         cls.auth_service = server._authentication_service
@@ -45,7 +45,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         # Mock the token to a default state such that check_token returns False and
         # get_token returns an arbitrary value.
         self.token = self.auth_service._credentials
-        self.token.reset()
+        self.token.reset_credentials()
         setattr(self.token, '_get_token', MagicMock(return_value='abcdefghijklmnop'))
         setattr(self.token, '_check_token', MagicMock(return_value=False))
         setattr(self.token, '_revoke_token', MagicMock(return_value=None))

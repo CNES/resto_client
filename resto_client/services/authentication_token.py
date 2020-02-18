@@ -45,9 +45,22 @@ class AuthenticationToken(ABC):
 
     @property
     @abstractmethod
+    def parent_server_name(self) -> str:
+        """
+        :returns: the name of the parent_server.
+        """
+
+    @property
+    @abstractmethod
     def parent_service(self) -> 'AuthenticationService':
         """
         :returns: the name of the parent_server.
+        """
+
+    @abstractmethod
+    def reset_credentials(self) -> None:
+        """
+        Reset the credentials unconditionally.
         """
 
     def __init__(self) -> None:
@@ -134,6 +147,26 @@ class AuthenticationToken(ABC):
                 self._revoke_token()
                 self._being_revoked = False
             self._token_value = None
+
+    def get_authorization_header(self) -> dict:
+        """
+        Returns the Authorization headers if possible
+
+        :returns: the authorization header
+        :raises AccesDeniedError: if token retrieval could not be made because of an authentication
+                                  error.
+        """
+        try:
+            return {'Authorization': 'Bearer ' + self.token_value}
+        except RestoClientTokenRenewed:
+            return {}
+        except AccesDeniedError as excp:
+            self.reset_credentials()
+            msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
+            msg_fmt += '\nFollowing denied access, credentials were reset.'
+            msg = msg_fmt.format(self.parent_server_name)
+            raise AccesDeniedError(msg) from excp
+
 
 # ++++++++ From here we have the calls to the requests handling tokens on the service ++++++++++++
     def _revoke_token(self) -> None:

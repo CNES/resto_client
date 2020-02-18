@@ -101,31 +101,12 @@ class AuthenticationCredentials(AuthenticationAccount, AuthenticationToken):
             else:
                 self.token_value = token_value
 
-    def reset(self) -> None:
+    def reset_credentials(self) -> None:
         """
         Reset the credentials unconditionally.
         """
         self._reset_account()
         self._reset_token()
-
-    def get_authorization_header(self) -> dict:
-        """
-        Returns the Authorization headers if possible
-
-        :returns: the authorization header
-        :raises AccesDeniedError: if token retrieval could not be made because of an authentication
-                                  error.
-        """
-        try:
-            return {'Authorization': 'Bearer ' + self.token_value}
-        except RestoClientTokenRenewed:
-            return {}
-        except AccesDeniedError as excp:
-            self.reset()
-            msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
-            msg_fmt += '\nFollowing denied access, credentials were reset.'
-            msg = msg_fmt.format(self.parent_server_name)
-            raise AccesDeniedError(msg) from excp
 
     def __str__(self) -> str:
         return 'username: {} / password: {} / token: {}'.format(self.username,
