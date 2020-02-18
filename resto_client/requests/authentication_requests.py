@@ -13,7 +13,6 @@
    limitations under the License.
 """
 from typing import TYPE_CHECKING, cast, Optional  # @NoMove
-from json.decoder import JSONDecodeError
 
 from requests import Response
 
@@ -21,7 +20,7 @@ from resto_client.responses.authentication_responses import GetTokenResponse, Ch
 from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
-from .base_request import BaseRequest, RestoClientEmulatedResponse, AccesDeniedError
+from .base_request import BaseRequest, RestoClientEmulatedResponse
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport

@@ -15,7 +15,6 @@
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.requests.base_request import AccesDeniedError
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
