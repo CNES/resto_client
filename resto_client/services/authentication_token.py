@@ -62,7 +62,7 @@ class AuthenticationToken():
         return self._token_value
 
     @property
-    def available(self) -> bool:
+    def token_is_available(self) -> bool:
         """
 
         :returns: True if a current token value exists.
@@ -79,7 +79,7 @@ class AuthenticationToken():
             raise RestoClientTokenRenewed('cannot provide a token while renewal/revoke is ongoing')
         if self._token_value is None:
             try:
-                self.renew()
+                self.renew_token()
             except AccesDeniedError:
                 self._being_renewed = False
                 self._being_revoked = False
@@ -97,29 +97,29 @@ class AuthenticationToken():
         :raises TypeError: when trying to set the token to None
         """
         if token_value is None:
-            raise TypeError('use AuthenticationToken.reset() if you want to reset a token')
+            raise TypeError('use AuthenticationToken.reset_token() if you want to reset a token')
         self._token_value = token_value
 
-    def ensure(self) -> None:
+    def ensure_token(self) -> None:
         """
         Ensure that we have a valid current token. If we have no current token or if the
         current token is rejected by the service, get a new token.
         """
         if self._token_value is None or not self._check_token(self._token_value):
-            self.renew()
+            self.renew_token()
 
-    def renew(self) -> None:
+    def renew_token(self) -> None:
         """
         Renew the current token unconditionally, by getting a new value from the server
         """
         # FIXME: decide if renewal management must be kept or not.
         if not self._being_renewed:
             self._being_renewed = True
-            self.reset()
+            self.reset_token()
             self.token_value = self._get_token()
             self._being_renewed = False
 
-    def reset(self) -> None:
+    def reset_token(self) -> None:
         """
         Forget the currently defined token, if any.
         """

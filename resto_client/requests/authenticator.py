@@ -66,7 +66,7 @@ class Authenticator(ABC):
             request_header.update(authorization_header)
             return
         if self.authentication_type == 'OPPORTUNITY' and (self.auth_service.account_defined or
-                                                          self.auth_service.token_available):
+                                                          self.auth_service.token_is_available):
             authorization_header = self.auth_service.get_authorization_header()
             request_header.update(authorization_header)
             return

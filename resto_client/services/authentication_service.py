@@ -63,11 +63,11 @@ class AuthenticationService(BaseService):
         return self._credentials.token
 
     @property
-    def token_available(self) -> bool:
+    def token_is_available(self) -> bool:
         """
         :returns: True if username and password are defined, but not necessarily valid.
         """
-        return self._credentials.token_available
+        return self._credentials.token_is_available
 
     def reset_credentials(self) -> None:
         """

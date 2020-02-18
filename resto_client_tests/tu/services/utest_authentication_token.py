@@ -79,7 +79,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assert_requests_calls()
 
         # Now we force token renewal
-        self.token.renew()
+        self.token.renew_token()
         # which emit a revoke_token and a get_token
         self.assert_requests_calls(nb_get_calls=1, nb_revoke_calls=1)
 
@@ -90,7 +90,7 @@ class UTestAuthenticationToken(unittest.TestCase):
 
         # change the value returned by get_token and renew token again.
         setattr(self.token, '_get_token', MagicMock(return_value='=============='))
-        self.token.renew()
+        self.token.renew_token()
         # a revoke_token and a get_token requests were emitted
         self.assert_requests_calls(nb_get_calls=1, nb_revoke_calls=1)
         self.assertEqual(self.token.token_value, '==============')
@@ -106,7 +106,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assert_requests_calls()
 
         # Reset the token.
-        self.token.reset()
+        self.token.reset_token()
         # does not trigger more requests.
         self.assert_requests_calls(nb_revoke_calls=1)
         # But retrieving it trigger check and get requests.
@@ -144,7 +144,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assertIsNone(self.token.get_current_token_value())
 
         # If we reset the token
-        self.token.reset()
+        self.token.reset_token()
         # no request is sent
         self.assert_requests_calls()
         # but retrieving the token

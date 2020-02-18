@@ -75,7 +75,7 @@ class AuthenticationCredentials(AuthenticationAccount):
             if password is not None:
                 self._password = password
             if token_value is None:
-                self._authentication_token.reset()
+                self._authentication_token.reset_token()
             else:
                 self._authentication_token.token_value = token_value
 
@@ -84,7 +84,7 @@ class AuthenticationCredentials(AuthenticationAccount):
             self._username = username.lower()  # resto server imposes lowercase account
             self._password = password
             if token_value is None:
-                self._authentication_token.reset()
+                self._authentication_token.reset_token()
             else:
                 self._authentication_token.token_value = token_value
 
@@ -93,7 +93,7 @@ class AuthenticationCredentials(AuthenticationAccount):
         Reset the credentials unconditionally.
         """
         self.reset_account()
-        self._authentication_token.reset()
+        self._authentication_token.reset_token()
 
     @property
     def token(self) -> Optional[str]:
@@ -103,11 +103,11 @@ class AuthenticationCredentials(AuthenticationAccount):
         return self._authentication_token.get_current_token_value()
 
     @property
-    def token_available(self) -> bool:
+    def token_is_available(self) -> bool:
         """
         :return: True if a token is available (not guaranteed to be valid).
         """
-        return self._authentication_token.available
+        return self._authentication_token.token_is_available
 
     def get_authorization_header(self) -> dict:
         """
