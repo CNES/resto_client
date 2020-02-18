@@ -63,16 +63,14 @@ class Authenticator(ABC):
         :param request_header: the request headers to update with the authorization part
         """
         if self._authentication_required:
-            authorization_header = self.auth_service.get_authorization_header(
-                self._authentication_required)
+            authorization_header = self.auth_service.get_authorization_header()
             request_header.update(authorization_header)
             return
-        if self.authentication_type == 'OPPORTUNITY':
-            if self.auth_service._credentials.account_defined:
-                authorization_header = self.auth_service.get_authorization_header(
-                    self._authentication_required)
-                request_header.update(authorization_header)
-                return
+        if self.authentication_type == 'OPPORTUNITY' and (self.auth_service.account_defined or
+                                                          self.auth_service.token_available):
+            authorization_header = self.auth_service.get_authorization_header()
+            request_header.update(authorization_header)
+            return
 
     def _get_authentication_arguments(self, request_headers: dict) -> \
             Tuple[Optional[requests.auth.HTTPBasicAuth], Optional['AuthorizationDataType']]:
@@ -88,17 +86,11 @@ class Authenticator(ABC):
         """
         :returns: the basic HTTP authorization for the request
         """
-        if not self._anonymous_request:
-            if self._authentication_required:
-                return self.auth_service.http_basic_auth
-        return None
+        return self.auth_service.http_basic_auth if self._authentication_required else None
 
     @property
     def authorization_data(self) -> Optional['AuthorizationDataType']:
         """
         :returns: the authorization data for the request
         """
-        if not self._anonymous_request:
-            if self._authentication_required:
-                return self.auth_service.authorization_data
-        return None
+        return self.auth_service.authorization_data if self._authentication_required else None

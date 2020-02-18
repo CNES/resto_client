@@ -48,11 +48,25 @@ class AuthenticationService(BaseService):
         return self._credentials.username
 
     @property
+    def account_defined(self) -> bool:
+        """
+        :returns: True if username and password are defined, but not necessarily valid.
+        """
+        return self._credentials.account_defined
+
+    @property
     def token(self) -> Optional[str]:
         """
         :return: the token value currently active on this AuthenticationService, or None.
         """
         return self._credentials.token
+
+    @property
+    def token_available(self) -> bool:
+        """
+        :returns: True if username and password are defined, but not necessarily valid.
+        """
+        return self._credentials.token_available
 
     def reset_credentials(self) -> None:
         """
@@ -94,16 +108,13 @@ class AuthenticationService(BaseService):
         """
         return self._credentials.authorization_data
 
-    def get_authorization_header(self, authentication_required: bool) -> dict:
+    def get_authorization_header(self) -> dict:
         """
         Get the Authorization header if possible
 
-        :param authentication_required: If True ensure to retrieve an Authorization header,
-                                        otherwise provide it only if a valid token can be
-                                        retrieved silently.
         :returns: the authorization header
         """
-        return self._credentials.get_authorization_header(authentication_required)
+        return self._credentials.get_authorization_header()
 
     def __str__(self) -> str:
         return super(AuthenticationService, self).__str__() + '\n' + str(self._credentials)

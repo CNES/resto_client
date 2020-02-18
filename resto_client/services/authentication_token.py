@@ -61,6 +61,7 @@ class AuthenticationToken():
         """
         return self._token_value
 
+    @property
     def available(self) -> bool:
         """
 

@@ -97,7 +97,7 @@ class AuthenticationCredentials():
 
     def reset(self) -> None:
         """
-        Reset the credentials unconditionaly.
+        Reset the credentials unconditionally.
         """
         self._username = None
         self._password = None
@@ -109,6 +109,13 @@ class AuthenticationCredentials():
         :return: the token value associated to these credentials, or None if not available.
         """
         return self._authentication_token.get_current_token_value()
+
+    @property
+    def token_available(self) -> bool:
+        """
+        :return: True if a token is available (not guaranteed to be valid).
+        """
+        return self._authentication_token.available
 
     @property
     def username(self) -> Optional[str]:
@@ -180,27 +187,22 @@ class AuthenticationCredentials():
             raise RestoClientDesignError(msg)
         return HTTPBasicAuth(self.username.encode('utf-8'), self.password.encode('utf-8'))
 
-    def get_authorization_header(self, authentication_required: bool) -> dict:
+    def get_authorization_header(self) -> dict:
         """
         Returns the Authorization headers if possible
 
-        :param authentication_required: If True ensure to retrieve an Authorization header,
-                                        otherwise provide it only if a valid token can be
-                                        retrieved silently.
         :returns: the authorization header
         """
-        if authentication_required or self._authentication_token.available:
-            try:
-                return {'Authorization': 'Bearer ' + self._authentication_token.token_value}
-            except RestoClientTokenRenewed:
-                pass
-            except AccesDeniedError as excp:
-                self.reset()
-                msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
-                msg_fmt += '\nFollowing denied access, credentials were reset.'
-                msg = msg_fmt.format(self.parent_server_name)
-                raise AccesDeniedError(msg) from excp
-        return {}
+        try:
+            return {'Authorization': 'Bearer ' + self._authentication_token.token_value}
+        except RestoClientTokenRenewed:
+            return {}
+        except AccesDeniedError as excp:
+            self.reset()
+            msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
+            msg_fmt += '\nFollowing denied access, credentials were reset.'
+            msg = msg_fmt.format(self.parent_server_name)
+            raise AccesDeniedError(msg) from excp
 
     def __str__(self) -> str:
         return 'username: {} / password: {} \ntoken: {}'.format(self.username,

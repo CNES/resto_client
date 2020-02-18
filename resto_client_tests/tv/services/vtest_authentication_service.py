@@ -40,5 +40,5 @@ class VTestAuthenticationService(unittest.TestCase):
                                        password='wrong_password')
                 expected_fmt = 'Access Denied : (username, password) does not fit the server : {}'
                 with self.assertRaises(AccesDeniedError) as ctxt:
-                    auth_service.get_authorization_header(authentication_required=True)
+                    auth_service.get_authorization_header()
                 self.assertIn(expected_fmt.format(server_name), str(ctxt.exception))
