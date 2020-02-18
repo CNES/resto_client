@@ -48,7 +48,7 @@ class AuthenticationToken():
 
         :param parent_credentials: parent credentials of this token.
         """
-        # FIXME: replace parent_credentials by parent_service (credentiass are not needed here)
+        # FIXME: replace parent_credentials by parent_service (credentials are not needed here)
         self.parent_credentials = parent_credentials
         self._token_value: Optional[str] = None
         self._being_renewed = False
@@ -69,18 +69,15 @@ class AuthenticationToken():
         """
         if self._being_renewed or self._being_revoked:
             raise RestoClientTokenRenewed('cannot provide a token while renewal/revoke is ongoing')
-        if self._token_value is not None:
-            return self._token_value
-#         check_ok: bool = self.parent_credentials.check_token(self._token_value)
-#         if not check_ok:
-        try:
-            self.renew()
-        except AccesDeniedError:
-            self._being_renewed = False
-            self._being_revoked = False
-            raise
         if self._token_value is None:
-            raise RestoClientNoToken('No token available and unable to retrieve one')
+            try:
+                self.renew()
+            except AccesDeniedError:
+                self._being_renewed = False
+                self._being_revoked = False
+                raise
+            if self._token_value is None:
+                raise RestoClientNoToken('No token available and unable to retrieve one')
         return self._token_value
 
     @token_value.setter
@@ -90,6 +87,8 @@ class AuthenticationToken():
 
         :param token_value: Store the token assuming that it is  valid.
         """
+        if token_value is None:
+            raise TypeError('use AuthenticationToken.reset() if you want to reset a token')
         self._token_value = token_value
 
     def ensure(self) -> None:

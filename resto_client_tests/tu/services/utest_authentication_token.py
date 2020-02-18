@@ -106,9 +106,9 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assert_requests_calls()
 
         # Reset the token.
-        self.token.token_value = None  # type: ignore
+        self.token.reset()
         # does not trigger more requests.
-        self.assert_requests_calls()
+        self.assert_requests_calls(nb_revoke_calls=1)
         # But retrieving it trigger check and get requests.
         retrieved_token = self.token.token_value
         self.assert_requests_calls(nb_get_calls=1)
@@ -131,6 +131,10 @@ class UTestAuthenticationToken(unittest.TestCase):
         # without sending requests
         self.assert_requests_calls()
 
+        # if we try to set the token to None, we get an exception
+        with self.assertRaises(TypeError):
+            self.token.token_value = None  # type:ignore
+
     def test_n_token_reset(self) -> None:
         """
         Test of the token_value reset
@@ -140,7 +144,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assertIsNone(self.token.get_current_token_value())
 
         # If we reset the token
-        self.token.token_value = None  # type: ignore
+        self.token.reset()
         # no request is sent
         self.assert_requests_calls()
         # but retrieving the token
