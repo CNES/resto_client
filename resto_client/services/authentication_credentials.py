@@ -25,10 +25,24 @@ if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
-class AuthenticationCredentials(AuthenticationAccount):
+class AuthenticationCredentials(AuthenticationAccount, AuthenticationToken):
     """
     Class implementing the credentials for a connection: username, password.
     """
+
+    @property
+    def parent_server_name(self) -> str:
+        """
+        :returns: the name of the parent_server.
+        """
+        return self.parent_service.parent_server.server_name
+
+    @property
+    def parent_service(self) -> 'AuthenticationService':
+        """
+        :returns: the name of the parent_server.
+        """
+        return self._parent_service
 
     def __init__(self, authentication_service: 'AuthenticationService') -> None:
         """
@@ -36,11 +50,10 @@ class AuthenticationCredentials(AuthenticationAccount):
 
         :param authentication_service: authentication service onto which these credentials are valid
         """
-        self.parent_service = authentication_service
-        self.parent_server_name = authentication_service.parent_server.server_name
+        self._parent_service = authentication_service
 
-        self._authentication_token = AuthenticationToken(self)
-        super(AuthenticationCredentials, self).__init__(authentication_service)
+        AuthenticationAccount.__init__(self)
+        AuthenticationToken.__init__(self)
 
     def set(self,
             username: Optional[str]=None,
@@ -75,39 +88,25 @@ class AuthenticationCredentials(AuthenticationAccount):
             if password is not None:
                 self._password = password
             if token_value is None:
-                self._authentication_token.reset_token()
+                self._reset_token()
             else:
-                self._authentication_token.token_value = token_value
+                self.token_value = token_value
 
         else:
             # Take the new username definition, either with a password or with a token
             self._username = username.lower()  # resto server imposes lowercase account
             self._password = password
             if token_value is None:
-                self._authentication_token.reset_token()
+                self._reset_token()
             else:
-                self._authentication_token.token_value = token_value
+                self.token_value = token_value
 
     def reset(self) -> None:
         """
         Reset the credentials unconditionally.
         """
-        self.reset_account()
-        self._authentication_token.reset_token()
-
-    @property
-    def token(self) -> Optional[str]:
-        """
-        :return: the token value associated to these credentials, or None if not available.
-        """
-        return self._authentication_token.get_current_token_value()
-
-    @property
-    def token_is_available(self) -> bool:
-        """
-        :return: True if a token is available (not guaranteed to be valid).
-        """
-        return self._authentication_token.token_is_available
+        self._reset_account()
+        self._reset_token()
 
     def get_authorization_header(self) -> dict:
         """
@@ -118,7 +117,7 @@ class AuthenticationCredentials(AuthenticationAccount):
                                   error.
         """
         try:
-            return {'Authorization': 'Bearer ' + self._authentication_token.token_value}
+            return {'Authorization': 'Bearer ' + self.token_value}
         except RestoClientTokenRenewed:
             return {}
         except AccesDeniedError as excp:
@@ -129,6 +128,6 @@ class AuthenticationCredentials(AuthenticationAccount):
             raise AccesDeniedError(msg) from excp
 
     def __str__(self) -> str:
-        return 'username: {} / password: {} \ntoken: {}'.format(self.username,
+        return 'username: {} / password: {} / token: {}'.format(self.username,
                                                                 self.password,
-                                                                self.token)
+                                                                self.current_token)

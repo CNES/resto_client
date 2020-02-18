@@ -21,8 +21,7 @@ from resto_client.services.resto_server import RestoServer
 
 
 if TYPE_CHECKING:
-    from resto_client.services.authentication_credentials import \
-        AuthenticationCredentials  # @UnusedImport
+    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class UTestAuthenticationToken(unittest.TestCase):
@@ -30,7 +29,7 @@ class UTestAuthenticationToken(unittest.TestCase):
     Unit Tests of the the authentication token class
     """
 
-    credentials: 'AuthenticationCredentials'
+    auth_service: 'AuthenticationService'
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -39,13 +38,14 @@ class UTestAuthenticationToken(unittest.TestCase):
         # AuthenticationCredentials
         server = RestoServer('kalideos', debug_server=True)
         # pylint: disable=protected-access
-        cls.credentials = server._authentication_service._credentials
+        cls.auth_service = server._authentication_service
 
     def setUp(self) -> None:
         super(UTestAuthenticationToken, self).setUp()
         # Mock the token to a default state such that check_token returns False and
         # get_token returns an arbitrary value.
-        self.token = AuthenticationToken(parent_credentials=self.credentials)
+        self.token = self.auth_service._credentials
+        self.token.reset()
         setattr(self.token, '_get_token', MagicMock(return_value='abcdefghijklmnop'))
         setattr(self.token, '_check_token', MagicMock(return_value=False))
         setattr(self.token, '_revoke_token', MagicMock(return_value=None))
@@ -65,7 +65,7 @@ class UTestAuthenticationToken(unittest.TestCase):
     def test_n_token_getter_setter(self) -> None:
 
         # initially, the token value is not set
-        self.assertIsNone(self.token.get_current_token_value())
+        self.assertIsNone(self.token.current_token)
 
         # accessing through its getter will trigger a check_token and then a get_token
         self.assertEqual(self.token.token_value, 'abcdefghijklmnop')
@@ -79,7 +79,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assert_requests_calls()
 
         # Now we force token renewal
-        self.token.renew_token()
+        self.token._renew_token()
         # which emit a revoke_token and a get_token
         self.assert_requests_calls(nb_get_calls=1, nb_revoke_calls=1)
 
@@ -90,7 +90,7 @@ class UTestAuthenticationToken(unittest.TestCase):
 
         # change the value returned by get_token and renew token again.
         setattr(self.token, '_get_token', MagicMock(return_value='=============='))
-        self.token.renew_token()
+        self.token._renew_token()
         # a revoke_token and a get_token requests were emitted
         self.assert_requests_calls(nb_get_calls=1, nb_revoke_calls=1)
         self.assertEqual(self.token.token_value, '==============')
@@ -106,7 +106,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assert_requests_calls()
 
         # Reset the token.
-        self.token.reset_token()
+        self.token._reset_token()
         # does not trigger more requests.
         self.assert_requests_calls(nb_revoke_calls=1)
         # But retrieving it trigger check and get requests.
@@ -120,7 +120,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         """
 
         # initially, the token value is not set
-        self.assertIsNone(self.token.get_current_token_value())
+        self.assertIsNone(self.token.current_token)
 
         # If we set a value, gotten from elsewhere (persisted for instance)
         self.token.token_value = 'a token which will be supposed to be valid'
@@ -141,10 +141,10 @@ class UTestAuthenticationToken(unittest.TestCase):
         """
 
         # initially, the token value is not set
-        self.assertIsNone(self.token.get_current_token_value())
+        self.assertIsNone(self.token.current_token)
 
         # If we reset the token
-        self.token.reset_token()
+        self.token._reset_token()
         # no request is sent
         self.assert_requests_calls()
         # but retrieving the token

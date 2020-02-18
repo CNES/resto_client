@@ -56,11 +56,11 @@ class AuthenticationService(BaseService):
         return self._credentials.account_defined
 
     @property
-    def token(self) -> Optional[str]:
+    def current_token(self) -> Optional[str]:
         """
         :return: the token value currently active on this AuthenticationService, or None.
         """
-        return self._credentials.token
+        return self._credentials.current_token
 
     @property
     def token_is_available(self) -> bool:
@@ -118,4 +118,4 @@ class AuthenticationService(BaseService):
         return self._credentials.get_authorization_header()
 
     def __str__(self) -> str:
-        return super(AuthenticationService, self).__str__() + '\n' + str(self._credentials)
+        return super(AuthenticationService, self).__str__() + str(self._credentials)

@@ -108,7 +108,7 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         """
         :return: the token value currently active on this server, or None.
         """
-        return self._authentication_service.token if self.server_on else None
+        return self._authentication_service.current_token if self.server_on else None
 
     @classmethod
     def build_from_defaults(cls,

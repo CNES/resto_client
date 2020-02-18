@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from abc import ABC, abstractmethod
 from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
 
 from resto_client.base_exceptions import RestoClientDesignError
@@ -22,7 +23,7 @@ from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 
 if TYPE_CHECKING:
-    from .authentication_credentials import AuthenticationCredentials  # @UnusedImport
+    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class RestoClientTokenRenewed(RestoClientDesignError):
@@ -37,24 +38,28 @@ class RestoClientNoToken(RestoClientDesignError):
     """
 
 
-class AuthenticationToken():
+class AuthenticationToken(ABC):
     """
     Class implementing the token for a connexion.
     """
 
-    def __init__(self, parent_credentials: 'AuthenticationCredentials') -> None:
+    @property
+    @abstractmethod
+    def parent_service(self) -> 'AuthenticationService':
+        """
+        :returns: the name of the parent_server.
+        """
+
+    def __init__(self) -> None:
         """
         Constructor
-
-        :param parent_credentials: parent credentials of this token.
         """
-        # FIXME: replace parent_credentials by parent_service (credentials are not needed here)
-        self.parent_credentials = parent_credentials
         self._token_value: Optional[str] = None
         self._being_renewed = False
         self._being_revoked = False
 
-    def get_current_token_value(self) -> Optional[str]:
+    @property
+    def current_token(self) -> Optional[str]:
         """
 
         :returns: the current token value, without trying to update it.
@@ -79,7 +84,7 @@ class AuthenticationToken():
             raise RestoClientTokenRenewed('cannot provide a token while renewal/revoke is ongoing')
         if self._token_value is None:
             try:
-                self.renew_token()
+                self._renew_token()
             except AccesDeniedError:
                 self._being_renewed = False
                 self._being_revoked = False
@@ -97,29 +102,29 @@ class AuthenticationToken():
         :raises TypeError: when trying to set the token to None
         """
         if token_value is None:
-            raise TypeError('use AuthenticationToken.reset_token() if you want to reset a token')
+            raise TypeError('use AuthenticationToken._reset_token() if you want to reset a token')
         self._token_value = token_value
 
-    def ensure_token(self) -> None:
+    def _ensure_token(self) -> None:
         """
         Ensure that we have a valid current token. If we have no current token or if the
         current token is rejected by the service, get a new token.
         """
         if self._token_value is None or not self._check_token(self._token_value):
-            self.renew_token()
+            self._renew_token()
 
-    def renew_token(self) -> None:
+    def _renew_token(self) -> None:
         """
         Renew the current token unconditionally, by getting a new value from the server
         """
         # FIXME: decide if renewal management must be kept or not.
         if not self._being_renewed:
             self._being_renewed = True
-            self.reset_token()
+            self._reset_token()
             self.token_value = self._get_token()
             self._being_renewed = False
 
-    def reset_token(self) -> None:
+    def _reset_token(self) -> None:
         """
         Forget the currently defined token, if any.
         """
@@ -137,7 +142,7 @@ class AuthenticationToken():
         """
         # FIXME: it is surprising that the token value is not passed as an argument.
         try:
-            RevokeTokenRequest(self.parent_credentials.parent_service).run()
+            RevokeTokenRequest(self.parent_service).run()
         except RestoClientUnsupportedRequest:
             # We have done our best, but some resto servers does not support RevokeToken.
             # Consider that token was revoked.
@@ -149,14 +154,14 @@ class AuthenticationToken():
 
         :returns: True if the token is valid, False otherwise
         """
-        return CheckTokenRequest(self.parent_credentials.parent_service, token).run()
+        return CheckTokenRequest(self.parent_service, token).run()
 
     def _get_token(self) -> str:
         """
         :returns: a new token to use
         :raises AccesDeniedError: when credentials are not valid for the service.
         """
-        return GetTokenRequest(self.parent_credentials.parent_service).run()
+        return GetTokenRequest(self.parent_service).run()
 
     def __str__(self) -> str:
         result_fmt = 'Token status : being_renewed: {} value: {}'

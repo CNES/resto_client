@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, TYPE_CHECKING, Dict, Callable  # @UnusedImport @NoMove
+from typing import Optional, Dict, Callable  # @UnusedImport @NoMove
 from abc import ABC, abstractmethod
 from base64 import b64encode
 from getpass import getpass
@@ -20,9 +20,6 @@ from getpass import getpass
 from requests.auth import HTTPBasicAuth
 
 from resto_client.base_exceptions import RestoClientDesignError
-
-if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 AuthorizationDataType = Dict[str, Optional[str]]
 
@@ -33,21 +30,23 @@ class AuthenticationAccount(ABC):
     """
     asking_input: Dict[str, Callable] = {'shown': input, 'hidden': getpass}
 
-    def __init__(self, authentication_service: 'AuthenticationService') -> None:
+    @property
+    @abstractmethod
+    def parent_server_name(self) -> str:
+        """
+        :returns: the name of the parent_server.
+        """
+
+    def __init__(self) -> None:
         """
         Constructor
-
-        :param authentication_service: authentication service onto which these credentials are valid
         """
-        self.parent_service = authentication_service
-        self.parent_server_name = authentication_service.parent_server.server_name
-
         self._username: Optional[str] = None
         self._password: Optional[str] = None
 
-    def set_account(self,
-                    username: Optional[str]=None,
-                    password: Optional[str]=None) -> None:
+    def _set_account(self,
+                     username: Optional[str]=None,
+                     password: Optional[str]=None) -> None:
         """
         Set or reset the username and the password.
 
@@ -78,7 +77,7 @@ class AuthenticationAccount(ABC):
             self._username = username.lower()  # resto server imposes lowercase account
             self._password = password
 
-    def reset_account(self) -> None:
+    def _reset_account(self) -> None:
         """
         Reset the account unconditionally.
         """
