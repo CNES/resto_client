@@ -12,29 +12,23 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import Optional, TYPE_CHECKING, Dict, Callable  # @UnusedImport @NoMove
-from base64 import b64encode
-from getpass import getpass
-
-from requests.auth import HTTPBasicAuth
+from typing import Optional, TYPE_CHECKING  # @NoMove
 
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.requests.base_request import AccesDeniedError
 
+from .authentication_account import AuthenticationAccount
 from .authentication_token import AuthenticationToken, RestoClientTokenRenewed
 
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
-AuthorizationDataType = Dict[str, Optional[str]]
 
-
-class AuthenticationCredentials():
+class AuthenticationCredentials(AuthenticationAccount):
     """
     Class implementing the credentials for a connection: username, password.
     """
-    asking_input: Dict[str, Callable] = {'shown': input, 'hidden': getpass}
 
     def __init__(self, authentication_service: 'AuthenticationService') -> None:
         """
@@ -45,9 +39,8 @@ class AuthenticationCredentials():
         self.parent_service = authentication_service
         self.parent_server_name = authentication_service.parent_server.server_name
 
-        self._username: Optional[str] = None
-        self._password: Optional[str] = None
         self._authentication_token = AuthenticationToken(self)
+        super(AuthenticationCredentials, self).__init__(authentication_service)
 
     def set(self,
             username: Optional[str]=None,
@@ -99,8 +92,7 @@ class AuthenticationCredentials():
         """
         Reset the credentials unconditionally.
         """
-        self._username = None
-        self._password = None
+        self.reset_account()
         self._authentication_token.reset()
 
     @property
@@ -117,81 +109,13 @@ class AuthenticationCredentials():
         """
         return self._authentication_token.available
 
-    @property
-    def username(self) -> Optional[str]:
-        """
-        :returns: the username
-        """
-        return self._username
-
-    @property
-    def password(self) -> Optional[str]:
-        """
-        :returns: the password
-        """
-        return self._password
-
-    @property
-    def account_defined(self) -> bool:
-        """
-        :returns: True if username and password are defined, but not necessarily valid.
-        """
-        return self.username is not None and self.password is not None
-
-    @property
-    def username_b64(self) -> str:
-        """
-
-        :returns: the username encoded as base64, suitable to insert in URLs
-        :raises RestoClientDesignError: when trying to get base64 username while it is undefined.
-        """
-        if self.username is None:
-            msg = 'Unable to provide base64 username when username undefined'
-            raise RestoClientDesignError(msg)
-        return b64encode(self.username.encode('UTF-8')).decode('UTF-8')
-
-    def _ensure_credentials(self) -> None:
-        """
-        Verify that both username and password are defined, and request their values if it
-        is not the case
-        """
-        if self.username is None:
-            msg = "Please enter your username for {} server: ".format(self.parent_server_name)
-            self.set(username=AuthenticationCredentials.asking_input['shown'](msg))
-        if self.password is None:
-            msg = "Please enter your password for {} server: ".format(self.parent_server_name)
-            self.set(password=AuthenticationCredentials.asking_input['hidden'](msg))
-
-    @property
-    def authorization_data(self) -> AuthorizationDataType:
-        """
-        :returns: the authorization data for the service
-        """
-        self._ensure_credentials()
-        return {'ident': self.username,
-                'pass': self.password}
-
-    @property
-    def http_basic_auth(self) -> HTTPBasicAuth:
-        """
-        :returns: the basic HTTP authorization for the service
-        :raises RestoClientDesignError: when trying to build authentication while username or
-                                        password is undefined.
-        """
-        self._ensure_credentials()
-        if self.password is None:
-            msg = 'Unable to provide http_basic_auth when password undefined'
-            raise RestoClientDesignError(msg)
-        if self.username is None:
-            msg = 'Unable to provide http_basic_auth when username undefined'
-            raise RestoClientDesignError(msg)
-        return HTTPBasicAuth(self.username.encode('utf-8'), self.password.encode('utf-8'))
-
     def get_authorization_header(self) -> dict:
         """
         Returns the Authorization headers if possible
 
         :returns: the authorization header
+        :raises AccesDeniedError: if token retrieval could not be made because of an authentication
+                                  error.
         """
         try:
             return {'Authorization': 'Bearer ' + self._authentication_token.token_value}

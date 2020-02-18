@@ -20,8 +20,7 @@ import requests
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
-    from resto_client.services.authentication_credentials import \
-        AuthorizationDataType  # @UnusedImport
+    from resto_client.services.authentication_account import AuthorizationDataType  # @UnusedImport
 
 
 class Authenticator(ABC):

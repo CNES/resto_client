@@ -16,7 +16,8 @@ from typing import Optional, TYPE_CHECKING  # @NoMove
 
 from requests.auth import HTTPBasicAuth
 
-from .authentication_credentials import AuthenticationCredentials, AuthorizationDataType
+from .authentication_account import AuthorizationDataType
+from .authentication_credentials import AuthenticationCredentials
 from .base_service import BaseService
 from .service_access import AuthenticationServiceAccess
 
