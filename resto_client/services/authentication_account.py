@@ -124,16 +124,16 @@ class AuthenticationAccount(ABC):
         """
         if self.username is None:
             msg = "Please enter your username for {} server: ".format(self.parent_server_name)
-            self.set(username=AuthenticationAccount.asking_input['shown'](msg))
+            self.set_credentials(username=AuthenticationAccount.asking_input['shown'](msg))
         if self.password is None:
             msg = "Please enter your password for {} server: ".format(self.parent_server_name)
-            self.set(password=AuthenticationAccount.asking_input['hidden'](msg))
+            self.set_credentials(password=AuthenticationAccount.asking_input['hidden'](msg))
 
     @abstractmethod
-    def set(self,
-            username: Optional[str]=None,
-            password: Optional[str]=None,
-            token_value: Optional[str]=None) -> None:
+    def set_credentials(self,
+                        username: Optional[str]=None,
+                        password: Optional[str]=None,
+                        token_value: Optional[str]=None) -> None:
         """
         Set or reset the username, the password and the token.
 

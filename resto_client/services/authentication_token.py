@@ -92,6 +92,8 @@ class AuthenticationToken(ABC):
         """
         :returns: the current token value or a renewed value if the current token is invalid.
         :raises RestoClientTokenRenewed: when trying to get the token while its renewal is ongoing
+        :raises AccesDeniedError: when authentication is refused when retrieving the token.
+        :raises RestoClientNoToken: when server responded without providing a token.
         """
         if self._being_renewed or self._being_revoked:
             raise RestoClientTokenRenewed('cannot provide a token while renewal/revoke is ongoing')

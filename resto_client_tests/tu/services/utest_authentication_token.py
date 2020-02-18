@@ -44,7 +44,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         super(UTestAuthenticationToken, self).setUp()
         # Mock the token to a default state such that check_token returns False and
         # get_token returns an arbitrary value.
-        self.token = self.auth_service._credentials
+        self.token = self.auth_service
         self.token.reset_credentials()
         setattr(self.token, '_get_token', MagicMock(return_value='abcdefghijklmnop'))
         setattr(self.token, '_check_token', MagicMock(return_value=False))
