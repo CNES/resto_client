@@ -12,12 +12,13 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import TYPE_CHECKING, cast  # @NoMove
+from typing import TYPE_CHECKING, cast, Optional  # @NoMove
 from json.decoder import JSONDecodeError
 
 from requests import Response
 
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
+from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest, RestoClientEmulatedResponse, AccesDeniedError
@@ -51,16 +52,26 @@ class GetTokenRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(str, super(GetTokenRequest, self).run())
 
+    def update_headers(self, dict_input: Optional[dict]=None) -> None:
+        if dict_input is not None:
+            self._request_headers.update(dict_input)
+
     def process_request_result(self) -> str:
-        try:
+        content_type = self._request_result.headers['content-type']
+        if 'application/json' in content_type:
             get_token_response_content = self._request_result.json()
-        except JSONDecodeError:
+        elif 'text/html' in content_type:
             response_text = self._request_result.text
-            # FIXME:For the sake of homogeneity, exception should be raised by GetTokenResponse,
-            if response_text == 'Please set mail and password':
-                msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
-                raise AccesDeniedError(msg.format(response_text))
-            get_token_response_content = {'token': response_text}
+            if response_text in ['Please set mail and password', '']:
+                get_token_response_content = {'success': False}
+                if response_text != '':
+                    get_token_response_content['message'] = response_text
+            else:
+                get_token_response_content = {'success': True, 'token': response_text}
+        else:
+            msg_fmt = 'Unable to process GetToken response: headers : {} \n content: {}'
+            raise RestoResponseError(msg_fmt.format(self._request_result.headers,
+                                                    self._request_result.content))
         return GetTokenResponse(self, get_token_response_content).as_resto_object()
 
 
