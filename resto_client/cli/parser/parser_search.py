@@ -201,7 +201,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                const='product',
                                help='download files corresponding to found features, by default'
                                ' product will be downloaded')
-    parser_search.add_argument('-j', '--save_json', action="store_true", 
+    parser_search.add_argument('-j', '--save_json', action="store_true",
                                help="save search's response in a json")
 
     parser_search.set_defaults(func=cli_search_collection)

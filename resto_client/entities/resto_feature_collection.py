@@ -14,12 +14,13 @@
 """
 from typing import List, Optional  # @NoMove
 
-import geojson
-
-from .resto_feature import RestoFeature
-from prettytable.prettytable import PrettyTable
 import json
 from pathlib import Path
+
+import geojson
+from prettytable import PrettyTable
+
+from .resto_feature import RestoFeature
 
 
 class RestoFeatureCollection(geojson.FeatureCollection):
@@ -102,7 +103,7 @@ class RestoFeatureCollection(geojson.FeatureCollection):
             for product_property in self.properties:
                 show_param: Optional[str] = str(self.properties[product_property])
                 feat_table.add_row([product_property, show_param])
-            
+
             feat_table.add_row(["all_id", str(self.all_id)])
             result += feat_table.get_string()
             result += '\n'
