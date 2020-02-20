@@ -156,8 +156,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     record_json = get_from_args(JSON_ARGNAME, args)
     if record_json and resto_server.server_name is not None:
         json_path = download_dir / resto_server.server_name
-        # FIXME Call to protected member
-        resto_server._ensure_server_directory(json_path)
+        resto_server.ensure_server_directory(json_path)
         json_search_file = features_collection.write_json(json_path)
         resto_client_print('Search saved in {}'.format(json_search_file))
 
