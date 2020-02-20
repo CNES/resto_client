@@ -101,7 +101,7 @@ class RestoFeatureCollection(geojson.FeatureCollection):
             feat_table.align['Property'] = 'l'
 
             for product_property in self.properties:
-                show_param: Optional[str] = str(self.properties[product_property])
+                show_param = str(self.properties[product_property])
                 feat_table.add_row([product_property, show_param])
 
             feat_table.add_row(["all_id", str(self.all_id)])
