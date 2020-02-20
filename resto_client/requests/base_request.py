@@ -34,7 +34,6 @@ RestoRequestResult = Union[RestoResponse, Path, str,
                            bool, RestoCollection, RestoCollections, requests.Response]
 
 
-# TODO: move in a module for requests specific exceptions
 class AccesDeniedError(RestoClientUserError):
     """
     Exception corresponding to HTTP Error 403

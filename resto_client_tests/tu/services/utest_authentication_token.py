@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import MagicMock
 
-from resto_client.services.authentication_token import AuthenticationToken
 from resto_client.services.resto_server import RestoServer
 
 
