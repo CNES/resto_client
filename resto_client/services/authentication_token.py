@@ -36,7 +36,7 @@ class RestoClientNoToken(RestoClientDesignError):
     """
 
 
-class AuthenticationToken(BaseService):
+class AuthenticationTokenService(BaseService):
     """
     Class implementing a service for managing the token for a connexion.
     """
@@ -97,7 +97,8 @@ class AuthenticationToken(BaseService):
         :raises TypeError: when trying to set the token to None
         """
         if token_value is None:
-            raise TypeError('use AuthenticationToken._reset_token() if you want to reset a token')
+            msg = 'use AuthenticationTokenService._reset_token() if you want to reset a token'
+            raise TypeError(msg)
         self._token_value = token_value
 
     # FIXME: _ensure_token never called, and thus no call to _check_token

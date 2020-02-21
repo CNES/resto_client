@@ -17,7 +17,7 @@ from typing import Optional, TYPE_CHECKING  # @NoMove
 from resto_client.base_exceptions import RestoClientDesignError
 
 from .authentication_account import AuthenticationAccount
-from .authentication_token import AuthenticationToken
+from .authentication_token import AuthenticationTokenService
 from .service_access import AuthenticationServiceAccess
 
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from .resto_server import RestoServer  # @UnusedImport
 
 
-class AuthenticationService(AuthenticationToken, AuthenticationAccount):
+class AuthenticationService(AuthenticationTokenService, AuthenticationAccount):
     """
     An authentication Service able to provide tokens, given credentials.
     """
@@ -38,7 +38,7 @@ class AuthenticationService(AuthenticationToken, AuthenticationAccount):
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """
-        AuthenticationToken.__init__(self, auth_access, parent_server)
+        AuthenticationTokenService.__init__(self, auth_access, parent_server)
         AuthenticationAccount.__init__(self, self.parent_server.server_name)
 
     def set_credentials(self,
