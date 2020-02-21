@@ -41,7 +41,7 @@ class AuthenticationService(BaseService, AuthenticationAccount, AuthenticationTo
         """
         BaseService.__init__(self, auth_access, self, parent_server)
         AuthenticationAccount.__init__(self)
-        AuthenticationToken.__init__(self)
+        AuthenticationToken.__init__(self, self.parent_server.server_name)
 
     @property
     def parent_server_name(self) -> str:

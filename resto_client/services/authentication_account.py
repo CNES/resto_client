@@ -30,19 +30,13 @@ class AuthenticationAccount(ABC):
     """
     asking_input: Dict[str, Callable] = {'shown': input, 'hidden': getpass}
 
-    @property
-    @abstractmethod
-    def parent_server_name(self) -> str:
-        """
-        :returns: the name of the parent_server.
-        """
-
-    def __init__(self) -> None:
+    def __init__(self, server_name: str) -> None:
         """
         Constructor
         """
         self._username: Optional[str] = None
         self._password: Optional[str] = None
+        self.server_name = server_name
 
     def _set_account(self, username: Optional[str]=None, password: Optional[str]=None) -> bool:
         """
@@ -125,11 +119,11 @@ class AuthenticationAccount(ABC):
         is not the case
         """
         if self.username is None:
-            msg = f'Please enter your username for {self.parent_server_name} server: '
+            msg = f'Please enter your username for {self.server_name} server: '
             new_username = AuthenticationAccount.asking_input['shown'](msg)
             self.set_credentials(username=new_username)
         if self.password is None:
-            msg = f'Please enter your password for {self.parent_server_name} server: '
+            msg = f'Please enter your password for {self.server_name} server: '
             new_password = AuthenticationAccount.asking_input['hidden'](msg)
             self.set_credentials(password=new_password)
 
