@@ -26,12 +26,6 @@ if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
-class RestoClientTokenRenewed(RestoClientDesignError):
-    """
-    Exception raised when trying to get token value while its renewal is ongoing
-    """
-
-
 class RestoClientNoToken(RestoClientDesignError):
     """
     Exception raised when no token is available and can be retrieved
@@ -68,8 +62,6 @@ class AuthenticationToken(ABC):
         Constructor
         """
         self._token_value: Optional[str] = None
-        self._being_renewed = False
-        self._being_revoked = False
 
     @property
     def current_token(self) -> Optional[str]:
@@ -91,19 +83,11 @@ class AuthenticationToken(ABC):
     def token_value(self) -> str:
         """
         :returns: the current token value or a renewed value if the current token is invalid.
-        :raises RestoClientTokenRenewed: when trying to get the token while its renewal is ongoing
         :raises AccesDeniedError: when authentication is refused when retrieving the token.
         :raises RestoClientNoToken: when server responded without providing a token.
         """
-        if self._being_renewed or self._being_revoked:
-            raise RestoClientTokenRenewed('cannot provide a token while renewal/revoke is ongoing')
         if self._token_value is None:
-            try:
-                self._renew_token()
-            except AccesDeniedError:
-                self._being_renewed = False
-                self._being_revoked = False
-                raise
+            self._renew_token()
             if self._token_value is None:
                 raise RestoClientNoToken('No token available and unable to retrieve one')
         return self._token_value
@@ -132,22 +116,15 @@ class AuthenticationToken(ABC):
         """
         Renew the current token unconditionally, by getting a new value from the server
         """
-        # FIXME: decide if renewal management must be kept or not.
-        if not self._being_renewed:
-            self._being_renewed = True
-            self._reset_token()
-            self.token_value = self._get_token()
-            self._being_renewed = False
+        self._reset_token()
+        self.token_value = self._get_token()
 
     def _reset_token(self) -> None:
         """
         Forget the currently defined token, if any.
         """
         if self._token_value is not None:
-            if not self._being_revoked:
-                self._being_revoked = True
-                self._revoke_token()
-                self._being_revoked = False
+            self._revoke_token()
             self._token_value = None
 
     def get_authorization_header(self) -> dict:
@@ -160,13 +137,10 @@ class AuthenticationToken(ABC):
         """
         try:
             return {'Authorization': 'Bearer ' + self.token_value}
-        except RestoClientTokenRenewed:
-            return {}
         except AccesDeniedError as excp:
             self.reset_credentials()
-            msg_fmt = 'Access Denied : (username, password) does not fit the server : {}'
-            msg_fmt += '\nFollowing denied access, credentials were reset.'
-            msg = msg_fmt.format(self.parent_server_name)
+            msg = f'Access Denied : (username, password) does not fit the server:'
+            msg += f' {self.parent_server_name}\nFollowing denied access, credentials were reset.'
             raise AccesDeniedError(msg) from excp
 
 
@@ -199,5 +173,4 @@ class AuthenticationToken(ABC):
         return GetTokenRequest(self.parent_service).run()
 
     def __str__(self) -> str:
-        result_fmt = 'Token status : being_renewed: {} value: {}'
-        return result_fmt.format(self._being_renewed, self._token_value)
+        return f'Token value: {self._token_value}'

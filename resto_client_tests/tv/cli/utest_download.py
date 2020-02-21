@@ -116,6 +116,6 @@ class UTestCliDownload(TestRestoClientCli):
                    '--collection=KALCNES', '--server=kalideos']
         with self.assertRaises(AccesDeniedError) as excp:
             resto_client_run(arguments=command)
-        exp_out = ('Access Denied : (username, password) does not fit the server : kalideos'
+        exp_out = ('Access Denied : (username, password) does not fit the server: kalideos'
                    '\nFollowing denied access, credentials were reset.')
         self. assertEqual(exp_out, str(excp.exception))
