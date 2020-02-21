@@ -12,8 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
-from typing import Optional, Any, TYPE_CHECKING  # @UnusedImport
+from abc import abstractmethod
+from typing import cast, Optional, Any, TYPE_CHECKING  # @UnusedImport
 
 from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
@@ -21,9 +21,13 @@ from resto_client.requests.authentication_requests import (GetTokenRequest, Chec
 from resto_client.requests.base_request import AccesDeniedError
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
+from .base_service import BaseService
+from .service_access import AuthenticationServiceAccess
+
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
+    from .resto_server import RestoServer  # @UnusedImport
 
 
 class RestoClientNoToken(RestoClientDesignError):
@@ -32,24 +36,10 @@ class RestoClientNoToken(RestoClientDesignError):
     """
 
 
-class AuthenticationToken(ABC):
+class AuthenticationToken(BaseService):
     """
-    Class implementing the token for a connexion.
+    Class implementing a service for managing the token for a connexion.
     """
-
-    @property
-    @abstractmethod
-    def parent_server_name(self) -> str:
-        """
-        :returns: the name of the parent_server.
-        """
-
-    @property
-    @abstractmethod
-    def parent_service(self) -> 'AuthenticationService':
-        """
-        :returns: the authentication service associated to this token
-        """
 
     @abstractmethod
     def reset_credentials(self) -> None:
@@ -57,10 +47,16 @@ class AuthenticationToken(ABC):
         Reset the credentials unconditionally.
         """
 
-    def __init__(self) -> None:
+    def __init__(self, auth_access: AuthenticationServiceAccess,
+                 parent_server: 'RestoServer') -> None:
         """
         Constructor
+
+        :param auth_access: access to the authentication server.
+        :param parent_server: Server which uses this service.
         """
+        super().__init__(auth_access, cast('AuthenticationService', self),
+                         parent_server=parent_server)
         self._token_value: Optional[str] = None
 
     @property
@@ -104,6 +100,7 @@ class AuthenticationToken(ABC):
             raise TypeError('use AuthenticationToken._reset_token() if you want to reset a token')
         self._token_value = token_value
 
+    # FIXME: _ensure_token never called, and thus no call to _check_token
     def _ensure_token(self) -> None:
         """
         Ensure that we have a valid current token. If we have no current token or if the
@@ -140,7 +137,8 @@ class AuthenticationToken(ABC):
         except AccesDeniedError as excp:
             self.reset_credentials()
             msg = f'Access Denied : (username, password) does not fit the server:'
-            msg += f' {self.parent_server_name}\nFollowing denied access, credentials were reset.'
+            msg += f' {self.parent_server.server_name}\nFollowing denied access,'
+            msg += f' credentials were reset.'
             raise AccesDeniedError(msg) from excp
 
 
@@ -151,7 +149,7 @@ class AuthenticationToken(ABC):
         """
         # FIXME: it is surprising that the token value is not passed as an argument.
         try:
-            RevokeTokenRequest(self.parent_service).run()
+            RevokeTokenRequest(self).run()
         except RestoClientUnsupportedRequest:
             # We have done our best, but some resto servers does not support RevokeToken.
             # Consider that token was revoked.
@@ -163,14 +161,14 @@ class AuthenticationToken(ABC):
 
         :returns: True if the token is valid, False otherwise
         """
-        return CheckTokenRequest(self.parent_service, token=token).run()
+        return CheckTokenRequest(self, token=token).run()
 
     def _get_token(self) -> str:
         """
         :returns: a new token to use
         :raises AccesDeniedError: when credentials are not valid for the service.
         """
-        return GetTokenRequest(self.parent_service).run()
+        return GetTokenRequest(self).run()
 
     def __str__(self) -> str:
         return f'Token value: {self._token_value}'

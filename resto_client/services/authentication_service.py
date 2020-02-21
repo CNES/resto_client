@@ -18,7 +18,6 @@ from resto_client.base_exceptions import RestoClientDesignError
 
 from .authentication_account import AuthenticationAccount
 from .authentication_token import AuthenticationToken
-from .base_service import BaseService
 from .service_access import AuthenticationServiceAccess
 
 
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
     from .resto_server import RestoServer  # @UnusedImport
 
 
-class AuthenticationService(BaseService, AuthenticationAccount, AuthenticationToken):
+class AuthenticationService(AuthenticationToken, AuthenticationAccount):
     """
     An authentication Service able to provide tokens, given credentials.
     """
@@ -39,23 +38,8 @@ class AuthenticationService(BaseService, AuthenticationAccount, AuthenticationTo
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """
-        BaseService.__init__(self, auth_access, self, parent_server)
-        AuthenticationAccount.__init__(self)
-        AuthenticationToken.__init__(self, self.parent_server.server_name)
-
-    @property
-    def parent_server_name(self) -> str:
-        """
-        :returns: the name of the parent_server.
-        """
-        return self.parent_server.server_name
-
-    @property
-    def parent_service(self) -> 'AuthenticationService':
-        """
-        :returns: this service.
-        """
-        return self
+        AuthenticationToken.__init__(self, auth_access, parent_server)
+        AuthenticationAccount.__init__(self, self.parent_server.server_name)
 
     def set_credentials(self,
                         username: Optional[str]=None,
