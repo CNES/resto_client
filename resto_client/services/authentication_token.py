@@ -163,7 +163,7 @@ class AuthenticationToken(ABC):
 
         :returns: True if the token is valid, False otherwise
         """
-        return CheckTokenRequest(self.parent_service, token).run()
+        return CheckTokenRequest(self.parent_service, token=token).run()
 
     def _get_token(self) -> str:
         """

@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import TYPE_CHECKING, cast, Optional  # @NoMove
+from typing import cast, Optional  # @NoMove
 
 from requests import Response
 
@@ -21,9 +21,6 @@ from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest, RestoClientEmulatedResponse
-
-if TYPE_CHECKING:
-    from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
 
 
 class RevokeTokenRequest(BaseRequest):
@@ -79,16 +76,6 @@ class CheckTokenRequest(BaseRequest):
      Request to check a service token.
     """
     request_action = 'checking token'
-
-    def __init__(self, service: 'AuthenticationService', token: str) -> None:
-        """
-        :param service: authentication service
-        :param token: token to be checked
-        :raises TypeError: when token argument type is not an str
-        """
-        if not isinstance(token, str):
-            raise TypeError('token argument must be of type <str>')
-        super(CheckTokenRequest, self).__init__(service, token=token)
 
     def run(self) -> bool:
         # overidding BaseRequest method, in order to specify the right type returned by this request
