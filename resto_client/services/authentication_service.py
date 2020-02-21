@@ -17,7 +17,7 @@ from typing import Optional, TYPE_CHECKING  # @NoMove
 from resto_client.base_exceptions import RestoClientDesignError
 
 from .authentication_account import AuthenticationAccount
-from .authentication_token import AuthenticationTokenService
+from .authentication_token_service import AuthenticationTokenService
 from .service_access import AuthenticationServiceAccess
 
 
