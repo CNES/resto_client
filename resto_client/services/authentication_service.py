@@ -53,7 +53,7 @@ class AuthenticationService(BaseService, AuthenticationAccount, AuthenticationTo
     @property
     def parent_service(self) -> 'AuthenticationService':
         """
-        :returns: the name of the parent_server.
+        :returns: this service.
         """
         return self
 

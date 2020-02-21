@@ -48,7 +48,7 @@ class AuthenticationToken(ABC):
     @abstractmethod
     def parent_service(self) -> 'AuthenticationService':
         """
-        :returns: the name of the parent_server.
+        :returns: the authentication service associated to this token
         """
 
     @abstractmethod
