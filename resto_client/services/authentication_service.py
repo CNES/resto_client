@@ -43,19 +43,6 @@ class AuthenticationService(BaseService, AuthenticationAccount, AuthenticationTo
         AuthenticationAccount.__init__(self)
         AuthenticationToken.__init__(self)
 
-    def set_credentials(self,
-                        username: Optional[str]=None,
-                        password: Optional[str]=None,
-                        token_value: Optional[str]=None) -> None:
-        """
-        Set the credentials to be used this authentication service.
-
-        :param username: name of the account on the server
-        :param password: account password
-        :param token_value: a token associated to these credentials
-        """
-        self.set(username=username, password=password, token_value=token_value)
-
     @property
     def parent_server_name(self) -> str:
         """
@@ -70,51 +57,43 @@ class AuthenticationService(BaseService, AuthenticationAccount, AuthenticationTo
         """
         return self
 
-    def set(self,
-            username: Optional[str]=None,
-            password: Optional[str]=None,
-            token_value: Optional[str]=None) -> None:
+    def set_credentials(self,
+                        username: Optional[str]=None,
+                        password: Optional[str]=None,
+                        token_value: Optional[str]=None) -> None:
         """
-        Set or reset the username, the password and the token.
+        Set the credentials to be used by this authentication service.
 
         If username is not None, it is set to the provided value if it is different from the
         already stored one and the password is stored whatever its value.
         If username is None and password is not, then only the password is updated with the
         provided value. Otherwise username and password are both reset.
 
-        :param username: the username to register
-        :param password: the account password
+        :param username: name of the account on the server
+        :param password: account password
         :param token_value: a token associated to these credentials
         :raises RestoClientDesignError: when an unconsistent set of arguments is provided
         """
         if username is None and password is None and token_value is None:
+            # don't change anything
             return
 
         if password is not None and token_value is not None:
             msg = 'Cannot define or change simultaneously password and token'
             raise RestoClientDesignError(msg)
 
-        if username is None:
-            if self._username is None:
-                msg = 'Cannot set/reset password or token when username is undefined.'
-                raise RestoClientDesignError(msg)
+        if username is None and self._username is None:
+            msg = 'Cannot change password and/or token when username is undefined.'
+            raise RestoClientDesignError(msg)
 
-            # We already have a username and want to set/change password or token.
-            if password is not None:
-                self._password = password
-            if token_value is None:
-                self._reset_token()
-            else:
-                self.token_value = token_value
+        # Record the new account definition and reset current token if account was changed
+        account_changed = self._set_account(username=username, password=password)
+        if account_changed:
+            self._reset_token()
 
-        else:
-            # Take the new username definition, either with a password or with a token
-            self._username = username.lower()  # resto server imposes lowercase account
-            self._password = password
-            if token_value is None:
-                self._reset_token()
-            else:
-                self.token_value = token_value
+        # We have an account and want to set its token.
+        if token_value is not None:
+            self.token_value = token_value
 
     def reset_credentials(self) -> None:
         """

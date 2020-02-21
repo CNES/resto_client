@@ -44,9 +44,7 @@ class AuthenticationAccount(ABC):
         self._username: Optional[str] = None
         self._password: Optional[str] = None
 
-    def _set_account(self,
-                     username: Optional[str]=None,
-                     password: Optional[str]=None) -> None:
+    def _set_account(self, username: Optional[str]=None, password: Optional[str]=None) -> bool:
         """
         Set or reset the username and the password.
 
@@ -57,25 +55,29 @@ class AuthenticationAccount(ABC):
 
         :param username: the username to register
         :param password: the account password
+        :returns: True if username and or password has been changed, False otherwise
         :raises RestoClientDesignError: when an unconsistent set of arguments is provided
         """
-        # FIXME: is this method needed (see in conjunction with credentials.set())
-        if username is None and password is None:
-            return
-
-        if username is None:
-            if self._username is None:
-                msg = 'Cannot set/reset password when username is undefined.'
+        change_username = True
+        change_password = password != self._password
+        if self._username is None and self._password is None:
+            if username is None and password is not None:
+                msg = 'Cannot set password because no username has been defined yet.'
                 raise RestoClientDesignError(msg)
+            change_username = username is not None
 
-            # We already have a username and want to set/reset password.
-            if password is not None:
-                self._password = password
+        if self._username is not None:
+            if username is None:
+                change_username = password is None
+            else:
+                change_username = username.lower() != self._username
 
-        else:
-            # Take the new username definition, possibly with a password
-            self._username = username.lower()  # resto server imposes lowercase account
+        if change_username:
+            self._username = username
+        if change_password:
             self._password = password
+
+        return change_username or change_password
 
     def _reset_account(self) -> None:
         """
@@ -123,12 +125,16 @@ class AuthenticationAccount(ABC):
         is not the case
         """
         if self.username is None:
-            msg = "Please enter your username for {} server: ".format(self.parent_server_name)
-            self.set_credentials(username=AuthenticationAccount.asking_input['shown'](msg))
+            msg = f'Please enter your username for {self.parent_server_name} server: '
+            new_username = AuthenticationAccount.asking_input['shown'](msg)
+            self.set_credentials(username=new_username)
         if self.password is None:
-            msg = "Please enter your password for {} server: ".format(self.parent_server_name)
-            self.set_credentials(password=AuthenticationAccount.asking_input['hidden'](msg))
+            msg = f'Please enter your password for {self.parent_server_name} server: '
+            new_password = AuthenticationAccount.asking_input['hidden'](msg)
+            self.set_credentials(password=new_password)
 
+    # We have to define set_credentials as abstract because we need it to propagate
+    # token reinitialization when defining new account via _ensure_account
     @abstractmethod
     def set_credentials(self,
                         username: Optional[str]=None,
@@ -174,4 +180,4 @@ class AuthenticationAccount(ABC):
         return HTTPBasicAuth(self.username.encode('utf-8'), self.password.encode('utf-8'))
 
     def __str__(self) -> str:
-        return 'username: {} / password: {}'.format(self.username, self.password)
+        return f'username: {self.username} / password: {self.password}'
