@@ -14,7 +14,11 @@
 """
 from typing import List, Optional  # @NoMove
 
+import json
+from pathlib import Path
+
 import geojson
+from prettytable import PrettyTable
 
 from .resto_feature import RestoFeature
 
@@ -75,3 +79,32 @@ class RestoFeatureCollection(geojson.FeatureCollection):
         :returns: the identifiers of all features in this feature collection
         """
         return [feature.product_identifier for feature in self.features]
+
+    def write_json(self, dir_path: Path) -> Path:
+        """
+        Save the current entity in a json file
+        :param dir_path: Path where to write the json
+        :returns: Path of the saved json file
+        """
+        json_name = 'request_{}.json'.format(self.identifier)
+        with open(dir_path / json_name, 'w') as stream:
+            json.dump(self, stream, indent=2)
+        return dir_path / json_name
+
+    def __str__(self) -> str:
+
+        if self.properties is not None:
+            result = '\nProperties available for the FeatureCollection\n'
+            feat_table = PrettyTable()
+            feat_table.field_names = ['Property', 'Value']
+            feat_table.align['Value'] = 'l'
+            feat_table.align['Property'] = 'l'
+
+            for product_property in self.properties:
+                show_param = str(self.properties[product_property])
+                feat_table.add_row([product_property, show_param])
+
+            feat_table.add_row(["all_id", str(self.all_id)])
+            result += feat_table.get_string()
+            result += '\n'
+        return result

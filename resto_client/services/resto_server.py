@@ -162,7 +162,7 @@ class RestoServer():
         :returns: the path of the downloaded file
         """
         return self._resto_service.download_feature_file(
-            feature, file_type, self._ensure_server_directory(download_dir))
+            feature, file_type, self.ensure_server_directory(download_dir))
 
     def download_features_file_from_ids(self,
                                         features_ids: Union[str, List[str]],
@@ -186,7 +186,7 @@ class RestoServer():
             downloaded_file_paths.append(downloaded_file_path)
         return downloaded_file_paths
 
-    def _ensure_server_directory(self, data_dir: Path) -> Path:
+    def ensure_server_directory(self, data_dir: Path) -> Path:
         """
         Build the server data directory path by appending the server name to the provided argument.
         Creates also that directory if it does not exist yet.

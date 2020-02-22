@@ -15,7 +15,7 @@
 from prettytable import PrettyTable
 
 
-class RestoLicense():
+class RestoLicense(dict):
     """
      Class representing a license as given by Resto, either on a collection or on a feature
     """
@@ -27,6 +27,7 @@ class RestoLicense():
         :param item_description: feature properties or collection item into which license
                                  information can be found.
         """
+        super(RestoLicense, self).__init__()
         license_entry = item_description.get('license')
         license_info = item_description.get('license_info')
         self._license_infos: dict
@@ -56,6 +57,7 @@ class RestoLicense():
 
         # Remove license information from item_description
         RestoLicense._clean_license_in_item(item_description)
+        self.update(self._license_infos)
 
     @staticmethod
     def _clean_license_in_item(item_description: dict) -> None:
