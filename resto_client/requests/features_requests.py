@@ -30,6 +30,7 @@ from resto_client.services.service_access import RestoClientUnsupportedRequest
 from resto_client.settings.resto_client_config import resto_client_print
 
 from .base_request import BaseRequest
+from .resto_json_request import RestoJsonRequest
 
 
 if TYPE_CHECKING:
@@ -70,11 +71,12 @@ class FeatureOnTape(RestoResponseError):
         super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
-class SignLicenseRequest(BaseRequest):
+class SignLicenseRequest(RestoJsonRequest):
     """
      Requests for signing a license
     """
     request_action = 'signing license'
+    resto_response_cls = SignLicenseResponse
 
     def __init__(self, service: 'RestoService', license_id: str) -> None:
         """
@@ -83,23 +85,13 @@ class SignLicenseRequest(BaseRequest):
         :param service: resto service
         :param license_id: the license id which must be signed
         """
-        self._license_id = license_id
         super(SignLicenseRequest, self).__init__(service,
                                                  user=service.auth_service.username_b64,
                                                  license_id=license_id)
 
-    def run(self) -> bool:
+    def run(self) -> SignLicenseResponse:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(bool, super(SignLicenseRequest, self).run())
-
-    def process_request_result(self) -> bool:
-        response = SignLicenseResponse(self, self._request_result.json())
-
-        if not response.is_signed:
-            msg = 'Unable to sign license {}. Reason : {}'
-            raise RestoResponseError(msg.format(self._license_id, response.validation_message))
-
-        return response.as_resto_object()
+        return cast(SignLicenseResponse, super(SignLicenseRequest, self).run())
 
 
 class DownloadRequestBase(BaseRequest):

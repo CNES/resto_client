@@ -36,12 +36,14 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
+from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.settings.resto_client_config import resto_client_print
 
 from .authentication_service import AuthenticationService
 from .base_service import BaseService
 from .resto_collections_manager import RestoCollectionsManager
 from .service_access import RestoServiceAccess
+
 
 if TYPE_CHECKING:
     from .resto_server import RestoServer  # @UnusedImport
@@ -177,14 +179,18 @@ class RestoService(BaseService):
 
         :param license_id: the identifier of the licnese to be signed.
         :returns: True if the license signature was successful
+        :raises RestoResponseError: when the license has not been signed successfully
         """
-        signature = SignLicenseRequest(self, license_id).run()
+        signature_response = SignLicenseRequest(self, license_id).run()
 
-        if signature:
-            with colorama_text():
-                msg = 'license {} signed successfully'.format(license_id)
-                resto_client_print(Fore.BLUE + Style.BRIGHT + msg + Style.RESET_ALL)
-        return signature
+        if not signature_response.is_signed:
+            msg = 'Unable to sign license {}. Reason : {}'
+            raise RestoResponseError(msg.format(license_id, signature_response.validation_message))
+
+        with colorama_text():
+            msg = 'license {} signed successfully'.format(license_id)
+            resto_client_print(Fore.BLUE + Style.BRIGHT + msg + Style.RESET_ALL)
+        return signature_response.is_signed
 
     DOWNLOAD_REQUEST_CLASSES: Dict[str, Type[DownloadRequestBase]]
     DOWNLOAD_REQUEST_CLASSES = {'product': DownloadProductRequest,

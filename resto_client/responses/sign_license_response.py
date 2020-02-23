@@ -36,8 +36,8 @@ class SignLicenseResponse(RestoJsonResponseSimple):
         """
         return self._normalized_response['message']
 
-    def as_resto_object(self) -> bool:
+    def as_resto_object(self) -> 'SignLicenseResponse':
         """
         :returns: the response expressed as a Resto object
         """
-        return self.is_signed
+        return self
