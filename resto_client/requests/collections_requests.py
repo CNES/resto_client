@@ -21,37 +21,34 @@ from resto_client.entities.resto_feature_collection import RestoFeatureCollectio
 from resto_client.responses.collection_description import CollectionDescription
 from resto_client.responses.collections_description import CollectionsDescription
 from resto_client.responses.feature_collection_response import FeatureCollectionResponse
-from resto_client.responses.resto_response_error import RestoResponseError
 
-from .base_request import BaseRequest
+from .resto_json_request import RestoJsonRequest
 
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
-class GetCollectionRequest(BaseRequest):
+class GetCollectionRequest(RestoJsonRequest):
     """
      Request accessing a single collection
     """
 
     request_action = 'getting collection'
+    resto_response_cls = CollectionDescription
 
     def run(self) -> RestoCollection:
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoCollection, super(GetCollectionRequest, self).run())
 
-    def process_request_result(self) -> RestoCollection:
-        collection_response = CollectionDescription(self, self._request_result.json())
-        return collection_response.as_resto_object()
 
-
-class SearchCollectionRequest(BaseRequest):
+class SearchCollectionRequest(RestoJsonRequest):
     """
      Request searching a single collection
     """
 
     request_action = 'searching'
+    resto_response_cls = FeatureCollectionResponse
 
     def __init__(self, service: 'RestoService',
                  collection: str, criteria: Optional[RestoCriteria] = None) -> None:
@@ -76,28 +73,18 @@ class SearchCollectionRequest(BaseRequest):
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoFeatureCollection, super(SearchCollectionRequest, self).run())
 
-    def process_request_result(self) -> RestoFeatureCollection:
-        feature_collection_response = FeatureCollectionResponse(self, self._request_result.json())
-        return feature_collection_response.as_resto_object()
 
-
-class GetCollectionsRequest(BaseRequest):
+class GetCollectionsRequest(RestoJsonRequest):
     """
      Request retrieving all the service collections
     """
 
     request_action = 'listing collections'
 
+    # TODO: parameterize duration into request description.
+    caching_max_seconds = 10
+    resto_response_cls = CollectionsDescription
+
     def run(self) -> RestoCollections:
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoCollections, super(GetCollectionsRequest, self).run())
-
-    def process_request_result(self) -> RestoCollections:
-        try:
-            collections_descr = CollectionsDescription(self, self._request_result.json())
-        except RestoResponseError:
-            msg = 'Get collections response from {} resto server cannot be understood.'
-            # TOOD: change exception type and move into CollectionsDescription
-            raise ValueError(msg.format(self.get_server_name()))
-
-        return collections_descr.as_resto_object()

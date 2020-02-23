@@ -15,28 +15,19 @@
 from typing import cast  # @NoMove
 
 from resto_client.entities.resto_collections import RestoCollections
-from resto_client.responses.collections_description import (CollectionsDescription,
-                                                            RestoResponseError)
+from resto_client.responses.collections_description import CollectionsDescription
 
-from .base_request import BaseRequest
+from .resto_json_request import RestoJsonRequest
 
 
-class DescribeRequest(BaseRequest):
+class DescribeRequest(RestoJsonRequest):
     """
      Request to retrieve the service description
     """
     request_action = 'getting service description'
+    caching_max_seconds = 10
+    resto_response_cls = CollectionsDescription
 
     def run(self) -> RestoCollections:
         # overidding BaseRequest method, in order to specify the right type returned by this request
         return cast(RestoCollections, super(DescribeRequest, self).run())
-
-    def process_request_result(self) -> RestoCollections:
-        try:
-            collections_descr = CollectionsDescription(self, self._request_result.json())
-        except RestoResponseError:
-            msg = 'Collections description response from {} resto server cannot be understood.'
-            # TOOD: change exception type and move into CollectionsDescription
-            raise ValueError(msg.format(self.get_server_name()))
-
-        return collections_descr.as_resto_object()
