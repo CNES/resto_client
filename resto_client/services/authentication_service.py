@@ -14,24 +14,20 @@
 """
 from typing import Optional, TYPE_CHECKING  # @NoMove
 
-import requests
-from requests.auth import HTTPBasicAuth
+from resto_client.base_exceptions import RestoClientDesignError
 
-from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
-                                                           RevokeTokenRequest)
-from resto_client.requests.base_request import AccesDeniedError
-
-from .authentication_credentials import AuthenticationCredentials, AuthorizationDataType
-from .base_service import BaseService
+from .authentication_account import AuthenticationAccount
+from .authentication_token_service import AuthenticationTokenService
 from .service_access import AuthenticationServiceAccess
+
 
 if TYPE_CHECKING:
     from .resto_server import RestoServer  # @UnusedImport
 
 
-class AuthenticationService(BaseService):
+class AuthenticationService(AuthenticationTokenService, AuthenticationAccount):
     """
-        An authentication Service able to provide tokens, given credentials.
+    An authentication Service able to provide tokens, given credentials.
     """
 
     def __init__(self, auth_access: AuthenticationServiceAccess,
@@ -42,107 +38,57 @@ class AuthenticationService(BaseService):
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """
-        super(AuthenticationService, self).__init__(auth_access, self, parent_server)
-        self._credentials = AuthenticationCredentials(authentication_service=self)
-
-    @property
-    def username(self) -> Optional[str]:
-        """
-        :returns: the username to use with this authentication service
-        """
-        return self._credentials.username
-
-    @property
-    def token(self) -> Optional[str]:
-        """
-        :return: the token value currently active on this AuthenticationService, or None.
-        """
-        return self._credentials.token
-
-    def reset_credentials(self) -> None:
-        """
-        Reset the credentials used by this authentication service.
-        """
-        self._credentials.reset()
+        AuthenticationTokenService.__init__(self, auth_access, parent_server)
+        AuthenticationAccount.__init__(self, self.parent_server.server_name)
 
     def set_credentials(self,
                         username: Optional[str]=None,
                         password: Optional[str]=None,
                         token_value: Optional[str]=None) -> None:
         """
-        Set the credentials to be used this authentication service.
+        Set the credentials to be used by this authentication service.
+
+        If username is not None, it is set to the provided value if it is different from the
+        already stored one and the password is stored whatever its value.
+        If username is None and password is not, then only the password is updated with the
+        provided value. Otherwise username and password are both reset.
 
         :param username: name of the account on the server
         :param password: account password
         :param token_value: a token associated to these credentials
+        :raises RestoClientDesignError: when an unconsistent set of arguments is provided
         """
-        self._credentials.set(username=username, password=password, token_value=token_value)
+        if username is None and password is None and token_value is None:
+            # don't change anything
+            return
 
-    @property
-    def http_basic_auth(self) -> HTTPBasicAuth:
-        """
-        :returns: the basic HTTP authorization for the service
-        """
-        return self._credentials.http_basic_auth
+        if password is not None and token_value is not None:
+            msg = 'Cannot define or change simultaneously password and token'
+            raise RestoClientDesignError(msg)
 
-    @property
-    def username_b64(self) -> str:
-        """
-        :returns: the base64 username associated to this service
-        """
-        return self._credentials.username_b64
+        if username is None and self._username is None:
+            msg = 'Cannot change password and/or token when username is undefined.'
+            raise RestoClientDesignError(msg)
 
-    @property
-    def authorization_data(self) -> AuthorizationDataType:
-        """
-        :returns: the authorization data for the service
-        """
-        return self._credentials.authorization_data
+        # Record the new account definition and reset current token if account was changed
+        account_changed = self._set_account(username=username, password=password)
+        if account_changed:
+            self._reset_token()
 
-    def get_authorization_header(self, authentication_required: bool) -> dict:
-        """
-        Get the Authorization header if possible
+        # We have an account and want to set its token.
+        if token_value is not None:
+            self.token_value = token_value
 
-        :param authentication_required: If True ensure to retrieve an Authorization header,
-                                        otherwise provide it only if a valid token can be
-                                        retrieved silently.
-        :returns: the authorization header
+    def reset_credentials(self) -> None:
         """
-        return self._credentials.get_authorization_header(authentication_required)
-
-# ++++++++ From here we have the requests supported by the service ++++++++++++
-
-    def get_token(self) -> str:
+        Reset the credentials unconditionally.
         """
-        :returns: a new token to use
-        :raises AccesDeniedError: when credentials are not valid for the service.
-        """
-        try:
-            get_token_response = GetTokenRequest(self).run()
-            new_token = get_token_response.token_value
-        except AccesDeniedError as excp:
-            self._credentials.reset()
-            msg = 'Access Denied : (username, password) does not fit the server : {}'
-            msg += '\nFollowing denied access, credentials were reset.'
-            raise AccesDeniedError(msg.format(self.get_base_url())) from excp
-        return new_token
-
-    def check_token(self, token: str) -> bool:
-        """
-        :returns: True if the token is still valid
-        """
-        check_token_response = CheckTokenRequest(self, token).run()
-        return check_token_response.is_valid
-
-    def revoke_token(self) -> Optional[requests.Response]:
-        """
-        Revoke the currently defined token.
-
-        :returns: unknown result at the moment (not working)
-        """
-        if self._credentials.token is not None:
-            return RevokeTokenRequest(self).run()
-        return None
+        self._reset_account()
+        self._reset_token()
 
     def __str__(self) -> str:
-        return super(AuthenticationService, self).__str__() + '\n' + str(self._credentials)
+        credentials_str = 'username: {} / password: {} / token: {}'.format(self.username,
+                                                                           self.password,
+                                                                           self.current_token)
+
+        return super(AuthenticationService, self).__str__() + credentials_str

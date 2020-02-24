@@ -55,12 +55,7 @@ class BaseService(ABC):
         self._auth_service = auth_service
 
     def __str__(self) -> str:
-        result = str(self.service_access)
-        if self.auth_service == self:
-            result += '    associated authentication service : self'
-        else:
-            result += '    associated authentication service : {}'.format(self.auth_service)
-        return result
+        return str(self.service_access)
 
     def get_base_url(self) -> str:
         """

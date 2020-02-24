@@ -112,13 +112,6 @@ class RestoServer():
         """
         return self._authentication_service.username
 
-    @property
-    def token(self) -> Optional[str]:
-        """
-        :return: the token value currently active on this server, or None.
-        """
-        return self._authentication_service.token
-
 # +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
 
     def search_by_criteria(self, criteria: Dict[str, Any],
@@ -216,5 +209,7 @@ class RestoServer():
         return self._resto_service.get_collection(collection=collection)
 
     def __str__(self) -> str:
-        msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'
-        return msg_fmt.format(self._server_name, self.current_collection, self.username, self.token)
+        msg_fmt = 'server_name: {} \n{}{}'
+        return msg_fmt.format(self._server_name,
+                              str(self._resto_service),
+                              str(self._authentication_service))

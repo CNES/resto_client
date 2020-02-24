@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import List  # @UnusedImport
+
 from .resto_json_response import RestoJsonResponseSimple
 from .resto_response_error import RestoResponseError
 
@@ -23,6 +25,7 @@ class DownloadErrorResponse(RestoJsonResponseSimple):
 
     needed_fields = ['ErrorMessage', 'ErrorCode',
                      'feature', 'collection', 'license_id', 'license', 'user_id']
+    optional_fields: List[str] = []
 
     def identify_response(self) -> None:
         """

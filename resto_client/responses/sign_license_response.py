@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import List  # @UnusedImport
+
 from .resto_json_response import RestoJsonResponseSimple
 
 
@@ -21,6 +23,7 @@ class SignLicenseResponse(RestoJsonResponseSimple):
     """
 
     needed_fields = ['status', 'message']
+    optional_fields: List[str] = []
 
     @property
     def is_signed(self) -> bool:
