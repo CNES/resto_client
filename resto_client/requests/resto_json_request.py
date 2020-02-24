@@ -82,7 +82,7 @@ class RestoJsonRequest(BaseRequest):
         if self.get_caching_duration() > 0:  # if caching is enabled for this request
             json_response = self._request_result.json()
             with open(self.cache_file_name, 'w') as json_file:
-                json.dump(json_response, json_file)
+                json.dump(json_response, json_file, indent=4)
 
     def run(self) -> RestoRequestResult:
         cached_response = self.get_cached_response()
