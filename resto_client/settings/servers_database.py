@@ -13,7 +13,6 @@
    limitations under the License.
 """
 from pathlib import Path
-from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.services.service_access import AuthenticationServiceAccess, RestoServiceAccess
