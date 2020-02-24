@@ -28,8 +28,8 @@ from .base_request import BaseRequest, RestoRequestResult
 class RestoJsonRequest(BaseRequest):
     """
      Base class for requests able to provide a RestoJsonResponse with associated as_resto_object()
-     method. Response caching can be enable client by client class, by specifying a positive number
-     of caching seconds.
+     method. Response caching can be enabled client class by client class, by specifying a positive
+     number of caching seconds.
     """
     @property  # type:ignore
     @abstractmethod

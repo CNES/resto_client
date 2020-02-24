@@ -81,7 +81,7 @@ class GetCollectionsRequest(RestoJsonRequest):
 
     request_action = 'listing collections'
 
-    # TODO: parameterize duration into request description.
+    # TODO: parameterize duration into request description and decide its value
     caching_max_seconds = 10
     resto_response_cls = CollectionsDescription
 
