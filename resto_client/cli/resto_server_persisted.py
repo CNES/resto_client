@@ -62,13 +62,13 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         :param token: an existing token associated to this account (will be checked prior its use)
         :param debug_server: When True debugging information on server and requests is printed out.
         """
+        self.server_on = True
         super(RestoServerPersisted, self).__init__(server_name,
                                                    current_collection=current_collection,
                                                    username=username,
                                                    password=password,
                                                    token=token,
                                                    debug_server=debug_server)
-        self.server_on = True
 
     def switch_off(self) -> None:
         """
@@ -108,7 +108,7 @@ class RestoServerPersisted(RestoServer, PersistedAttributes):
         """
         :return: the token value currently active on this server, or None.
         """
-        return self._authentication_service.token if self.server_on else None
+        return self._authentication_service.current_token if self.server_on else None
 
     @classmethod
     def build_from_defaults(cls,

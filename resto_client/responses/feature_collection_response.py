@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import List  # @UnusedImport
+
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from .resto_json_response import RestoJsonResponseSimple
 from .resto_response_error import RestoResponseError
@@ -23,6 +25,7 @@ class FeatureCollectionResponse(RestoJsonResponseSimple):
     """
 
     needed_fields = ['type', 'features', 'properties']
+    optional_fields: List[str] = []
 
     def identify_response(self) -> None:
         """

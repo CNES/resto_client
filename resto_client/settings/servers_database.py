@@ -50,6 +50,8 @@ WELL_KNOWN_SERVERS = {'kalideos': {RESTO_URL_KEY: 'https://www.kalideos.fr/resto
                                 AUTH_URL_KEY: 'https://theia.cnes.fr/atdistrib/services'
                                 '/authenticate/',
                                 AUTH_PROTOCOL_KEY: 'sso_theia'},
+                      # FIXME:
+                      # https://auth.creodias.eu/auth/realms/DIAS/protocol/openid-connect/token
                       'creodias': {RESTO_URL_KEY: 'https://finder.creodias.eu/resto/',
                                    RESTO_PROTOCOL_KEY: 'theia_version',
                                    AUTH_URL_KEY: 'https://finder.creodias.eu/resto/',

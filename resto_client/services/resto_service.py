@@ -236,3 +236,7 @@ class RestoService(BaseService):
             # Retry file download after product staging
             downloaded_file_path = self.download_feature_file(redo_feature, file_type, download_dir)
         return downloaded_file_path
+
+    def __str__(self) -> str:
+        msg_fmt = '{}current collection: {}\n'
+        return msg_fmt.format(super(RestoService, self).__str__(), str(self.current_collection))

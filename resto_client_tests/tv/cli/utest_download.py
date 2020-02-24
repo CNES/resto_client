@@ -14,7 +14,7 @@
 """
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.responses.resto_response_error import RestoResponseError
+from resto_client.requests.base_request import AccesDeniedError
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
@@ -107,15 +107,15 @@ class UTestCliDownload(TestRestoClientCli):
                     resto_client_run(arguments=command)
                 self.assertEqual('No result found for id 136371490492', str(context.exception))
 
-    def test_d_down_prod_with_license(self) -> None:
+    def test_d_down_prod_wrong_account(self) -> None:
         """
-        Unit test of download product when wonrg username/password given
+        Unit test of download product when wrong username/password given
         """
         command = ['download', 'product', '715640488937144',
                    '--username=wrong_username', '--password=wrong_password',
                    '--collection=KALCNES', '--server=kalideos']
-        with self.assertRaises(RestoResponseError) as excp:
+        with self.assertRaises(AccesDeniedError) as excp:
             resto_client_run(arguments=command)
-        exp_out = ('Response to GetTokenRequest does not contain a token field.' +
-                   " Available fields: dict_keys(['success', 'message'])")
+        exp_out = ('Access Denied : (username, password) does not fit the server: kalideos'
+                   '\nFollowing denied access, credentials were reset.')
         self. assertEqual(exp_out, str(excp.exception))
