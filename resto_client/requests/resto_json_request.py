@@ -38,8 +38,11 @@ class RestoJsonRequest(BaseRequest):
         :returns: the action performed by this request.
         """
 
-    # TODO: parameterize duration into request description.
-    caching_max_seconds = 0
+    def get_caching_duration(self) -> int:
+        """
+        :returns: The caching duration to be used for caching this request's result
+        """
+        return self.parent_service.service_access.get_caching_duration(self)
 
     @property
     def cache_file_name(self) -> Path:
@@ -57,11 +60,11 @@ class RestoJsonRequest(BaseRequest):
         """
         cached_response = None
         # if caching is enabled for this request and cached file exists
-        if self.caching_max_seconds > 0 and self.cache_file_name.exists():
+        if self.get_caching_duration() > 0 and self.cache_file_name.exists():
             # Using file modification time to avoid file "tunneling" management on some OS.
             cache_file_modif_time = datetime.fromtimestamp(self.cache_file_name.stat().st_mtime)
             cache_file_age = datetime.now() - cache_file_modif_time
-            if cache_file_age < timedelta(seconds=self.caching_max_seconds):
+            if cache_file_age < timedelta(seconds=self.get_caching_duration()):
                 if self.debug:
                     print(f'Using cached response for {self.__class__.__name__}')
                 with open(self.cache_file_name) as json_file:
@@ -76,7 +79,7 @@ class RestoJsonRequest(BaseRequest):
         """
         When cache is enabled, records the current request response json content in the cache file.
         """
-        if self.caching_max_seconds > 0:  # if caching is enabled for this request
+        if self.get_caching_duration() > 0:  # if caching is enabled for this request
             json_response = self._request_result.json()
             with open(self.cache_file_name, 'w') as json_file:
                 json.dump(json_response, json_file)

@@ -25,9 +25,6 @@ class DescribeRequest(RestoJsonRequest):
      Request to retrieve the service description
     """
     request_action = 'getting service description'
-
-    # TODO: parameterize duration into request description
-    caching_max_seconds = 1800
     resto_response_cls = CollectionsDescription
 
     def run(self) -> RestoCollections:

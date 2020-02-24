@@ -80,9 +80,6 @@ class GetCollectionsRequest(RestoJsonRequest):
     """
 
     request_action = 'listing collections'
-
-    # TODO: parameterize duration into request description
-    caching_max_seconds = 1800
     resto_response_cls = CollectionsDescription
 
     def run(self) -> RestoCollections:

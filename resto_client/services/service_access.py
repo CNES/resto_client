@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 SA = TypeVar('SA', bound='ServiceAccess')
 
-RoutesPatternsType = Dict[str, Dict[str, Dict[str, str]]]
+RoutesPatternsType = Dict[str, Dict[str, Dict[str, Union[str, int]]]]
 """
 Routes patterns for a service are described in a dictionary whose key is the service protocol
 and the value is another dictionary. This second dictionary has the request class name as its key,
@@ -89,7 +89,7 @@ class ServiceAccess(ABC):
         :param request: the request instance for which route must be found.
         :returns: the route pattern
         """
-        return self._get_route_description_item(request, 'rel_url')
+        return str(self._get_route_description_item(request, 'rel_url'))
 
     def get_method(self, request: 'BaseRequest') -> str:
         """
@@ -98,7 +98,7 @@ class ServiceAccess(ABC):
         :param request: the request instance for which method must be found.
         :returns: the method
         """
-        return self._get_route_description_item(request, 'method')
+        return str(self._get_route_description_item(request, 'method'))
 
     def get_accept(self, request: 'BaseRequest') -> str:
         """
@@ -107,7 +107,7 @@ class ServiceAccess(ABC):
         :param request: the request instance for which response format must be found.
         :returns: the response format
         """
-        return self._get_route_description_item(request, 'accept')
+        return str(self._get_route_description_item(request, 'accept'))
 
     def get_authentication(self, request: 'BaseRequest') -> str:
         """
@@ -117,7 +117,7 @@ class ServiceAccess(ABC):
         :param request: the request instance for which authentication type must be found.
         :returns: the authentication type
         """
-        return self._get_route_description_item(request, 'authentication')
+        return str(self._get_route_description_item(request, 'authentication'))
 
     def get_streamed(self, request: 'BaseRequest') -> bool:
         """
@@ -129,7 +129,21 @@ class ServiceAccess(ABC):
         stream_flag = self._get_route_description_item(request, 'streamed')
         return stream_flag == 'YES'
 
-    def _get_route_description_item(self, request: 'BaseRequest', item: str) -> str:
+    def get_caching_duration(self, request: 'BaseRequest') -> int:
+        """
+        Returns the caching duration for a request.
+
+        :param request: the request instance for which caching duration must be found.
+        :returns: the caching duration in seconds given in the request description or 0 if
+                  this field is undefined.
+        """
+        try:
+            caching_duration = int(self._get_route_description_item(request, 'caching_duration'))
+        except RestoClientUnsupportedRequest:
+            caching_duration = 0
+        return caching_duration
+
+    def _get_route_description_item(self, request: 'BaseRequest', item: str) -> Union[str, int]:
         """
         Returns an item of the route description for a request
 
@@ -147,7 +161,7 @@ class ServiceAccess(ABC):
                 msg.format(item, type(request).__name__, request.get_server_name()))
         return item_value
 
-    def _get_route_description(self, request: 'BaseRequest') -> Dict[str, str]:
+    def _get_route_description(self, request: 'BaseRequest') -> Dict[str, Union[str, int]]:
         """
         Returns the route description for a request
 
@@ -287,13 +301,15 @@ class RestoServiceAccess(ServiceAccess):
                     'method': 'get',
                     'accept': 'application/json',
                     'authentication': 'NEVER',
-                    'streamed': 'NO'},
+                    'streamed': 'NO',
+                    'caching_duration': 1800},
                 'GetCollectionsRequest': {
                     'rel_url': 'collections',
                     'method': 'get',
                     'accept': 'application/json',
                     'authentication': 'NEVER',
-                    'streamed': 'NO'},
+                    'streamed': 'NO',
+                    'caching_duration': 1800},
                 'GetCollectionRequest': {
                     'rel_url': 'collections/{collection}',
                     'method': 'get',
