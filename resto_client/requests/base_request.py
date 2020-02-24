@@ -30,7 +30,7 @@ from resto_client.services.base_service import BaseService
 from .authenticator import Authenticator
 
 
-RestoRequestResult = Union[RestoResponse, Path, str,
+RestoRequestResult = Union[RestoResponse, Path,
                            RestoCollection, RestoCollections, requests.Response]
 
 

@@ -118,7 +118,8 @@ class AuthenticationService(BaseService):
         :raises AccesDeniedError: when credentials are not valid for the service.
         """
         try:
-            new_token = GetTokenRequest(self).run()
+            get_token_response = GetTokenRequest(self).run()
+            new_token = get_token_response.token_value
         except AccesDeniedError as excp:
             self._credentials.reset()
             msg = 'Access Denied : (username, password) does not fit the server : {}'

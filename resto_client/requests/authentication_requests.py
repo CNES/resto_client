@@ -21,6 +21,7 @@ from resto_client.responses.authentication_responses import GetTokenResponse, Ch
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest, RestoClientEmulatedResponse, AccesDeniedError
+from .resto_json_request import RestoJsonRequest
 
 if TYPE_CHECKING:
     from resto_client.services.authentication_service import AuthenticationService  # @UnusedImport
@@ -47,11 +48,11 @@ class GetTokenRequest(BaseRequest):
     """
     request_action = 'getting token'
 
-    def run(self) -> str:
+    def run(self) -> GetTokenResponse:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(str, super(GetTokenRequest, self).run())
+        return cast(GetTokenResponse, super(GetTokenRequest, self).run())
 
-    def process_request_result(self) -> str:
+    def process_request_result(self) -> GetTokenResponse:
         try:
             get_token_response_content = self._request_result.json()
         except JSONDecodeError:
@@ -64,11 +65,12 @@ class GetTokenRequest(BaseRequest):
         return GetTokenResponse(self, get_token_response_content).as_resto_object()
 
 
-class CheckTokenRequest(BaseRequest):
+class CheckTokenRequest(RestoJsonRequest):
     """
      Request to check a service token.
     """
     request_action = 'checking token'
+    resto_response_cls = CheckTokenResponse
 
     def __init__(self, service: 'AuthenticationService', token: str) -> None:
         """
@@ -94,6 +96,3 @@ class CheckTokenRequest(BaseRequest):
             emulated_json = {'status': 'error', 'message': 'user not connected'}
             emulated_response.result = CheckTokenResponse(self, emulated_json).as_resto_object()
             raise emulated_response
-
-    def process_request_result(self) -> CheckTokenResponse:
-        return CheckTokenResponse(self, self._request_result.json()).as_resto_object()

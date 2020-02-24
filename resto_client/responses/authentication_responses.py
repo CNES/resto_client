@@ -21,11 +21,18 @@ class GetTokenResponse(RestoJsonResponseSimple):
     """
     needed_fields = ['token']
 
-    def as_resto_object(self) -> str:
+    @property
+    def token_value(self) -> str:
+        """
+        :returns: the token included in the response
+        """
+        return self._normalized_response['token']
+
+    def as_resto_object(self) -> 'GetTokenResponse':
         """
         :returns: the response expressed as a Resto object
         """
-        return self._normalized_response['token']
+        return self
 
 
 class CheckTokenResponse(RestoJsonResponseSimple):
