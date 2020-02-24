@@ -80,9 +80,9 @@ class CheckTokenRequest(BaseRequest):
             raise TypeError('token argument must be of type <str>')
         super(CheckTokenRequest, self).__init__(service, token=token)
 
-    def run(self) -> bool:
+    def run(self) -> CheckTokenResponse:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(bool, super(CheckTokenRequest, self).run())
+        return cast(CheckTokenResponse, super(CheckTokenRequest, self).run())
 
     def finalize_request(self) -> None:
         try:
@@ -95,5 +95,5 @@ class CheckTokenRequest(BaseRequest):
             emulated_response.result = CheckTokenResponse(self, emulated_json).as_resto_object()
             raise emulated_response
 
-    def process_request_result(self) -> bool:
+    def process_request_result(self) -> CheckTokenResponse:
         return CheckTokenResponse(self, self._request_result.json()).as_resto_object()

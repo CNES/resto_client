@@ -31,7 +31,7 @@ from .authenticator import Authenticator
 
 
 RestoRequestResult = Union[RestoResponse, Path, str,
-                           bool, RestoCollection, RestoCollections, requests.Response]
+                           RestoCollection, RestoCollections, requests.Response]
 
 
 # TODO: move in a module for requests specific exceptions

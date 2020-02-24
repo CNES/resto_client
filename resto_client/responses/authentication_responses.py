@@ -49,8 +49,8 @@ class CheckTokenResponse(RestoJsonResponseSimple):
         """
         return self._normalized_response['message']
 
-    def as_resto_object(self) -> bool:
+    def as_resto_object(self) -> 'CheckTokenResponse':
         """
-        :returns: the response expressed as a Resto object
+        :returns: the response expressed as a Resto response
         """
-        return self.is_valid
+        return self

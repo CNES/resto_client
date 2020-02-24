@@ -130,7 +130,8 @@ class AuthenticationService(BaseService):
         """
         :returns: True if the token is still valid
         """
-        return CheckTokenRequest(self, token).run()
+        check_token_response = CheckTokenRequest(self, token).run()
+        return check_token_response.is_valid
 
     def revoke_token(self) -> Optional[requests.Response]:
         """
