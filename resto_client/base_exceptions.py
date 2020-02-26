@@ -18,12 +18,14 @@ class RestoClientError(Exception):
     """
     Base exception for all resto_client specific exceptions.
     """
+    print_to_terminal = False
 
 
 class RestoClientUserError(RestoClientError):
     """
     Base exception for all resto_client exceptions which correspond to a user mistake.
     """
+    print_to_terminal = True
 
 
 class RestoClientDesignError(RestoClientError):
