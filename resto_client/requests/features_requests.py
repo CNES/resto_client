@@ -135,9 +135,9 @@ class DownloadRequestBase(BaseRequest):
                 self._url_to_download += "/?issuerId=theia"
         self._download_directory = download_directory
 
-    def run(self) -> Path:
+    def run(self) -> RestoFeature:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(Path, super(DownloadRequestBase, self).run())
+        return cast(RestoFeature, super(DownloadRequestBase, self).run())
 
     def get_file_infos(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
@@ -242,8 +242,10 @@ class DownloadRequestBase(BaseRequest):
             msg = 'Unexpected content-type {} when downloading {}.'
             raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
 
-        # Download finished. Return the file path where download has been made.
-        return full_file_path
+        # Download finished. Write the file path where download has been made and
+        # return updated feature
+        self._feature.downloaded_file_path[self.file_type] = full_file_path
+        return self._feature
 
     def download_file(self, file_path: Path, file_size: Optional[int]=None) -> None:
         """

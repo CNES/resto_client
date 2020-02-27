@@ -13,7 +13,7 @@
    limitations under the License.
 """
 import json
-from typing import Optional  # @NoMove
+from pathlib import Path
 
 import geojson
 from prettytable import PrettyTable
@@ -21,6 +21,8 @@ from prettytable import PrettyTable
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 
 from .resto_license import RestoFeatureLicense
+from typing import Optional, Dict  # @NoMove
+
 
 KNOWN_FILES_TYPES = ['product', 'quicklook', 'thumbnail', 'annexes']
 
@@ -43,6 +45,8 @@ class RestoFeature(geojson.Feature):
                                            geometry=feature_descr['geometry'],
                                            properties=feature_descr['properties'])
         self.license = RestoFeatureLicense(feature_descr['properties'])
+        self.downloaded_file_path: Dict[str, Path]
+        self.downloaded_file_path = {}
 
     def get_download_url(self, file_type: str) -> str:
         """

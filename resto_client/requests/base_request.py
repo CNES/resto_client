@@ -22,7 +22,6 @@ import requests
 from requests.exceptions import HTTPError, SSLError
 
 from resto_client.base_exceptions import (RestoClientEvent, RestoNetworkError,
-                                          AccessDeniedError,
                                           NetworkAccessDeniedError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
