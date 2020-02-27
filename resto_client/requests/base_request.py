@@ -172,11 +172,11 @@ class BaseRequest(Authenticator):
         """
         try:
             self.finalize_request()
+            # FIXME: filter https protocol exceptions and send others to process_request_result
+            self.run_request()
+            return self.process_request_result()
         except RestoClientEmulatedResponse as excp:
             return excp.result
-        # FIXME: filter https protocol exceptions and send others to process_request_result
-        self.run_request()
-        return self.process_request_result()
 
     def finalize_request(self) -> None:
         """
