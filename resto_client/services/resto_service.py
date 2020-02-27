@@ -19,7 +19,8 @@ from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
-from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.base_exceptions import (RestoClientDesignError,
+                                          RestoResponseError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
@@ -36,7 +37,6 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.settings.resto_client_config import resto_client_print
 
 from .authentication_service import AuthenticationService

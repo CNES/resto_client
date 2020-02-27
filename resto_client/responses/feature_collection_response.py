@@ -14,9 +14,10 @@
 """
 from typing import List  # @UnusedImport
 
+from resto_client.base_exceptions import RestoResponseError
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
+
 from .resto_json_response import RestoJsonResponseSimple
-from .resto_response_error import RestoResponseError
 
 
 class FeatureCollectionResponse(RestoJsonResponseSimple):

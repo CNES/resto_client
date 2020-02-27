@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 from typing import Type, Optional
 
-from resto_client.responses.collections_description import RestoResponseError
+from resto_client.base_exceptions import RestoResponseError
 from resto_client.responses.resto_json_response import RestoJsonResponse
 from resto_client.settings.resto_client_config import RESTO_CLIENT_CONFIG_DIR
 

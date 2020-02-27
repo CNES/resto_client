@@ -14,8 +14,9 @@
 """
 from typing import List  # @UnusedImport
 
+from resto_client.base_exceptions import RestoResponseError
+
 from .resto_json_response import RestoJsonResponseSimple
-from .resto_response_error import RestoResponseError
 
 
 class DownloadErrorResponse(RestoJsonResponseSimple):

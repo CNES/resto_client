@@ -13,14 +13,13 @@
    limitations under the License.
 """
 import copy
-
 from typing import Optional
 
+from resto_client.base_exceptions import RestoResponseError
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 
 from .resto_json_response import RestoJsonResponse
-from .resto_response_error import RestoResponseError
 
 
 OSDESCRIPTION_KEYS = ['ShortName', 'LongName', 'Description'

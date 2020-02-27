@@ -16,8 +16,8 @@ from typing import cast, Optional  # @NoMove
 
 from requests import Response
 
+from resto_client.base_exceptions import RestoResponseError
 from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest, RestoClientEmulatedResponse

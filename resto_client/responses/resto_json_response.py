@@ -17,8 +17,10 @@ import copy
 from typing import Dict, List, Any, Optional, TYPE_CHECKING  # @UnusedImport
 import warnings
 
+from resto_client.base_exceptions import RestoResponseError
+
 from .resto_response import RestoResponse
-from .resto_response_error import RestoResponseError
+
 
 if TYPE_CHECKING:
     from resto_client.requests.base_request import BaseRequest  # @UnusedImport
