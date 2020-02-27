@@ -64,7 +64,7 @@ def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
     Command line interface to access collections from resto.
 
     :param arguments: list of arguments
-    :raises RestoClientUserError: when in debug mode to check the whole exception.
+    :raises RestoClientError: when in debug mode to check the whole exception.
     """
     arg_parser = build_parser()
 
