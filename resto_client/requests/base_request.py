@@ -21,7 +21,8 @@ from colorama import Fore, Style, colorama_text
 import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import RestoClientUserError, RestoClientEvent
+from resto_client.base_exceptions import (RestoClientUserError, RestoClientEvent,
+                                          RestoNetworkError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
@@ -253,5 +254,5 @@ class BaseRequest(Authenticator):
                     raise AccesDeniedError(msg) from excp
             else:
                 msg = 'Error when {} for {}.'.format(self.request_action, self.get_url())
-            raise Exception(msg) from excp
+            raise RestoNetworkError(msg) from excp
         self._request_result = result

@@ -40,7 +40,7 @@ class RestoClientServerError(RestoClientError):
     """
 
 
-class RestoClientNetworkError(RestoClientServerError):
+class RestoNetworkError(RestoClientServerError):
     """
     Base exception for all resto_client exceptions which correspond to network.
     """
