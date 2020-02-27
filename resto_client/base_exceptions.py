@@ -32,3 +32,21 @@ class RestoClientDesignError(RestoClientError):
     """
     Base exception for all resto_client exceptions which correspond to a design or coding error.
     """
+
+
+class RestoClientServerError(RestoClientError):
+    """
+    Base exception for all resto_client exceptions which correspond to a server error.
+    """
+
+
+class RestoClientNetworkError(RestoClientServerError):
+    """
+    Base exception for all resto_client exceptions which correspond to network.
+    """
+
+
+class RestoResponseError(RestoClientServerError):
+    """
+    Exception raised when a Resto response cannot be understood
+    """
