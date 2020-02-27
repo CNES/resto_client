@@ -16,15 +16,15 @@ from abc import abstractmethod
 from pathlib import Path
 import tempfile
 from warnings import warn
-from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 
+from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 from tqdm import tqdm
 
-from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
+from resto_client.base_exceptions import (RestoClientDesignError, RestoClientEvent,
+                                          RestoResponseError)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 from resto_client.settings.resto_client_config import resto_client_print
@@ -37,13 +37,13 @@ if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
-class RestrictedProductError(RestoClientUserError):
+class RestrictedProductError(RestoResponseError):
     """
     Exception used when a product exist but cannot be downloaded
     """
 
 
-class LicenseSignatureRequested(RestoResponseError):
+class LicenseSignatureRequested(RestoClientEvent):
     """
     Exception raised when a license signature is requested before proceeding with the download.
     """
@@ -59,7 +59,7 @@ class LicenseSignatureRequested(RestoResponseError):
         self.error_response = error_response
 
 
-class FeatureOnTape(RestoResponseError):
+class FeatureOnTape(RestoClientEvent):
     """
     Exception raised when a product requested is on tape
     """

@@ -50,3 +50,9 @@ class RestoResponseError(RestoClientServerError):
     """
     Exception raised when a Resto response cannot be understood
     """
+
+
+class RestoClientEvent(RestoClientError):
+    """
+    Exception raised when a Resto response cannot be understood
+    """

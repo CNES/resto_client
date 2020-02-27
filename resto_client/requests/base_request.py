@@ -21,7 +21,7 @@ from colorama import Fore, Style, colorama_text
 import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
+from resto_client.base_exceptions import RestoClientUserError, RestoClientEvent
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
@@ -40,7 +40,7 @@ class AccesDeniedError(RestoClientUserError):
     """
 
 
-class RestoClientEmulatedResponse(RestoClientDesignError):
+class RestoClientEmulatedResponse(RestoClientEvent):
     """
     Exception raised when an emulated response is to be processed.
     """
