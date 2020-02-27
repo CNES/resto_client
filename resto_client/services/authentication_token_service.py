@@ -15,10 +15,9 @@
 from abc import abstractmethod
 from typing import cast, Optional, Any, TYPE_CHECKING  # @UnusedImport
 
-from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.base_exceptions import (RestoClientDesignError, AccessDeniedError)
 from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
                                                            RevokeTokenRequest)
-from resto_client.requests.base_request import AccesDeniedError
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_service import BaseService
@@ -79,7 +78,7 @@ class AuthenticationTokenService(BaseService):
     def token_value(self) -> str:
         """
         :returns: the current token value or a renewed value if the current token is invalid.
-        :raises AccesDeniedError: when authentication is refused when retrieving the token.
+        :raises AccessDeniedError: when authentication is refused when retrieving the token.
         :raises RestoClientNoToken: when server responded without providing a token.
         """
         if self._token_value is None:
@@ -130,17 +129,17 @@ class AuthenticationTokenService(BaseService):
         Returns the Authorization headers if possible
 
         :returns: the authorization header
-        :raises AccesDeniedError: if token retrieval could not be made because of an authentication
+        :raises AccessDeniedError: if token retrieval could not be made because of an authentication
                                   error.
         """
         try:
             return {'Authorization': 'Bearer ' + self.token_value}
-        except AccesDeniedError as excp:
+        except AccessDeniedError as excp:
             self.reset_credentials()
             msg = f'Access Denied : (username, password) does not fit the server:'
             msg += f' {self.parent_server.server_name}\nFollowing denied access,'
             msg += f' credentials were reset.'
-            raise AccesDeniedError(msg) from excp
+            raise AccessDeniedError(msg) from excp
 
 
 # ++++++++ From here we have the calls to the requests handling tokens on the service ++++++++++++
@@ -168,7 +167,7 @@ class AuthenticationTokenService(BaseService):
     def _get_token(self) -> str:
         """
         :returns: a new token to use
-        :raises AccesDeniedError: when credentials are not valid for the service.
+        :raises AccessDeniedError: when credentials are not valid for the service.
         """
         get_token_response = GetTokenRequest(self).run()
         return get_token_response.token_value

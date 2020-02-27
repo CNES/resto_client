@@ -21,8 +21,9 @@ from colorama import Fore, Style, colorama_text
 import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import (RestoClientUserError, RestoClientEvent,
-                                          RestoNetworkError)
+from resto_client.base_exceptions import (RestoClientEvent, RestoNetworkError,
+                                          AccessDeniedError,
+                                          NetworkAccessDeniedError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
@@ -33,12 +34,6 @@ from .authenticator import Authenticator
 
 RestoRequestResult = Union[RestoResponse, Path,
                            RestoCollection, RestoCollections, requests.Response]
-
-
-class AccesDeniedError(RestoClientUserError):
-    """
-    Exception corresponding to HTTP Error 403
-    """
 
 
 class RestoClientEmulatedResponse(RestoClientEvent):
@@ -233,8 +228,8 @@ class BaseRequest(Authenticator):
         :param method: method to use for sending the request: requests.get() or requests.post()
         :param stream: If True, only the response header will be retrieved, allowing to drive
                        the retrieval of the full response body within process_request_result()
-        :raises AccesDeniedError: if the request was refused because authentication failed.
-        :raises Exception: for other exceptions
+        :raises NetworkAccessDeniedError: if the request was refused because authentication failed.
+        :raises RestoNetworkError: for other exceptions
         """
         auth_arg, data_arg = self._get_authentication_arguments(self._request_headers)
         result = None
@@ -251,7 +246,7 @@ class BaseRequest(Authenticator):
                 msg = 'Error {} when {} for {}.'.format(self._request_result.status_code,
                                                         self.request_action, self.get_url())
                 if self._request_result.status_code == 403:
-                    raise AccesDeniedError(msg) from excp
+                    raise NetworkAccessDeniedError(msg) from excp
             else:
                 msg = 'Error when {} for {}.'.format(self.request_action, self.get_url())
             raise RestoNetworkError(msg) from excp

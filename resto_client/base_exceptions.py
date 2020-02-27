@@ -46,9 +46,21 @@ class RestoNetworkError(RestoClientServerError):
     """
 
 
+class NetworkAccessDeniedError(RestoNetworkError):
+    """
+    Exception corresponding to HTTP Error 403
+    """
+
+
 class RestoResponseError(RestoClientServerError):
     """
     Exception raised when a Resto response cannot be understood
+    """
+
+
+class AccessDeniedError(RestoResponseError):
+    """
+    Exception corresponding to forbiden access due to credential
     """
 
 

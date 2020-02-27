@@ -15,7 +15,7 @@
 from typing import cast
 import unittest
 
-from resto_client.requests.base_request import AccesDeniedError
+from resto_client.base_exceptions import AccessDeniedError
 from resto_client.services.authentication_service import AuthenticationService
 from resto_client.services.resto_server import RestoServer
 from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
@@ -39,6 +39,6 @@ class VTestAuthenticationService(unittest.TestCase):
                 server.set_credentials(username='resto_client_test_account',
                                        password='wrong_password')
                 expected_fmt = 'Access Denied : (username, password) does not fit the server: {}'
-                with self.assertRaises(AccesDeniedError) as ctxt:
+                with self.assertRaises(AccessDeniedError) as ctxt:
                     auth_service.get_authorization_header()
                 self.assertIn(expected_fmt.format(server_name), str(ctxt.exception))
