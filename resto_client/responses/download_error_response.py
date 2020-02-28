@@ -14,7 +14,7 @@
 """
 from typing import List  # @UnusedImport
 
-from resto_client.base_exceptions import RestoResponseError
+from resto_client.base_exceptions import UnsupportedError
 
 from .resto_json_response import RestoJsonResponseSimple
 
@@ -32,7 +32,7 @@ class DownloadErrorResponse(RestoJsonResponseSimple):
         """
         Verify that the response is a valid json response when download request are submitted.
 
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
+        :raises UnsupportedError: if the dictionary does not contain a valid Resto response.
         """
         # Firstly verify that the needed fields are present and build standard normalized response.
         super(DownloadErrorResponse, self).identify_response()
@@ -40,7 +40,7 @@ class DownloadErrorResponse(RestoJsonResponseSimple):
         # Secondly verify that no code different from those we understand are present.
         if self._original_response['ErrorCode'] not in [3002, 3006]:
             msg = 'Received a DownloadErrorResponse with unsupported error code: {}.'
-            raise RestoResponseError(msg.format(self._original_response['ErrorCode']))
+            raise UnsupportedError(msg.format(self._original_response['ErrorCode']))
 
     @property
     def download_need_license_signature(self) -> bool:

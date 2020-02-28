@@ -20,7 +20,8 @@ from warnings import warn
 from colorama import Fore, Style, colorama_text
 
 from resto_client.base_exceptions import (RestoClientDesignError,
-                                          RestoResponseError)
+                                          RestoResponseError,
+                                          InconsistentResponse)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
@@ -152,8 +153,8 @@ class RestoService(BaseService):
         :param collection: the name of the collection to search
         :returns: the requested feature
         :raises IndexError: when the feature collection does not contain exactly one feature.
-        :raises ValueError: when the retrieved feature has not the right id (case where uuid
-                            incorrectly provided as argument)
+        :raises InconsistentResponse: when the retrieved feature has not the right id
+        (case where uuid incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)
@@ -169,8 +170,8 @@ class RestoService(BaseService):
         feature = feature_collection['features'][0]
         if feature_id not in (feature['properties']['productIdentifier'], feature['id']):
             msg = 'Retrieved feature (id : {} / uuid : {}) inconsistent with requested one ({})'
-            raise ValueError(msg.format(feature['properties']['productIdentifier'],
-                                        feature['id'], feature_id))
+            raise InconsistentResponse(msg.format(feature['properties']['productIdentifier'],
+                                                  feature['id'], feature_id))
         return feature
 
     def sign_license(self, license_id: str) -> bool:

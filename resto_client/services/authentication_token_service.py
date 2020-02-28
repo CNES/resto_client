@@ -93,11 +93,11 @@ class AuthenticationTokenService(BaseService):
         Set the token value.
 
         :param token_value: Store the token assuming that it is  valid.
-        :raises TypeError: when trying to set the token to None
+        :raises RestoClientDesignError: when trying to set the token to None
         """
         if token_value is None:
             msg = 'use AuthenticationTokenService._reset_token() if you want to reset a token'
-            raise TypeError(msg)
+            raise RestoClientDesignError(msg)
         self._token_value = token_value
 
     # FIXME: _ensure_token never called, and thus no call to _check_token

@@ -58,6 +58,24 @@ class RestoResponseError(RestoClientServerError):
     """
 
 
+class IncomprehensibleResponse(RestoResponseError):
+    """
+    Exception raised when response cannot be understood.
+    """
+
+
+class UnsupportedError(RestoResponseError):
+    """
+    Exception raised when error code is not supported
+    """
+
+
+class InconsistentResponse(RestoResponseError):
+    """
+    Exception raised when response is inconsistent with the request
+    """
+
+
 class AccessDeniedError(RestoResponseError):
     """
     Exception corresponding to forbiden access due to credential
