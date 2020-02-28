@@ -100,3 +100,17 @@ class CheckTokenResponse(RestoJsonResponseSimple):
         :returns: the response expressed as a Resto response
         """
         return self
+
+
+class RevokeTokenResponse(RestoJsonResponseSimple):
+    """
+     Response received from RevokeTokenRequest.
+    """
+    needed_fields: List[str] = []
+    optional_fields: List[str] = []
+
+    def as_resto_object(self) -> 'RevokeTokenResponse':
+        """
+        :returns: the response expressed as a Resto response
+        """
+        return self

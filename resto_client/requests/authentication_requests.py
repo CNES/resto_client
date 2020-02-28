@@ -14,10 +14,10 @@
 """
 from typing import cast, Optional  # @NoMove
 
-from requests import Response
 
 from resto_client.base_exceptions import RestoResponseError
-from resto_client.responses.authentication_responses import GetTokenResponse, CheckTokenResponse
+from resto_client.responses.authentication_responses import (GetTokenResponse, CheckTokenResponse,
+                                                             RevokeTokenResponse)
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
 from .base_request import BaseRequest, RestoClientEmulatedResponse
@@ -31,12 +31,19 @@ class RevokeTokenRequest(BaseRequest):
 
     request_action = 'revoking token'
 
-    def run(self) -> Response:
+    def run(self) -> RevokeTokenResponse:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(Response, super(RevokeTokenRequest, self).run())
+        return cast(RevokeTokenResponse, super(RevokeTokenRequest, self).run())
 
-    def process_request_result(self) -> Response:
-        return self._request_result
+    def process_request_result(self) -> RevokeTokenResponse:
+        content_type = self._request_result.headers['content-type']
+        if 'application/json' in content_type:
+            get_token_response_content = self._request_result.json()
+        else:
+            msg_fmt = 'Unable to process RevokeToken response: headers : {} \n content: {}'
+            raise RestoResponseError(msg_fmt.format(self._request_result.headers,
+                                                    self._request_result.content))
+        return RevokeTokenResponse(self, get_token_response_content).as_resto_object()
 
 
 class GetTokenRequest(BaseRequest):

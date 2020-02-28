@@ -25,6 +25,7 @@ from resto_client.base_exceptions import (RestoClientEvent, RestoNetworkError,
                                           NetworkAccessDeniedError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.responses.resto_json_response import RestoJsonResponseSimple
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
@@ -32,7 +33,7 @@ from .authenticator import Authenticator
 
 
 RestoRequestResult = Union[RestoResponse, Path,
-                           RestoCollection, RestoCollections, requests.Response]
+                           RestoCollection, RestoCollections, RestoJsonResponseSimple]
 
 
 class RestoClientEmulatedResponse(RestoClientEvent):
