@@ -21,8 +21,9 @@ from colorama import Fore, Style, colorama_text
 import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import (RestoClientEvent, RestoNetworkError,
-                                          NetworkAccessDeniedError)
+from resto_client.base_exceptions import (RestoNetworkError,
+                                          NetworkAccessDeniedError,
+                                          RestoClientEmulatedResponse)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.responses.resto_json_response import RestoJsonResponseSimple
@@ -34,13 +35,6 @@ from .authenticator import Authenticator
 
 RestoRequestResult = Union[RestoResponse, Path,
                            RestoCollection, RestoCollections, RestoJsonResponseSimple]
-
-
-class RestoClientEmulatedResponse(RestoClientEvent):
-    """
-    Exception raised when an emulated response is to be processed.
-    """
-    result: RestoRequestResult
 
 
 class BaseRequest(Authenticator):

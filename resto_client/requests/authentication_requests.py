@@ -15,12 +15,12 @@
 from typing import cast, Optional  # @NoMove
 
 
-from resto_client.base_exceptions import RestoResponseError
+from resto_client.base_exceptions import (RestoResponseError, RestoClientEmulatedResponse)
 from resto_client.responses.authentication_responses import (GetTokenResponse, CheckTokenResponse,
                                                              RevokeTokenResponse)
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 
-from .base_request import BaseRequest, RestoClientEmulatedResponse
+from .base_request import BaseRequest
 from .resto_json_request import RestoJsonRequest
 
 
