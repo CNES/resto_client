@@ -217,7 +217,7 @@ class DownloadRequestBase(BaseRequest):
 
         # Download finished. Write the file path where download has been made and
         # return updated feature
-        self._feature.downloaded_file_path[self.file_type] = full_file_path
+        self._feature.downloaded_files_paths[self.file_type] = full_file_path
         return self._feature
 
     def download_file(self, file_path: Path, file_size: Optional[int]=None) -> None:
