@@ -12,6 +12,12 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from resto_client.requests.base_request import RestoRequestResult  # @UnusedImport
+    from resto_client.responses.download_error_response import \
+        DownloadErrorResponse  # @UnusedImport
 
 
 class RestoClientError(Exception):
@@ -52,6 +58,8 @@ class NetworkAccessDeniedError(RestoNetworkError):
     """
 
 
+# ++++++++++++++++++++ Exceptions raised when processing resto responses +++++++++++++++++++++++
+
 class RestoResponseError(RestoClientServerError):
     """
     Exception raised when a Resto response cannot be understood
@@ -81,6 +89,8 @@ class AccessDeniedError(RestoResponseError):
     Exception corresponding to forbiden access due to credential
     """
 
+# ++++++++++++++++++++ Application events implemented as exceptions +++++++++++++++++++++++
+
 
 class RestoClientEvent(RestoClientError):
     """
@@ -92,6 +102,7 @@ class RestoClientEmulatedResponse(RestoClientEvent):
     """
     Exception raised when an emulated response is to be processed.
     """
+    result: 'RestoRequestResult'
 
 
 class FeatureOnTape(RestoClientEvent):
@@ -104,3 +115,19 @@ class FeatureOnTape(RestoClientEvent):
         Constructor.
         """
         super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
+
+
+class LicenseSignatureRequested(RestoClientEvent):
+    """
+    Exception raised when a license signature is requested before proceeding with the download.
+    """
+
+    def __init__(self, error_response: 'DownloadErrorResponse') -> None:
+        """
+        Constructor.
+
+        :param error_response: the error response as provided by resto, which contains the
+                               identifier of the license to sign.
+        """
+        super(LicenseSignatureRequested, self).__init__('user needs to sign a license')
+        self.error_response = error_response

@@ -22,7 +22,7 @@ from tqdm import tqdm
 
 from resto_client.base_exceptions import (RestoClientDesignError,
                                           RestoResponseError,
-                                          FeatureOnTape, RestoClientEvent)
+                                          FeatureOnTape, LicenseSignatureRequested)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
@@ -42,22 +42,6 @@ class RestrictedProductError(RestoResponseError):
     """
     Exception used when a product exist but cannot be downloaded
     """
-
-
-class LicenseSignatureRequested(RestoClientEvent):
-    """
-    Exception raised when a license signature is requested before proceeding with the download.
-    """
-
-    def __init__(self, error_response: DownloadErrorResponse) -> None:
-        """
-        Constructor.
-
-        :param error_response: the error response as provided by resto, which contains the
-                               identifier of the license to sign.
-        """
-        super(LicenseSignatureRequested, self).__init__('user needs to sign a license')
-        self.error_response = error_response
 
 
 class SignLicenseRequest(RestoJsonRequest):

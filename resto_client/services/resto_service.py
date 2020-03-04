@@ -21,7 +21,8 @@ from colorama import Fore, Style, colorama_text
 
 from resto_client.base_exceptions import (RestoClientDesignError,
                                           RestoResponseError,
-                                          InconsistentResponse)
+                                          InconsistentResponse,
+                                          LicenseSignatureRequested)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
@@ -34,7 +35,6 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      DownloadQuicklookRequest,
                                                      DownloadThumbnailRequest,
                                                      SignLicenseRequest,
-                                                     LicenseSignatureRequested,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
