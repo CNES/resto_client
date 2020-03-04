@@ -157,7 +157,7 @@ class DownloadRequestBase(BaseRequest):
         """
         return self._url_to_download
 
-    def process_request_result(self) -> Path:
+    def process_request_result(self) -> RestoFeature:
         """
          Download one of the different files available for a feature.
 
