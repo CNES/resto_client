@@ -223,7 +223,7 @@ class RestoService(BaseService):
         # Do download
         try:
             downloaded_feature = download_req.run()
-            downloaded_file_path = downloaded_feature.downloaded_file_path[file_type]
+            downloaded_file_path = downloaded_feature.downloaded_files_paths[file_type]
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)

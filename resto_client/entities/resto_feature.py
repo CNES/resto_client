@@ -45,8 +45,8 @@ class RestoFeature(geojson.Feature):
                                            geometry=feature_descr['geometry'],
                                            properties=feature_descr['properties'])
         self.license = RestoFeatureLicense(feature_descr['properties'])
-        self.downloaded_file_path: Dict[str, Path]
-        self.downloaded_file_path = {}
+        self.downloaded_files_paths: Dict[str, Path]
+        self.downloaded_files_paths = {}
 
     def get_download_url(self, file_type: str) -> str:
         """
