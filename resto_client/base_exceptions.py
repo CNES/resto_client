@@ -72,7 +72,7 @@ class IncomprehensibleResponse(RestoResponseError):
     """
 
 
-class UnsupportedError(RestoResponseError):
+class UnsupportedErrorCode(RestoResponseError):
     """
     Exception raised when error code is not supported
     """
