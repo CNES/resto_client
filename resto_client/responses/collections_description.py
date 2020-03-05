@@ -15,7 +15,7 @@
 import copy
 from typing import Optional
 
-from resto_client.base_exceptions import RestoResponseError
+from resto_client.base_exceptions import InconsistentResponse
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 
@@ -69,7 +69,7 @@ class CollectionsDescription(RestoJsonResponse):
         """
         Verify that the response is a valid resto response for this class and set the resto type
 
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
+        :raises InconsistentResponse: if the dictionary does not contain a valid Resto response.
         """
         detected_protocol = None
         # Find which kind of Resto server we could have
@@ -88,11 +88,11 @@ class CollectionsDescription(RestoJsonResponse):
 
         self.detected_protocol = detected_protocol
         if detected_protocol is None:
-            raise RestoResponseError('Dictionary does not contain a valid Resto response')
+            raise InconsistentResponse('Dictionary does not contain a valid Resto response')
         if self._parent_request.get_protocol() != detected_protocol:
             msg_fmt = 'Detected a {} response while waiting for a {} response.'
             msg = msg_fmt.format(detected_protocol, self._parent_request.get_protocol())
-            raise RestoResponseError(msg)
+            raise InconsistentResponse(msg)
 
     def normalize_response(self) -> None:
         """

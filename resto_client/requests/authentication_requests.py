@@ -15,7 +15,8 @@
 from typing import cast, Optional  # @NoMove
 
 
-from resto_client.base_exceptions import (RestoResponseError, RestoClientEmulatedResponse)
+from resto_client.base_exceptions import (RestoClientEmulatedResponse,
+                                          IncomprehensibleResponse)
 from resto_client.responses.authentication_responses import (GetTokenResponse, CheckTokenResponse,
                                                              RevokeTokenResponse)
 from resto_client.services.service_access import RestoClientUnsupportedRequest
@@ -41,8 +42,8 @@ class RevokeTokenRequest(BaseRequest):
             get_token_response_content = self._request_result.json()
         else:
             msg_fmt = 'Unable to process RevokeToken response: headers : {} \n content: {}'
-            raise RestoResponseError(msg_fmt.format(self._request_result.headers,
-                                                    self._request_result.content))
+            raise IncomprehensibleResponse(msg_fmt.format(self._request_result.headers,
+                                                          self._request_result.content))
         return RevokeTokenResponse(self, get_token_response_content).as_resto_object()
 
 
@@ -74,8 +75,8 @@ class GetTokenRequest(BaseRequest):
                 get_token_response_content = {'success': True, 'token': response_text}
         else:
             msg_fmt = 'Unable to process GetToken response: headers : {} \n content: {}'
-            raise RestoResponseError(msg_fmt.format(self._request_result.headers,
-                                                    self._request_result.content))
+            raise IncomprehensibleResponse(msg_fmt.format(self._request_result.headers,
+                                                          self._request_result.content))
         return GetTokenResponse(self, get_token_response_content).as_resto_object()
 
 

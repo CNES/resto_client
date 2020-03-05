@@ -22,7 +22,8 @@ from tqdm import tqdm
 
 from resto_client.base_exceptions import (RestoClientDesignError,
                                           RestoResponseError,
-                                          FeatureOnTape, LicenseSignatureRequested)
+                                          FeatureOnTape, LicenseSignatureRequested,
+                                          IncomprehensibleResponse)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
@@ -163,6 +164,7 @@ class DownloadRequestBase(BaseRequest):
 
         :returns: the path to the downloaded file
         :raises RestoResponseError: when the response does not have one of the expected contents.
+        :raises IncomprehensibleResponse: the response does not have one of the expected contents.
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
         :raises FeatureOnTape: when the feature file is on tape and not available for download
@@ -177,7 +179,7 @@ class DownloadRequestBase(BaseRequest):
                 # Unexpected json content
                 msg_fmt = 'Cannot process json when downloading {} feature\nJson content:\n{}'
                 msg = msg_fmt.format(self._feature.product_identifier, dict_json)
-                raise RestoResponseError(msg) from excp
+                raise IncomprehensibleResponse(msg) from excp
             if error_response.download_need_license_signature:
                 # user needs to sign a license for this product
                 raise LicenseSignatureRequested(error_response)
@@ -186,7 +188,7 @@ class DownloadRequestBase(BaseRequest):
                 raise RestrictedProductError(msg.format(self._feature.product_identifier))
 
         if content_type is None:
-            raise RestoResponseError('Cannot infer file extension with None content-type')
+            raise IncomprehensibleResponse('Cannot infer file extension with None content-type')
 
         file_name, full_file_path, file_mimetype, _ = self.get_file_infos(content_type)
 
@@ -213,7 +215,8 @@ class DownloadRequestBase(BaseRequest):
             self.download_file(full_file_path, file_size=self._feature.product_size)
         else:
             msg = 'Unexpected content-type {} when downloading {}.'
-            raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
+            raise IncomprehensibleResponse(msg.format(content_type,
+                                                      self._feature.product_identifier))
 
         # Download finished. Write the file path where download has been made and
         # return updated feature

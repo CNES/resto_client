@@ -19,10 +19,9 @@ from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
-from resto_client.base_exceptions import (RestoClientDesignError,
-                                          RestoResponseError,
-                                          InconsistentResponse,
-                                          LicenseSignatureRequested)
+from resto_client.base_exceptions import (InconsistentResponse,
+                                          LicenseSignatureRequested,
+                                          RestoClientDesignError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
@@ -180,13 +179,14 @@ class RestoService(BaseService):
 
         :param license_id: the identifier of the licnese to be signed.
         :returns: True if the license signature was successful
-        :raises RestoResponseError: when the license has not been signed successfully
+        :raises InconsistentResponse: when the license has not been signed successfully
         """
         signature_response = SignLicenseRequest(self, license_id).run()
 
         if not signature_response.is_signed:
             msg = 'Unable to sign license {}. Reason : {}'
-            raise RestoResponseError(msg.format(license_id, signature_response.validation_message))
+            raise InconsistentResponse(msg.format(license_id,
+                                                  signature_response.validation_message))
 
         with colorama_text():
             msg = 'license {} signed successfully'.format(license_id)

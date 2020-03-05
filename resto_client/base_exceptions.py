@@ -72,6 +72,12 @@ class IncomprehensibleResponse(RestoResponseError):
     """
 
 
+class InvalidResponse(RestoResponseError):
+    """
+    Exception raised when response is not as expected.
+    """
+
+
 class UnsupportedErrorCode(RestoResponseError):
     """
     Exception raised when error code is not supported
