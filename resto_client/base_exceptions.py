@@ -94,6 +94,7 @@ class AccessDeniedError(RestoResponseError):
     """
     Exception corresponding to forbiden access due to credential
     """
+    print_to_terminal = True
 
 # ++++++++++++++++++++ Application events implemented as exceptions +++++++++++++++++++++++
 
