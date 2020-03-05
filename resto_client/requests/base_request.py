@@ -176,7 +176,7 @@ class BaseRequest(Authenticator):
         Base class method update the headers, possibly setting the authentication headers and
         checks that the route is available.
         """
-        self.update_headers()
+        self.update_headers(dict_input={'Accept': self.get_accept()})
         self.get_route()  # Will trigger an exception if the route is undefined
 
     def run_request(self) -> None:
@@ -185,7 +185,6 @@ class BaseRequest(Authenticator):
         suit their needs. Default is submitting a get request, requesting json response.
         """
         streamed = self.get_streamed()
-        self.update_headers(dict_input={'Accept': self.get_accept()})
         if self.get_method() == 'post':
             self._run_request_post(stream=streamed)
         else:
