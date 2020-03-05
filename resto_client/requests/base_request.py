@@ -14,6 +14,7 @@
 """
 from abc import abstractmethod
 from urllib.parse import urljoin
+from typing import Optional, Union, Dict, Callable  # @NoMove @UnusedImport
 
 from colorama import Fore, Style, colorama_text
 import requests
@@ -30,7 +31,6 @@ from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
 from .authenticator import Authenticator
-from typing import Optional, Union, Dict, Callable  # @NoMove @UnusedImport
 
 
 RestoEntities = Union[RestoFeature, RestoCollection, RestoCollections]
