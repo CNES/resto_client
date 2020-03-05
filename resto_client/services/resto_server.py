@@ -145,17 +145,17 @@ class RestoServer():
         return features_list
 
     def download_feature_file(self, feature: RestoFeature,
-                              file_type: str, download_dir: Path) -> Path:
+                              file_type: str, download_dir: Path) -> None:
         """
         Download different files of a feature
 
         :param feature: a resto feature
         :param download_dir: the path to the directory where download must be done.
         :param file_type: type of file to download: product, quicklook, thumbnail or annexes
-        :returns: the path of the downloaded file
         """
-        return self._resto_service.download_feature_file(
-            feature, file_type, self.ensure_server_directory(download_dir))
+        self._resto_service.download_feature_file(feature,
+                                                  file_type,
+                                                  self.ensure_server_directory(download_dir))
 
     def download_features_file_from_ids(self,
                                         features_ids: Union[str, List[str]],
@@ -175,8 +175,9 @@ class RestoServer():
         downloaded_file_paths: List[Path] = []
         for feature in features:
             # Do download
-            downloaded_file_path = self.download_feature_file(feature, file_type, download_dir)
-            downloaded_file_paths.append(downloaded_file_path)
+            self.download_feature_file(feature, file_type, download_dir)
+            downloaded_file_paths.append(feature.downloaded_files_paths[file_type])
+
         return downloaded_file_paths
 
     def ensure_server_directory(self, data_dir: Path) -> Path:

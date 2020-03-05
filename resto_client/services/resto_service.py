@@ -202,7 +202,7 @@ class RestoService(BaseService):
     def download_feature_file(self,
                               feature: RestoFeature,
                               file_type: str,
-                              download_dir: Path) -> Path:
+                              download_dir: Path) -> None:
         """
         Download one of the files associated to a feature : product, quicklook, thumbnail, annexes.
 
@@ -210,7 +210,6 @@ class RestoService(BaseService):
         :param file_type: the type of the file to donwload. Can be one of  'product', 'quicklook',
                           'thumbnail', 'annexes'.
         :param download_dir: the directory where downloaded file must be recorded.
-        :returns: the path to the downloaded file.
         :raises RestoClientDesignError: when the file_type is not supported.
         """
         if file_type not in self.DOWNLOAD_REQUEST_CLASSES:
@@ -222,13 +221,12 @@ class RestoService(BaseService):
         download_req = download_req_cls(self, feature, download_directory=download_dir)
         # Do download
         try:
-            downloaded_feature = download_req.run()
-            downloaded_file_path = downloaded_feature.downloaded_files_paths[file_type]
+            download_req.run()
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)
             # Retry file download after license signature
-            downloaded_file_path = self.download_feature_file(feature, file_type, download_dir)
+            self.download_feature_file(feature, file_type, download_dir)
         except FeatureOnTape as excp:
             # Redo_feature to update the storage status
             redo_feature = self.get_feature_by_id(feature.product_identifier)
@@ -236,8 +234,7 @@ class RestoService(BaseService):
             # Wait 60 second
             time.sleep(60)
             # Retry file download after product staging
-            downloaded_file_path = self.download_feature_file(redo_feature, file_type, download_dir)
-        return downloaded_file_path
+            self.download_feature_file(redo_feature, file_type, download_dir)
 
     def __str__(self) -> str:
         msg_fmt = '{}current collection: {}\n'
