@@ -138,7 +138,7 @@ class AuthenticationTokenService(BaseService):
             return {'Authorization': 'Bearer ' + self.token_value}
         except AccessDeniedError as excp:
             # If token is old then ask for a new one and relaunch command
-            if not self._fresh_token:
+            if not self._fresh_token and self.token_is_available:
                 self._renew_token()
                 return self.get_authorization_header()
             self.reset_credentials()
