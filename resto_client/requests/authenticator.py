@@ -61,12 +61,10 @@ class Authenticator(ABC):
         """
         :param request_header: the request headers to update with the authorization part
         """
-        if self._authentication_required:
-            authorization_header = self.auth_service.get_authorization_header()
-            request_header.update(authorization_header)
-            return
-        if self.authentication_type == 'OPPORTUNITY' and (self.auth_service.account_defined or
-                                                          self.auth_service.token_is_available):
+        try_asking_token = (self.authentication_type == 'OPPORTUNITY' and
+                            (self.auth_service.account_defined or
+                             self.auth_service.token_is_available))
+        if self._authentication_required or try_asking_token:
             authorization_header = self.auth_service.get_authorization_header()
             request_header.update(authorization_header)
             return
