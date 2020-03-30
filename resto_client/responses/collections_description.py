@@ -15,7 +15,8 @@
 import copy
 from typing import Optional
 
-from resto_client.base_exceptions import InconsistentResponse
+from resto_client.base_exceptions import (InconsistentResponse,
+                                          IncomprehensibleResponse)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 
@@ -88,7 +89,7 @@ class CollectionsDescription(RestoJsonResponse):
 
         self.detected_protocol = detected_protocol
         if detected_protocol is None:
-            raise InconsistentResponse('Dictionary does not contain a valid Resto response')
+            raise IncomprehensibleResponse('Dictionary does not contain a valid Resto response')
         if self._parent_request.get_protocol() != detected_protocol:
             msg_fmt = 'Detected a {} response while waiting for a {} response.'
             msg = msg_fmt.format(detected_protocol, self._parent_request.get_protocol())

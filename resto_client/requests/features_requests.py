@@ -23,7 +23,8 @@ from tqdm import tqdm
 from resto_client.base_exceptions import (RestoClientDesignError,
                                           RestoResponseError,
                                           FeatureOnTape, LicenseSignatureRequested,
-                                          IncomprehensibleResponse)
+                                          IncomprehensibleResponse,
+                                          AccessDeniedError)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
@@ -39,7 +40,7 @@ if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
-class RestrictedProductError(RestoResponseError):
+class RestrictedProductError(AccessDeniedError):
     """
     Exception used when a product exist but cannot be downloaded
     """
