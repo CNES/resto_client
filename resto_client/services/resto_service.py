@@ -228,11 +228,11 @@ class RestoService(BaseService):
             # Retry file download after license signature
             self.download_feature_file(feature, file_type, download_dir)
         except FeatureOnTape as excp:
-            # Redo_feature to update the storage status
-            redo_feature = self.get_feature_by_id(feature.product_identifier)
             warn('Waiting 60 seconds for product transfert...')
             # Wait 60 second
             time.sleep(60)
+            # Redo_feature to update the storage status
+            redo_feature = self.get_feature_by_id(feature.product_identifier)
             # Retry file download after product staging
             self.download_feature_file(redo_feature, file_type, download_dir)
 
