@@ -162,8 +162,7 @@ class DownloadRequestBase(BaseRequest):
         """
          Download one of the different files available for a feature.
 
-        :returns: the path to the downloaded file
-        :raises RestoResponseError: when the response does not have one of the expected contents.
+        :returns: the downloaded RestoFeature updated with the downloaded_files_paths
         :raises IncomprehensibleResponse: the response does not have one of the expected contents.
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed

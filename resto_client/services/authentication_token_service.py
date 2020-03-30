@@ -79,7 +79,6 @@ class AuthenticationTokenService(BaseService):
     def token_value(self) -> str:
         """
         :returns: the current token value or a renewed value if the current token is invalid.
-        :raises AccessDeniedError: when authentication is refused when retrieving the token.
         :raises RestoClientNoToken: when server responded without providing a token.
         """
         if self._token_value is None:
@@ -173,7 +172,6 @@ class AuthenticationTokenService(BaseService):
     def _get_token(self) -> str:
         """
         :returns: a new token to use
-        :raises AccessDeniedError: when credentials are not valid for the service.
         """
         get_token_response = GetTokenRequest(self).run()
         return get_token_response.token_value

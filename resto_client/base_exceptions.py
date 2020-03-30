@@ -101,7 +101,7 @@ class AccessDeniedError(RestoResponseError):
 
 class RestoClientEvent(RestoClientError):
     """
-    Exception raised when a Resto response cannot be understood
+    Exception raised when a Resto Event that requires a particular process appears
     """
 
 
