@@ -33,7 +33,7 @@ class FeatureCollectionResponse(RestoJsonResponseSimple):
         Verify that the response is a valid FeatureCollection geojson object.
 
         :raises InconsistentResponse: if the dictionary does not contain a valid Resto response.
-        :raises InvalidResponse: if field are not as expected.
+        :raises InvalidResponse: if fields are not as expected.
 
         """
         # Firstly verify that the needed fields are present
