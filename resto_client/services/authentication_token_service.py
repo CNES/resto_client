@@ -57,7 +57,6 @@ class AuthenticationTokenService(BaseService):
         super().__init__(auth_access, cast('AuthenticationService', self),
                          parent_server=parent_server)
         self._token_value: Optional[str] = None
-        self._fresh_token = False
 
     @property
     def current_token(self) -> Optional[str]:
@@ -115,7 +114,6 @@ class AuthenticationTokenService(BaseService):
         """
         self._reset_token()
         self.token_value = self._get_token()
-        self._fresh_token = True
 
     def _reset_token(self) -> None:
         """
@@ -136,10 +134,6 @@ class AuthenticationTokenService(BaseService):
         try:
             return {'Authorization': 'Bearer ' + self.token_value}
         except AccessDeniedError as excp:
-            # If token is old then ask for a new one and relaunch command
-            if not self._fresh_token and self.token_is_available:
-                self._renew_token()
-                return self.get_authorization_header()
             self.reset_credentials()
             msg = f'Access Denied : (username, password) does not fit the server:'
             msg += f' {self.parent_server.server_name}\nFollowing denied access,'
