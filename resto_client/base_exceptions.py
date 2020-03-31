@@ -99,7 +99,7 @@ class AccessDeniedError(RestoResponseError):
 # ++++++++++++++++++++ Application events implemented as exceptions +++++++++++++++++++++++
 
 
-class RestoClientEvent(RestoClientError):
+class RestoClientEvent(Exception):
     """
     Exception raised when a Resto Event that requires a particular process appears
     """
