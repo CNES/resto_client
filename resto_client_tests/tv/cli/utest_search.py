@@ -100,7 +100,7 @@ class UTestCliSearch(TestRestoClientCli):
         output = self.get_command_output(command)
         ids_out = ['718546971960888', '2193469539462683', '2193246286290231', '2193020092357640']
         text_out = '{}\n4 results shown on a total of'
-        self.assertIn(text_out.format(str(ids_out)), output)
+        self.assertIn(text_out.format("\n".join(ids_out)), output)
         self.assertIn(' 4 results ', output)
         self.assertIn('beginning at index 1', output)
 
@@ -113,7 +113,7 @@ class UTestCliSearch(TestRestoClientCli):
         output = self.get_command_output(command)
         ids_out = ['127387459591469', '313788470150102', '312422352833026', '377704677444208']
         text_out = '{}\n4 results shown on a total of'
-        self.assertIn(text_out.format(str(ids_out)), output)
+        self.assertIn(text_out.format("\n".join(ids_out)), output)
         self.assertIn(' 4 results ', output)
         self.assertIn('beginning at index 1', output)
 
@@ -127,7 +127,7 @@ class UTestCliSearch(TestRestoClientCli):
         output = self.get_command_output(command)
         ids_out = ['312422352833026', '377704677444208']
         text_out = '{}\n2 results shown on a total of'
-        self.assertIn(text_out.format(str(ids_out)), output)
+        self.assertIn(text_out.format("\n".join(ids_out)), output)
         self.assertIn(' 4 results ', output)
         self.assertIn('beginning at index 3', output)
 
@@ -151,7 +151,7 @@ class UTestCliSearch(TestRestoClientCli):
         output = self.get_command_output(command)
         ids_out = ['399183522347555', '399184189945956', '399377909654471']
         text_out = '{}\n3 results shown on a total of'
-        self.assertIn(text_out.format(str(ids_out)), output)
+        self.assertIn(text_out.format("\n".join(ids_out)), output)
         self.assertIn(' 3 results ', output)
         self.assertIn('beginning at index 1', output)
 
