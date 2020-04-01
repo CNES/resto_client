@@ -222,7 +222,7 @@ class BaseRequest(Authenticator):
         :param method: method to use for sending the request: requests.get() or requests.post()
         :param stream: If True, only the response header will be retrieved, allowing to drive
                        the retrieval of the full response body within process_request_result()
-        :raises NetworkAccessDeniedError: if the request was refused because of a forbiden access.
+        :raises NetworkAccessDeniedError: if the request was refused because of a forbidden access.
         :raises RestoNetworkError: for other exceptions
         """
         auth_arg, data_arg = self._get_authentication_arguments(self._request_headers)
