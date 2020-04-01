@@ -15,7 +15,8 @@
 from abc import abstractmethod
 from typing import cast, Optional, Any, TYPE_CHECKING  # @UnusedImport
 
-from resto_client.base_exceptions import (RestoClientDesignError, AccessDeniedError)
+from resto_client.base_exceptions import (RestoClientDesignError, AccessDeniedError,
+                                          NetworkAccessDeniedError)
 from resto_client.requests.authentication_requests import (GetTokenRequest, CheckTokenRequest,
                                                            RevokeTokenRequest)
 from resto_client.services.service_access import RestoClientUnsupportedRequest
@@ -133,7 +134,7 @@ class AuthenticationTokenService(BaseService):
         """
         try:
             return {'Authorization': 'Bearer ' + self.token_value}
-        except AccessDeniedError as excp:
+        except (AccessDeniedError, NetworkAccessDeniedError) as excp:
             self.reset_credentials()
             msg = f'Access Denied : (username, password) does not fit the server:'
             msg += f' {self.parent_server.server_name}\nFollowing denied access,'
