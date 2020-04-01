@@ -19,7 +19,9 @@ from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
-from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.base_exceptions import (InconsistentResponse,
+                                          LicenseSignatureRequested,
+                                          RestoClientDesignError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
@@ -32,11 +34,9 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      DownloadQuicklookRequest,
                                                      DownloadThumbnailRequest,
                                                      SignLicenseRequest,
-                                                     LicenseSignatureRequested,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.settings.resto_client_config import resto_client_print
 
 from .authentication_service import AuthenticationService
@@ -152,8 +152,8 @@ class RestoService(BaseService):
         :param collection: the name of the collection to search
         :returns: the requested feature
         :raises IndexError: when the feature collection does not contain exactly one feature.
-        :raises ValueError: when the retrieved feature has not the right id (case where uuid
-                            incorrectly provided as argument)
+        :raises InconsistentResponse: when the retrieved feature has not the right id
+        (case where uuid incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)
@@ -169,8 +169,8 @@ class RestoService(BaseService):
         feature = feature_collection['features'][0]
         if feature_id not in (feature['properties']['productIdentifier'], feature['id']):
             msg = 'Retrieved feature (id : {} / uuid : {}) inconsistent with requested one ({})'
-            raise ValueError(msg.format(feature['properties']['productIdentifier'],
-                                        feature['id'], feature_id))
+            raise InconsistentResponse(msg.format(feature['properties']['productIdentifier'],
+                                                  feature['id'], feature_id))
         return feature
 
     def sign_license(self, license_id: str) -> bool:
@@ -179,13 +179,14 @@ class RestoService(BaseService):
 
         :param license_id: the identifier of the licnese to be signed.
         :returns: True if the license signature was successful
-        :raises RestoResponseError: when the license has not been signed successfully
+        :raises InconsistentResponse: when the license has not been signed successfully
         """
         signature_response = SignLicenseRequest(self, license_id).run()
 
         if not signature_response.is_signed:
             msg = 'Unable to sign license {}. Reason : {}'
-            raise RestoResponseError(msg.format(license_id, signature_response.validation_message))
+            raise InconsistentResponse(msg.format(license_id,
+                                                  signature_response.validation_message))
 
         with colorama_text():
             msg = 'license {} signed successfully'.format(license_id)
@@ -201,7 +202,7 @@ class RestoService(BaseService):
     def download_feature_file(self,
                               feature: RestoFeature,
                               file_type: str,
-                              download_dir: Path) -> Path:
+                              download_dir: Path) -> None:
         """
         Download one of the files associated to a feature : product, quicklook, thumbnail, annexes.
 
@@ -209,7 +210,6 @@ class RestoService(BaseService):
         :param file_type: the type of the file to donwload. Can be one of  'product', 'quicklook',
                           'thumbnail', 'annexes'.
         :param download_dir: the directory where downloaded file must be recorded.
-        :returns: the path to the downloaded file.
         :raises RestoClientDesignError: when the file_type is not supported.
         """
         if file_type not in self.DOWNLOAD_REQUEST_CLASSES:
@@ -221,21 +221,20 @@ class RestoService(BaseService):
         download_req = download_req_cls(self, feature, download_directory=download_dir)
         # Do download
         try:
-            downloaded_file_path = download_req.run()
+            download_req.run()
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)
             # Retry file download after license signature
-            downloaded_file_path = self.download_feature_file(feature, file_type, download_dir)
+            self.download_feature_file(feature, file_type, download_dir)
         except FeatureOnTape as excp:
-            # Redo_feature to update the storage status
-            redo_feature = self.get_feature_by_id(feature.product_identifier)
             warn('Waiting 60 seconds for product transfert...')
             # Wait 60 second
             time.sleep(60)
+            # Redo_feature to update the storage status
+            redo_feature = self.get_feature_by_id(feature.product_identifier)
             # Retry file download after product staging
-            downloaded_file_path = self.download_feature_file(redo_feature, file_type, download_dir)
-        return downloaded_file_path
+            self.download_feature_file(redo_feature, file_type, download_dir)
 
     def __str__(self) -> str:
         msg_fmt = '{}current collection: {}\n'

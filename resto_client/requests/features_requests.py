@@ -16,15 +16,18 @@ from abc import abstractmethod
 from pathlib import Path
 import tempfile
 from warnings import warn
-from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 
+from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
 from tqdm import tqdm
 
-from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
+from resto_client.base_exceptions import (RestoClientDesignError,
+                                          RestoResponseError,
+                                          FeatureOnTape, LicenseSignatureRequested,
+                                          IncomprehensibleResponse,
+                                          AccessDeniedError)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
 from resto_client.services.service_access import RestoClientUnsupportedRequest
 from resto_client.settings.resto_client_config import resto_client_print
@@ -37,38 +40,10 @@ if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
-class RestrictedProductError(RestoClientUserError):
+class RestrictedProductError(AccessDeniedError):
     """
     Exception used when a product exist but cannot be downloaded
     """
-
-
-class LicenseSignatureRequested(RestoResponseError):
-    """
-    Exception raised when a license signature is requested before proceeding with the download.
-    """
-
-    def __init__(self, error_response: DownloadErrorResponse) -> None:
-        """
-        Constructor.
-
-        :param error_response: the error response as provided by resto, which contains the
-                               identifier of the license to sign.
-        """
-        super(LicenseSignatureRequested, self).__init__('user needs to sign a license')
-        self.error_response = error_response
-
-
-class FeatureOnTape(RestoResponseError):
-    """
-    Exception raised when a product requested is on tape
-    """
-
-    def __init__(self) -> None:
-        """
-        Constructor.
-        """
-        super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
 class SignLicenseRequest(RestoJsonRequest):
@@ -135,9 +110,9 @@ class DownloadRequestBase(BaseRequest):
                 self._url_to_download += "/?issuerId=theia"
         self._download_directory = download_directory
 
-    def run(self) -> Path:
+    def run(self) -> RestoFeature:
         # overidding BaseRequest method, in order to specify the right type returned by this request
-        return cast(Path, super(DownloadRequestBase, self).run())
+        return cast(RestoFeature, super(DownloadRequestBase, self).run())
 
     def get_file_infos(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
@@ -184,12 +159,12 @@ class DownloadRequestBase(BaseRequest):
         """
         return self._url_to_download
 
-    def process_request_result(self) -> Path:
+    def process_request_result(self) -> RestoFeature:
         """
          Download one of the different files available for a feature.
 
-        :returns: the path to the downloaded file
-        :raises RestoResponseError: when the response does not have one of the expected contents.
+        :returns: the downloaded RestoFeature updated with the downloaded_files_paths
+        :raises IncomprehensibleResponse: the response does not have one of the expected contents.
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
         :raises FeatureOnTape: when the feature file is on tape and not available for download
@@ -204,7 +179,7 @@ class DownloadRequestBase(BaseRequest):
                 # Unexpected json content
                 msg_fmt = 'Cannot process json when downloading {} feature\nJson content:\n{}'
                 msg = msg_fmt.format(self._feature.product_identifier, dict_json)
-                raise RestoResponseError(msg) from excp
+                raise IncomprehensibleResponse(msg) from excp
             if error_response.download_need_license_signature:
                 # user needs to sign a license for this product
                 raise LicenseSignatureRequested(error_response)
@@ -213,7 +188,7 @@ class DownloadRequestBase(BaseRequest):
                 raise RestrictedProductError(msg.format(self._feature.product_identifier))
 
         if content_type is None:
-            raise RestoResponseError('Cannot infer file extension with None content-type')
+            raise IncomprehensibleResponse('Cannot infer file extension with None content-type')
 
         file_name, full_file_path, file_mimetype, _ = self.get_file_infos(content_type)
 
@@ -240,10 +215,13 @@ class DownloadRequestBase(BaseRequest):
             self.download_file(full_file_path, file_size=self._feature.product_size)
         else:
             msg = 'Unexpected content-type {} when downloading {}.'
-            raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
+            raise IncomprehensibleResponse(msg.format(content_type,
+                                                      self._feature.product_identifier))
 
-        # Download finished. Return the file path where download has been made.
-        return full_file_path
+        # Download finished. Write the file path where download has been made and
+        # return updated feature
+        self._feature.downloaded_files_paths[self.file_type] = full_file_path
+        return self._feature
 
     def download_file(self, file_path: Path, file_size: Optional[int]=None) -> None:
         """

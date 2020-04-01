@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 from typing import Type, Optional
 
-from resto_client.responses.collections_description import RestoResponseError
+from resto_client.base_exceptions import (RestoResponseError, IncomprehensibleResponse)
 from resto_client.responses.resto_json_response import RestoJsonResponse
 from resto_client.settings.resto_client_config import RESTO_CLIENT_CONFIG_DIR
 
@@ -103,13 +103,13 @@ class RestoJsonRequest(BaseRequest):
 
         :param json_result: response content interpreted as json and represented as a dictionary.
         :returns: a Resto object
-        :raises ValueError: when the json response cannot be processed.
+        :raises IncomprehensibleResponse: when the json response cannot be processed.
         """
         try:
             resto_response = self.resto_response_cls(self, json_result)
         except RestoResponseError:
             msg = 'Response to {} from {} resto server cannot be understood.'
-            # TOOD: change exception type and move elsewhere ?
-            raise ValueError(msg.format(self.get_server_name()))
+            # TOOD: move elsewhere ?
+            raise IncomprehensibleResponse(msg.format(self.get_server_name()))
 
         return resto_response.as_resto_object()

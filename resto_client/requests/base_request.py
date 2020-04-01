@@ -13,7 +13,6 @@
    limitations under the License.
 """
 from abc import abstractmethod
-from pathlib import Path
 from urllib.parse import urljoin
 from typing import Optional, Union, Dict, Callable  # @NoMove @UnusedImport
 
@@ -21,30 +20,22 @@ from colorama import Fore, Style, colorama_text
 import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import RestoClientDesignError, RestoClientUserError
+from resto_client.base_exceptions import (RestoNetworkError,
+                                          RestoClientEmulatedResponse,
+                                          NetworkAccessDeniedError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.entities.resto_feature import RestoFeature
+from resto_client.responses.resto_json_response import RestoJsonResponseSimple
 from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
 from .authenticator import Authenticator
 
 
-RestoRequestResult = Union[RestoResponse, Path,
-                           RestoCollection, RestoCollections, requests.Response]
+RestoEntities = Union[RestoFeature, RestoCollection, RestoCollections]
 
-
-class AccesDeniedError(RestoClientUserError):
-    """
-    Exception corresponding to HTTP Error 403
-    """
-
-
-class RestoClientEmulatedResponse(RestoClientDesignError):
-    """
-    Exception raised when an emulated response is to be processed.
-    """
-    result: RestoRequestResult
+RestoRequestResult = Union[RestoEntities, RestoResponse, RestoJsonResponseSimple]
 
 
 class BaseRequest(Authenticator):
@@ -185,7 +176,7 @@ class BaseRequest(Authenticator):
         Base class method update the headers, possibly setting the authentication headers and
         checks that the route is available.
         """
-        self.update_headers()
+        self.update_headers(dict_input={'Accept': self.get_accept()})
         self.get_route()  # Will trigger an exception if the route is undefined
 
     def run_request(self) -> None:
@@ -194,7 +185,6 @@ class BaseRequest(Authenticator):
         suit their needs. Default is submitting a get request, requesting json response.
         """
         streamed = self.get_streamed()
-        self.update_headers(dict_input={'Accept': self.get_accept()})
         if self.get_method() == 'post':
             self._run_request_post(stream=streamed)
         else:
@@ -232,8 +222,8 @@ class BaseRequest(Authenticator):
         :param method: method to use for sending the request: requests.get() or requests.post()
         :param stream: If True, only the response header will be retrieved, allowing to drive
                        the retrieval of the full response body within process_request_result()
-        :raises AccesDeniedError: if the request was refused because authentication failed.
-        :raises Exception: for other exceptions
+        :raises NetworkAccessDeniedError: if the request was refused because of a forbidden access.
+        :raises RestoNetworkError: for other exceptions
         """
         auth_arg, data_arg = self._get_authentication_arguments(self._request_headers)
         result = None
@@ -250,8 +240,8 @@ class BaseRequest(Authenticator):
                 msg = 'Error {} when {} for {}.'.format(self._request_result.status_code,
                                                         self.request_action, self.get_url())
                 if self._request_result.status_code == 403:
-                    raise AccesDeniedError(msg) from excp
+                    raise NetworkAccessDeniedError(msg) from excp
             else:
                 msg = 'Error when {} for {}.'.format(self.request_action, self.get_url())
-            raise Exception(msg) from excp
+            raise RestoNetworkError(msg) from excp
         self._request_result = result

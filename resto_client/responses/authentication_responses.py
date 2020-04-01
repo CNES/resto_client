@@ -14,7 +14,7 @@
 """
 from typing import List  # @UnusedImport
 
-from resto_client.requests.base_request import AccesDeniedError
+from resto_client.base_exceptions import AccessDeniedError
 
 from .resto_json_response import RestoJsonResponseSimple
 
@@ -55,7 +55,7 @@ class GetTokenResponse(RestoJsonResponseSimple):
     def token_value(self) -> str:
         """
         :returns: the token included in the response
-        :raises AccesDeniedError: when the GetToken request was rejected for incorrect credentials.
+        :raises AccessDeniedError: when the GetToken request was rejected for incorrect credentials.
         """
         if self._normalized_response['success']:
             return self._normalized_response['token']
@@ -64,7 +64,7 @@ class GetTokenResponse(RestoJsonResponseSimple):
             msg_excp = self._normalized_response['message']
         else:
             msg_excp = 'Invalid username/password'
-        raise AccesDeniedError(msg_excp)
+        raise AccessDeniedError(msg_excp)
 
     def as_resto_object(self) -> 'GetTokenResponse':
         """
@@ -96,6 +96,20 @@ class CheckTokenResponse(RestoJsonResponseSimple):
         return self._normalized_response['message']
 
     def as_resto_object(self) -> 'CheckTokenResponse':
+        """
+        :returns: the response expressed as a Resto response
+        """
+        return self
+
+
+class RevokeTokenResponse(RestoJsonResponseSimple):
+    """
+     Response received from RevokeTokenRequest.
+    """
+    needed_fields: List[str] = []
+    optional_fields: List[str] = []
+
+    def as_resto_object(self) -> 'RevokeTokenResponse':
         """
         :returns: the response expressed as a Resto response
         """

@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import MagicMock
 
+from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.services.resto_server import RestoServer
 
 
@@ -131,7 +132,7 @@ class UTestAuthenticationToken(unittest.TestCase):
         self.assert_requests_calls()
 
         # if we try to set the token to None, we get an exception
-        with self.assertRaises(TypeError):
+        with self.assertRaises(RestoClientDesignError):
             self.token.token_value = None  # type:ignore
 
     def test_n_token_reset(self) -> None:

@@ -12,9 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from resto_client.base_exceptions import RestoClientUserError
+from resto_client.base_exceptions import RestoClientUserError, AccessDeniedError
 from resto_client.cli.resto_client_cli import resto_client_run
-from resto_client.requests.base_request import AccesDeniedError
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
@@ -114,7 +113,7 @@ class UTestCliDownload(TestRestoClientCli):
         command = ['download', 'product', '715640488937144',
                    '--username=wrong_username', '--password=wrong_password',
                    '--collection=KALCNES', '--server=kalideos']
-        with self.assertRaises(AccesDeniedError) as excp:
+        with self.assertRaises(AccessDeniedError) as excp:
             resto_client_run(arguments=command)
         exp_out = ('Access Denied : (username, password) does not fit the server: kalideos'
                    '\nFollowing denied access, credentials were reset.')

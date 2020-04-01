@@ -14,9 +14,10 @@
 """
 from typing import List  # @UnusedImport
 
+from resto_client.base_exceptions import InconsistentResponse, InvalidResponse
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
+
 from .resto_json_response import RestoJsonResponseSimple
-from .resto_response_error import RestoResponseError
 
 
 class FeatureCollectionResponse(RestoJsonResponseSimple):
@@ -31,7 +32,9 @@ class FeatureCollectionResponse(RestoJsonResponseSimple):
         """
         Verify that the response is a valid FeatureCollection geojson object.
 
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
+        :raises InconsistentResponse: if the dictionary does not contain a valid Resto response.
+        :raises InvalidResponse: if fields are not as expected.
+
         """
         # Firstly verify that the needed fields are present
         super(FeatureCollectionResponse, self).identify_response()
@@ -39,13 +42,13 @@ class FeatureCollectionResponse(RestoJsonResponseSimple):
         # Secondly verify geojson constraints on these fields, (not verified by geojson package)
         if self._original_response['type'] != 'FeatureCollection':
             msg = 'Waited a FeatureCollection geojson response. Received a {} response instead.'
-            raise RestoResponseError(msg.format(self._original_response['type']))
+            raise InconsistentResponse(msg.format(self._original_response['type']))
         if not isinstance(self._original_response['features'], list):
             msg = 'features field in a FeatureCollection must be a list. Found a {} instead.'
-            raise RestoResponseError(msg.format((self._original_response['features'])))
+            raise InvalidResponse(msg.format((self._original_response['features'])))
         if not isinstance(self._original_response['properties'], dict):
             msg = 'properties field in a FeatureCollection must be a dict. Found a {} instead.'
-            raise RestoResponseError(msg.format((self._original_response['properties'])))
+            raise InvalidResponse(msg.format((self._original_response['properties'])))
 
     def as_resto_object(self) -> RestoFeatureCollection:
         """
