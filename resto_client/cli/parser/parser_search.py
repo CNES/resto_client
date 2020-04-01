@@ -38,6 +38,14 @@ from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNA
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME, JSON_ARGNAME)
 
 
+def display_list_on_lines(list_to_display: list) -> str:
+    """
+    :returns: display one item of the list per line
+    """
+    final_display = str(list_to_display)
+    return final_display
+
+
 def get_table_help_criteria() -> str:
     """
     :returns: attributes to be displayed in the tabulated dump of all supported criteria
@@ -144,7 +152,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
                 resto_client_print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
         else:
             search_feature_id = features_collection.all_id
-            resto_client_print(features_collection.all_id)
+            resto_client_print("\n".join(features_collection.all_id))
             msg_search = '{} results shown on a total of '
             msg_search += Style.BRIGHT + ' {} results ' + Style.NORMAL + 'beginning at index {}'
             resto_client_print(msg_search.format(len(features_collection.all_id),
