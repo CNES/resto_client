@@ -149,6 +149,8 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
             msg_search += Style.BRIGHT + f' {features_collection.total_results} results '
             msg_search += Style.NORMAL + f'beginning at index {features_collection.start_index}'
             resto_client_print(msg_search)
+            for feature_id in search_feature_id:
+                print(features_collection.get_feature(feature_id))
         resto_client_print(Style.RESET_ALL)
 
     download_dir = Path(client_params.download_dir)
