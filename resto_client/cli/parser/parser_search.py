@@ -144,9 +144,11 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     with colorama_text():
         search_feature_id = None
         if len(features_collection.all_id) == 1:
-            msg_head = Fore.BLUE + 'One result found with id : ' + Style.BRIGHT
+            msg_search = Fore.BLUE + 'One result found with id : ' + Style.BRIGHT
             search_feature_id = features_collection.features[0].product_identifier
-            resto_client_print(msg_head + search_feature_id)
+            msg_search += search_feature_id + Style.NORMAL
+            msg_search += f' : {features_collection.features[0].title}'
+            resto_client_print(msg_search)
         elif not features_collection.all_id:
             page_search = criteria_dict.get('page', 1)
             if page_search > 1:
