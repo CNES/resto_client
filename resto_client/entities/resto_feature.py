@@ -76,6 +76,104 @@ class RestoFeature(geojson.Feature):
         return url_to_download
 
     @property
+    def title(self) -> str:
+        """
+        :returns: the title
+        """
+        return self.properties['title']
+
+    @property
+    def description(self) -> str:
+        """
+        :returns: the description
+        """
+        return self.properties['description']
+
+    @property
+    def organisationName(self) -> str:
+        """
+        :returns: the organisationName
+        """
+        return self.properties['organisationName']
+
+    @property
+    def lang(self) -> str:
+        """
+        :returns: the associated language
+        """
+        return self.properties['lang']
+
+    @property
+    def parent_identifier(self) -> str:
+        """
+        :returns: the parentIdentifier
+        """
+        return self.properties['parentIdentifier']
+
+    @property
+    def platform(self) -> str:
+        """
+        :returns: the platform
+        """
+        return self.properties['platform']
+
+    @property
+    def instrument(self) -> str:
+        """
+        :returns: the instrument
+        """
+        return self.properties['instrument']
+
+    @property
+    def processing_level(self) -> str:
+        """
+        :returns: the processingLevel
+        """
+        return self.properties['processingLevel']
+
+    @property
+    def sensor_mode(self) -> str:
+        """
+        :returns: the sensorMode
+        """
+        return self.properties['sensorMode']
+
+    @property
+    def start_date(self) -> str:
+        """
+        :returns: the startDate
+        """
+        return self.properties['startDate']
+
+    @property
+    def completion_date(self) -> str:
+        """
+        :returns: the completionDate
+        """
+        return self.properties['completionDate']
+
+    @property
+    def updated(self) -> str:
+        """
+        :returns: the updated
+        """
+        return self.properties['updated']
+
+    @property
+    def resolution(self) -> str:
+        """
+        :returns: the resolution
+        """
+        return self.properties['resolution']
+
+    @property
+    def orbitNumber(self) -> str:
+        """
+        :returns: the orbitNumber
+        """
+        return self.properties['orbitNumber']
+
+    @property
     def download_quicklook_url(self) -> str:
         """
         :returns: the quicklook URL
@@ -168,6 +266,13 @@ class RestoFeature(geojson.Feature):
         :returns: the feature productIdentifier.
         """
         return self.properties['productIdentifier']
+
+    @property
+    def product_type(self) -> str:
+        """
+        :returns: the feature productType.
+        """
+        return self.properties['productType']
 
     @property
     def storage(self) -> Optional[str]:

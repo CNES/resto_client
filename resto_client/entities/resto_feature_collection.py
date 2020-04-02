@@ -39,9 +39,9 @@ class RestoFeatureCollection(geojson.FeatureCollection):
             msg = 'Cannot create a feature collection whose type is not FeatureCollection'
             raise TypeError(msg)
 
-        resto_features = [RestoFeature(desc) for desc in feature_coll_descr['features']]
+        self.resto_features = [RestoFeature(desc) for desc in feature_coll_descr['features']]
         super(RestoFeatureCollection, self).__init__(properties=feature_coll_descr['properties'],
-                                                     features=resto_features)
+                                                     features=self.resto_features)
 
     @property
     def identifier(self) -> str:
@@ -79,6 +79,19 @@ class RestoFeatureCollection(geojson.FeatureCollection):
         :returns: the identifiers of all features in this feature collection
         """
         return [feature.product_identifier for feature in self.features]
+
+    def get_feature(self, feature_id: str) -> RestoFeature:
+        """
+        Get the feature from this features collection with the requested id
+
+        :param feature_id: identifier of the feature to retrieve
+        :returns: a resto feature
+        :raises KeyError: when no feature with the specified identifier can be found.
+        """
+        result = [feat for feat in self.resto_features if feat.product_identifier == feature_id]
+        if len(result) != 1:
+            raise KeyError(f'No feature found with id: {feature_id}')
+        return result[0]
 
     def write_json(self, dir_path: Path) -> Path:
         """
