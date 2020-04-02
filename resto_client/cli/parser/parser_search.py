@@ -56,8 +56,8 @@ def get_table_help_criteria() -> str:
         title_help = 'Following criteria are supported by all resto servers:'
     else:
         protocol_name = DB_SERVERS.get_server(persisted_server_name).resto_access.protocol
-        msg = 'Current {} server supports the following criteria (defined in the Resto API):'
-        title_help = msg.format(persisted_server_name)
+        title_help = f'Current {persisted_server_name} server'
+        title_help += ' supports the following criteria (defined in the Resto API):'
 
     dict_to_print = get_criteria_for_protocol(protocol_name)
 
@@ -108,7 +108,7 @@ def criteria_args_fitter(criteria: Optional[dict]=None,
                 try:
                     criteria_dict[criterion[0]] = criterion[1]
                 except IndexError:
-                    msg_err = 'No value given for the following criterion : {}'.format(criterion[0])
+                    msg_err = f'No value given for the following criterion : {criterion[0]}'
                     raise RestoClientUserError(msg_err)
 
     if maxrecords is not None:
@@ -146,18 +146,17 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
         elif not features_collection.all_id:
             page_search = criteria_dict.get('page', 1)
             if page_search > 1:
-                msg_search = msg_no_result + 'at page {}, try a lower page number'
-                resto_client_print(msg_search.format(page_search))
+                msg_search = msg_no_result + f'at page {page_search}, try a lower page number'
+                resto_client_print(msg_search)
             else:
-                resto_client_print(msg_no_result + 'found with criteria : {}'.format(criteria_dict))
+                resto_client_print(msg_no_result + f'found with criteria : {criteria_dict}')
         else:
             search_feature_id = features_collection.all_id
             resto_client_print("\n".join(features_collection.all_id))
-            msg_search = '{} results shown on a total of '
-            msg_search += Style.BRIGHT + ' {} results ' + Style.NORMAL + 'beginning at index {}'
-            resto_client_print(msg_search.format(len(features_collection.all_id),
-                                                 features_collection.total_results,
-                                                 features_collection.start_index))
+            msg_search = f'{len(features_collection.all_id)} results shown on a total of '
+            msg_search += Style.BRIGHT + f' {features_collection.total_results} results '
+            msg_search += Style.NORMAL + f'beginning at index {features_collection.start_index}'
+            resto_client_print(msg_search)
         resto_client_print(Style.RESET_ALL)
 
     download_dir = Path(client_params.download_dir)
@@ -165,7 +164,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     if record_json and resto_server.server_name is not None:
         json_path = resto_server.ensure_server_directory(download_dir)
         json_search_file = features_collection.write_json(json_path)
-        resto_client_print('Search saved in {}'.format(json_search_file))
+        resto_client_print(f'Search saved in {json_search_file}')
 
     download = get_from_args(DOWNLOAD_ARGNAME, args)
     if download and search_feature_id is not None:
