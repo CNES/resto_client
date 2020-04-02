@@ -16,7 +16,6 @@ from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 
 from colorama import Fore, Style, colorama_text
 from prettytable import PrettyTable
@@ -27,6 +26,7 @@ from resto_client.cli.resto_client_parameters import RestoClientParameters
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
 from resto_client.entities.resto_feature import KNOWN_FILES_TYPES
+from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.functions.aoi_utils import find_region_choice
 from resto_client.settings.resto_client_config import resto_client_print
 from resto_client.settings.servers_database import DB_SERVERS
@@ -36,6 +36,18 @@ from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
                             collection_option_parser, CliFunctionReturnType)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME, JSON_ARGNAME)
+from typing import Optional, Dict, Any  # @UnusedImport @NoMove
+
+
+def display_features_on_lines(features_to_display: RestoFeatureCollection) -> str:
+    """
+    :returns: display one item of the list per line with title
+    """
+    final_display = str()
+    for feature_id in features_to_display.all_id:
+        feature = features_to_display.get_feature(feature_id)
+        final_display += f'{feature_id} : {feature.title}\n'
+    return final_display
 
 
 def get_table_help_criteria() -> str:
@@ -144,13 +156,11 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
                 resto_client_print(msg_no_result + f'found with criteria : {criteria_dict}')
         else:
             search_feature_id = features_collection.all_id
-            resto_client_print("\n".join(features_collection.all_id))
+            resto_client_print(display_features_on_lines(features_collection))
             msg_search = f'{len(features_collection.all_id)} results shown on a total of '
             msg_search += Style.BRIGHT + f' {features_collection.total_results} results '
             msg_search += Style.NORMAL + f'beginning at index {features_collection.start_index}'
             resto_client_print(msg_search)
-            for feature_id in search_feature_id:
-                print(features_collection.get_feature(feature_id))
         resto_client_print(Style.RESET_ALL)
 
     download_dir = Path(client_params.download_dir)
