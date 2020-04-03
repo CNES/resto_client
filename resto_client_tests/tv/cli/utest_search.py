@@ -163,6 +163,30 @@ class UTestCliSearch(TestRestoClientCli):
         self.assertIn(' 3 results ', output)
         self.assertIn('beginning at index 1', output)
 
+    def test_n_search_with_region(self) -> None:
+        """
+        Unit test of search with region
+        """
+        command = ['search', '--criteria', 'platform:SPOT 4', '--region=bretagne',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn('{}'.format(id_kalideos), output)
+
+    def test_n_search_set_region(self) -> None:
+        """
+        Unit test of search with region already set
+        """
+
+        resto_client_run(arguments=['set', 'region', 'bretagne'])
+        command = ['search', '--criteria', 'platform:SPOT 4',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn('{}'.format(id_kalideos), output)
+
     def test_d_search(self) -> None:
         """
         Unit test of search in degraded cases (no result found)
