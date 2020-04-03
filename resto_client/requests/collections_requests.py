@@ -50,21 +50,16 @@ class SearchCollectionRequest(RestoJsonRequest):
     request_action = 'searching'
     resto_response_cls = FeatureCollectionResponse
 
-    def __init__(self, service: 'RestoService',
-                 collection: str, criteria: Optional[RestoCriteria] = None) -> None:
+    def __init__(self, service: 'RestoService', collection: str, criteria: RestoCriteria) -> None:
         """
         Constructor
 
         :param service: resto service
         :param collection: collection name
-        :param criteria: give all criteria for search using a dictionnary
+        :param criteria: the criteria to use for the search
         """
-        # initiate request with asking number of total items
-        criteria_url = '_rc=true&'
-        # TODO: move as a method of RestoCriteria?
-        if criteria is not None:
-            for key, value in criteria.items():
-                criteria_url += '{}={}&'.format(key, value)
+        # build criteria url part while asking total number of items
+        criteria_url = f'_rc=true&{criteria.as_url_str()}'
         super(SearchCollectionRequest, self).__init__(service,
                                                       collection=collection,
                                                       criteria_url=criteria_url)
