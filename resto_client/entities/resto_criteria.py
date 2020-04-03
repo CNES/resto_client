@@ -32,8 +32,6 @@ class RestoCriteria(dict):
 
         :param resto_protocol : name of the resto protocol or None for common criteria.
         :param dict kwargs : dictionary in keyword=value form
-        :raises IndexError: if no service protocol given
-        :raises RestoClientUserError: if a criterion is not in criteria key list
         """
         self.supported_criteria = get_criteria_for_protocol(resto_protocol)
 
@@ -145,6 +143,7 @@ class RestoCriteria(dict):
                     return key_to_test
             # if not found raise criterion error
             msg = 'Criterion {} not supported by this resto server'.format(key)
-            msg += ', choose from the following list: {}'.format(self.supported_criteria)
+            msg += ', choose from the following list: '
+            msg += '{}'.format(list(self.supported_criteria.keys()))
             raise RestoClientUserError(msg)
         return key

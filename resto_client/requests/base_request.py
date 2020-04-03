@@ -12,29 +12,33 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from urllib.parse import urljoin
-
-from typing import Optional, Union, Dict, TYPE_CHECKING  # @UnusedImport @NoMove
+from typing import Optional, Union, Dict, Callable  # @NoMove @UnusedImport
 
 from colorama import Fore, Style, colorama_text
-from requests import post, Response
-from requests.auth import HTTPBasicAuth
+import requests
 from requests.exceptions import HTTPError, SSLError
 
-from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.base_exceptions import (RestoNetworkError,
+                                          RestoClientEmulatedResponse,
+                                          NetworkAccessDeniedError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
+from resto_client.entities.resto_feature import RestoFeature
+from resto_client.responses.resto_json_response import RestoJsonResponseSimple
+from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
 from resto_client.services.base_service import BaseService
 
-from .utils import AccesDeniedError, get_response
+from .authenticator import Authenticator
 
 
-if TYPE_CHECKING:
-    from resto_client.responses.resto_response import RestoResponse  # @UnusedImport
+RestoEntities = Union[RestoFeature, RestoCollection, RestoCollections]
+
+RestoRequestResult = Union[RestoEntities, RestoResponse, RestoJsonResponseSimple]
 
 
-class BaseRequest(ABC):
+class BaseRequest(Authenticator):
     """
      Base class for all service Requests
     """
@@ -46,6 +50,13 @@ class BaseRequest(ABC):
         :returns: the action performed by this request.
         """
 
+    @property
+    def authentication_type(self) -> str:
+        """
+        :returns: the authentication type of this request (NEVER or ALWAYS or OPPORTUNITY)
+        """
+        return self.parent_service.service_access.get_authentication(self)
+
     def __init__(self, service: BaseService, **url_kwargs: str) -> None:
         """
         Constructor
@@ -54,117 +65,183 @@ class BaseRequest(ABC):
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
         :raises TypeError: if the service argument is not derived from :class:`BaseService`.
         """
-        # FIXME: Could it be better to check that the route is supported at creation time?
-        # Problem: routes for DOnwloadRequests are not parameterized, but come from json response
-        self.headers: Dict[str, str] = {}
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
             raise TypeError(msg_err.format(type(service)))
         self.parent_service = service
-        self.service_access = self.parent_service.service_access
-        self.auth_service = self.parent_service.auth_service
-        self._url_kwargs = url_kwargs
-        if self.parent_service.parent_server.debug_server:
+        self.debug = self.parent_service.parent_server.debug_server
+        if self.debug:
             with colorama_text():
                 msg = 'Building request {} for {}'.format(type(self).__name__,
-                                                          self.service_access.base_url)
+                                                          self.parent_service.get_base_url())
                 print(Fore.CYAN + msg + Style.RESET_ALL)
+        self._request_headers: Dict[str, str] = {}
+        self._request_result: requests.Response
+        self._url_kwargs = url_kwargs
+        Authenticator.__init__(self, self.parent_service.auth_service)
 
-    def get_route(self) -> Optional[str]:
+    def get_server_name(self) -> str:
         """
-        :returns: True if this request type is supported by the service, False otherwise.
+        :returns: the name of the server which uses this request.
         """
-        return self.service_access.get_route_pattern(self)
+        return self.parent_service.parent_server.server_name
 
-    def supported_by_service(self) -> bool:
+    def get_route(self) -> str:
         """
-        :returns: True if this request type is supported by the service, False otherwise.
+        :returns: The route pattern of this request
         """
-        return self.get_route() is not None
+        return self.parent_service.service_access.get_route_pattern(self)
+
+    def get_method(self) -> str:
+        """
+        :returns: The method to be used for sending this request
+        """
+        return self.parent_service.service_access.get_method(self)
+
+    def get_accept(self) -> str:
+        """
+        :returns: The accepted response format to be used for sending this request
+        """
+        return self.parent_service.service_access.get_accept(self)
+
+    def get_streamed(self) -> bool:
+        """
+        :returns: The stream flag to be used for sending this request
+        """
+        return self.parent_service.service_access.get_streamed(self)
+
+    def get_protocol(self) -> str:
+        """
+        :returns: The protocol of this request
+        """
+        return self.parent_service.get_protocol()
 
     def get_url(self) -> str:
         """
         :returns: full url for this request
-        :raises RestoClientDesignError: when the request is unsupported by the service
         """
         url_extension = self.get_route()
-        if url_extension is None:
-            msg_fmt = 'Trying to build an URL for {} request, unsupported by the service.'
-            raise RestoClientDesignError(msg_fmt.format(type(self).__name__))
-        return urljoin(self.service_access.base_url,
+        return urljoin(self.parent_service.get_base_url(),
                        url_extension.format(**self._url_kwargs))
 
-    def set_headers(self, dict_input: Optional[dict]=None) -> None:
+    def update_headers(self, dict_input: Optional[dict]=None) -> None:
         """
-        Set headers with dic_input
+        Update the headers with dict_input and with authorization header
 
-        :param dict_input: entry to add in headers
+        :param dict_input: entries to add in headers
         """
         if dict_input is not None:
-            self.headers = dict_input
+            self._request_headers.update(dict_input)
+        self.update_authorization_headers(self._request_headers)
+
+# ++++++++++++++ Request runner +++++++++++++++++++++++++++++
 
     @abstractmethod
-    def run(self) -> Union['RestoResponse', str, bool, RestoCollection, RestoCollections, None,
-                           Response]:
+    def run(self) -> RestoRequestResult:
         """
-        Submit the request and provide its result
+        THis is the main method of the request runner. Subclasses should override this method
+        only for specifying the right return type that they are committed to return and which
+        may differ from one request to the other.
 
-        :returns: an object of base type (bool,, str) or of a type from resto_client.entities
+        This method run the request in 3 steps :
+
+        1. prepare the request. This must set _request_headers attribute to the desired state
+        2. run the request. The request result is made available in  _request_result attribute
+        3. process the request result
+
+        Each of these steps is implemented by a dedicated method, and these are the only methods
+        which should be overridden by the client classes.
+
+        A special processing is done for what concerns exception handling:
+
+        1- if request preparation raises a RestoClientEmulatedResponse, the request response
+           is directly returned from the 'result' attribute of that exception
+        2- TBD
+
+        :returns: an object of one the types defined by RestoRequestResult,
                   directly usable by resto_client.
         """
-
-    @property
-    def http_basic_auth(self) -> Optional[HTTPBasicAuth]:
-        """
-        The default basic HTTP authorization for the service (None)
-        """
-
-    @property
-    def authorization_data(self) -> Optional[Dict[str, Optional[str]]]:
-        """
-        The default authorization data for the service (None)
-        """
-
-    def get_as_json(self) -> Union[dict, list, str, int, float, bool, None]:
-        """
-         This create and execute a GET request and return the response content interpreted as json
-         or None if no json can be found
-        """
-        headers_with_json = {}
-        if self.headers is not None:
-            headers_with_json.update(self.headers)
-        headers_with_json.update({'Accept': 'application/json'})
-        result = get_response(self.get_url(), self.request_action,
-                              headers=headers_with_json, auth=self.http_basic_auth)
-        return result.json()
-
-    def post_as_text(self, stream: bool=False) -> Optional[str]:
-        """
-         This create and execute a POST request and return the response content interpreted as text
-         or None if no text can be found
-        """
-        result = self.post(stream=stream)
-        response_text = result.text
-        if response_text == 'Please set mail and password':
-            msg = 'Connection Error : "{}", connection not allowed with ident/pass given'
-            raise AccesDeniedError(msg.format(response_text))
-        return response_text
-
-    def post(self, stream: bool=False) -> Response:
-        """
-         This create and execute a POST request and return the response content
-        """
-
         try:
-            if 'Authorization' in self.headers:
-                result = post(self.get_url(), headers=self.headers,
-                              stream=stream)
-            else:
-                result = post(self.get_url(), headers=self.headers, auth=self.http_basic_auth,
-                              stream=stream, data=self.authorization_data)
+            self.finalize_request()
+            # FIXME: filter https protocol exceptions and send others to process_request_result
+            self.run_request()
+            return self.process_request_result()
+        except RestoClientEmulatedResponse as excp:
+            return excp.result
+
+    def finalize_request(self) -> None:
+        """
+        Prepare the request before running it. This method may be overidden by client classes to
+        set the headers or change the URL in order to fulfill their needs.
+        Base class method update the headers, possibly setting the authentication headers and
+        checks that the route is available.
+        """
+        self.update_headers(dict_input={'Accept': self.get_accept()})
+        self.get_route()  # Will trigger an exception if the route is undefined
+
+    def run_request(self) -> None:
+        """
+        Run the requests. This method may be overidden by client classes to select the method that
+        suit their needs. Default is submitting a get request, requesting json response.
+        """
+        streamed = self.get_streamed()
+        if self.get_method() == 'post':
+            self._run_request_post(stream=streamed)
+        else:
+            self._run_request_get(stream=streamed)
+
+    @abstractmethod
+    def process_request_result(self) -> RestoRequestResult:
+        """
+        Method to be implemented by each request in order to process the content of the request
+        response (self._request_result) and return a valid RestoRequestResult.
+        """
+
+    def _run_request_post(self, stream: bool=False) -> None:
+        """
+        Create and execute a POST request and store the response content
+
+        :param stream: If True, only the response header will be retrieved, allowing to drive
+                       the retrieval of the full response body within process_request_result()
+        """
+        self._do_run_request(requests.post, stream=stream)
+
+    def _run_request_get(self, stream: bool=False) -> None:
+        """
+        Create and execute a GET request and store the response content
+
+        :param stream: If True, only the response header will be retrieved, allowing to drive
+                       the retrieval of the full response body within process_request_result()
+        """
+        self._do_run_request(requests.get, stream=stream)
+
+    def _do_run_request(self, method: Callable[..., requests.Response], stream: bool=False) -> None:
+        """
+        Send the request using the specified method and stores the response content
+
+        :param method: method to use for sending the request: requests.get() or requests.post()
+        :param stream: If True, only the response header will be retrieved, allowing to drive
+                       the retrieval of the full response body within process_request_result()
+        :raises NetworkAccessDeniedError: if the request was refused because of a forbidden access.
+        :raises RestoNetworkError: for other exceptions
+        """
+        auth_arg, data_arg = self._get_authentication_arguments(self._request_headers)
+        result = None
+        try:
+            result = method(self.get_url(),
+                            headers=self._request_headers, stream=stream,
+                            auth=auth_arg, data=data_arg)
             result.raise_for_status()
+
         except (HTTPError, SSLError) as excp:
-            msg = 'Error {} when {} {}.'
-            raise Exception(msg.format(result.status_code, self.request_action,
-                                       self.get_url())) from excp
-        return result
+            if result is not None:
+                self._request_result = result
+                # FIXME: Processing to be made by process_request_result of client classes
+                msg = 'Error {} when {} for {}.'.format(self._request_result.status_code,
+                                                        self.request_action, self.get_url())
+                if self._request_result.status_code == 403:
+                    raise NetworkAccessDeniedError(msg) from excp
+            else:
+                msg = 'Error when {} for {}.'.format(self.request_action, self.get_url())
+            raise RestoNetworkError(msg) from excp
+        self._request_result = result

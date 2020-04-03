@@ -18,6 +18,7 @@ from typing import Iterable, Optional, Callable
 from typing import List  # @UnusedImport
 
 from resto_client.settings.dict_settings import DictSettingsJson
+from resto_client.settings.resto_client_config import resto_client_print
 
 
 def persist_settings(settings: Iterable[DictSettingsJson],
@@ -40,12 +41,12 @@ def persist_settings(settings: Iterable[DictSettingsJson],
             if last_chance_update_func is not None:
                 last_chance_update_func(setting)
             if print_settings:
-                print(setting)
+                resto_client_print(setting)
             setting.save()
 
     for setting in settings:
         if print_settings:
-            print(setting)
+            resto_client_print(setting)
         persisted_settings.append(setting)
 
     atexit.register(_save_settings)

@@ -14,13 +14,16 @@
 """
 from abc import abstractmethod
 import copy
-from typing import Dict, List, Any, Optional  # @UnusedImport
+from typing import Dict, List, Any, Optional, TYPE_CHECKING  # @UnusedImport
 import warnings
 
-from resto_client.requests.base_request import BaseRequest
+from resto_client.base_exceptions import InvalidResponse
 
 from .resto_response import RestoResponse
-from .resto_response_error import RestoResponseError
+
+
+if TYPE_CHECKING:
+    from resto_client.requests.base_request import BaseRequest  # @UnusedImport
 
 
 class RestoJsonResponse(RestoResponse):
@@ -28,13 +31,12 @@ class RestoJsonResponse(RestoResponse):
      Json responses received from Resto.
     """
 
-    def __init__(self, request: BaseRequest, response: dict) -> None:
+    def __init__(self, request: 'BaseRequest', response: dict) -> None:
         """
         Constructor
 
         :param request: the parent request of this response
         :param response: the response received from the server and structured as a dict.
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
         """
         super(RestoJsonResponse, self).__init__(request)
 
@@ -49,12 +51,14 @@ class RestoJsonResponse(RestoResponse):
         """
         Verify that the response is a valid resto response for this class.
 
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
+        :raises InvalidResponse: if the dictionary does not contain a valid Resto response.
         """
 
     def normalize_response(self) -> None:
         """
         Returns a normalized response whose structure does not depend on the server.
+
+        This method should be overidden by client classes. Default is to copy the original response.
         """
         self._normalized_response = copy.deepcopy(self._original_response)
 
@@ -74,25 +78,37 @@ class RestoJsonResponseSimple(RestoJsonResponse):
     @abstractmethod
     def needed_fields(self) -> List[str]:
         """
+
         :returns: the field names that the response must contain
+        """
+
+    @property
+    @abstractmethod
+    def optional_fields(self) -> List[str]:
+        """
+        :returns: the field names that the response contains optionally
         """
 
     def identify_response(self) -> None:
         """
         Verify that the response is a valid resto response for this class.
 
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
+        :raises InvalidResponse: if the dictionary does not contain a valid Resto response.
         """
+        # First verify that all needed fields are present. Raise an exception when some are missing
         for field in self.needed_fields:
             if field not in self._original_response:
-                msg = 'Response to {} does not contain a {} field. Available fields: {}'
-                raise RestoResponseError(msg.format(self.request_name, field,
-                                                    self._original_response.keys()))
+                msg = 'Response to {} does not contain a "{}" field. Available fields: {}'
+                raise InvalidResponse(msg.format(self.request_name, field,
+                                                 self._original_response.keys()))
 
+        # Then check that no other entries than those defined as needed or optional
+        # are contained in the response. Issue a warning if not when in debug mode.
         response = copy.deepcopy(self._original_response)
-        # Check that no other entries are contained in the response. Issue a warning if not.
         for field in self.needed_fields:
             response.pop(field)
-        if response.keys() and self._parent_request.parent_service.parent_server.debug_server:
+        for field in self.optional_fields:
+            response.pop(field, None)
+        if response.keys() and self._parent_request.debug:  # type: ignore
             msg = '{} response contains unknown entries: {}.'
             warnings.warn(msg.format(self.request_name, response))

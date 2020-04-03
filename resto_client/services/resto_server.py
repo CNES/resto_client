@@ -15,10 +15,7 @@
 from pathlib import Path
 from typing import Optional, TypeVar, List, Union, Dict, Any
 
-from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_collection import RestoCollection
-from resto_client.entities.resto_criteria import RestoCriteria
-from resto_client.entities.resto_criteria_definition import CriteriaDictType
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.settings.servers_database import DB_SERVERS
@@ -53,60 +50,18 @@ class RestoServer():
         :param debug_server: When True debugging information on server and requests is printed out.
         """
         self.debug_server = debug_server
-        self._authentication_service: Optional[AuthenticationService] = None
-        self._resto_service: Optional[RestoService] = None
-        self._server_name: Optional[str] = None
 
-        # set server_name which triggers server creation from the database if not None.
-        self.server_name = server_name
-
-        self.current_collection = current_collection
-        self.set_credentials(username=username, password=password, token_value=token)
-
-    def _init_from_db(self) -> None:
-        """
-        Initialize or reinitialize the server from the servers database
-        """
-        server_description = DB_SERVERS.get_server(self._server_name)  # type: ignore
-        self._authentication_service = AuthenticationService(server_description.auth_access, self)
+        # initialize the services
+        self._server_name = DB_SERVERS.check_server_name(server_name)
+        server_description = DB_SERVERS.get_server(self._server_name)
+        self._authentication_service = AuthenticationService(server_description.auth_access,
+                                                             self)
         self._resto_service = RestoService(server_description.resto_access,
                                            self._authentication_service, self)
 
-# +++++++++++++++++++++++ server properties section ++++++++++++++++++++++++++++++++++++
-    @property
-    def server_name(self) -> Optional[str]:
-        """
-        :returns: the name of the server
-        """
-        return self._server_name
-
-    @server_name.setter
-    def server_name(self, server_name: Optional[str]) -> None:
-        if server_name is not None:
-            canonical_server_name = DB_SERVERS.check_server_name(server_name)
-            if canonical_server_name != self._server_name:
-                self._server_name = canonical_server_name
-                self._init_from_db()
-                self.current_collection = None  # Not None in case there is a single collection
-                self.reset_credentials()
-        else:
-            self._server_name = None
-            self._authentication_service = None
-            self._resto_service = None
-
-    @property
-    def current_collection(self) -> Optional[str]:
-        """
-        :returns: the current collection
-        """
-        if self._resto_service is None:
-            return None
-        return self._resto_service.current_collection
-
-    @current_collection.setter
-    def current_collection(self, collection_name: Optional[str]) -> None:
-        if self._resto_service is not None:
-            self._resto_service.current_collection = collection_name
+        # set services parameters
+        self.current_collection = current_collection
+        self.set_credentials(username=username, password=password, token_value=token)
 
     def set_credentials(self,
                         username: Optional[str]=None,
@@ -119,47 +74,45 @@ class RestoServer():
         :param password: account password
         :param token_value: a token associated to these credentials
         """
-        if self._authentication_service is not None:
-            self._authentication_service.set_credentials(username=username,
-                                                         password=password,
-                                                         token_value=token_value)
+        self._authentication_service.set_credentials(username=username,
+                                                     password=password,
+                                                     token_value=token_value)
 
     def reset_credentials(self) -> None:
         """
         Reset the credentials used by the authentication service.
         """
-        if self._authentication_service is not None:
-            self._authentication_service.reset_credentials()
+        self._authentication_service.reset_credentials()
+
+# +++++++++++++++++++++++ server properties section ++++++++++++++++++++++++++++++++++++
+    @property
+    def current_collection(self) -> Optional[str]:
+        """
+        :returns: the current collection
+        """
+        return self._resto_service.current_collection
+
+    @current_collection.setter
+    def current_collection(self, collection_name: Optional[str]) -> None:
+        self._resto_service.current_collection = collection_name
 
 # +++++++++++ read only properties +++++++++++
+
+    @property
+    def server_name(self) -> str:
+        """
+        :returns: the name of the server
+        """
+        return self._server_name
 
     @property
     def username(self) -> Optional[str]:
         """
         :returns: the username to use with this server
         """
-        if self._authentication_service is None:
-            return None
         return self._authentication_service.username
 
-    @property
-    def token(self) -> Optional[str]:
-        """
-        :return: the token value currently active on this server, or None.
-        """
-        if self._authentication_service is None:
-            return None
-        return self._authentication_service.token
-
 # +++++++++++++++++++++++ proxy to resto_service functions ++++++++++++++++++++++++++++++++++++
-
-    def get_supported_criteria(self) -> CriteriaDictType:
-        """
-        :returns: the supported criteria definition
-        """
-        if self._resto_service is not None:
-            return self._resto_service.get_supported_criteria()
-        return RestoCriteria(None).supported_criteria
 
     def search_by_criteria(self, criteria: Dict[str, Any],
                            collection_name: Optional[str] = None) -> RestoFeatureCollection:
@@ -169,10 +122,7 @@ class RestoServer():
         :param criteria: searching criteria
         :param collection_name: name of the collection to use. Default to the current collection.
         :returns: a collection of resto features
-        :raises RestoClientUserError: when the resto service is not initialized
         """
-        if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
         return self._resto_service.search_by_criteria(criteria, collection_name)
 
     def get_features_from_ids(self, features_ids: Union[str, List[str]],
@@ -183,10 +133,7 @@ class RestoServer():
         :param features_ids: Feature(s) identifier(s)
         :param collection_name: name of the collection to use. Default to the current collection.
         :returns: a list of Resto features
-        :raises RestoClientUserError: when the resto service is not initialized
         """
-        if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
         features_list = []
         if not isinstance(features_ids, list):
             features_ids = [features_ids]
@@ -198,45 +145,37 @@ class RestoServer():
         return features_list
 
     def download_feature_file(self, feature: RestoFeature,
-                              file_type: str, download_dir: Path) -> Optional[str]:
+                              file_type: str, download_dir: Path) -> None:
         """
         Download different files of a feature
 
         :param feature: a resto feature
         :param download_dir: the path to the directory where download must be done.
         :param file_type: type of file to download: product, quicklook, thumbnail or annexes
-        :returns: the path of the downloaded file
-        :raises RestoClientUserError: when the resto service is not initialized
         """
-        if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
-        return self._resto_service.download_feature_file(
-            feature, file_type, self._ensure_server_directory(download_dir))
+        self._resto_service.download_feature_file(feature,
+                                                  file_type,
+                                                  self.ensure_server_directory(download_dir))
 
     def download_features_file_from_ids(self,
                                         features_ids: Union[str, List[str]],
                                         file_type: str,
-                                        download_dir: Path) -> List[str]:
+                                        download_dir: Path) -> None:
         """
         Download different file types from feature id(s)
 
         :param features_ids: id(s) of the feature(s) which as a file to download
         :param download_dir: the path to the directory where download must be done.
         :param file_type: type of file to download: product, quicklook, thumbnail or annexes
-        :returns: the list of downloaded files paths
         """
         # Issue a search request into the collection to retrieve features.
         features = self.get_features_from_ids(features_ids)
 
-        downloaded_filenames: List[str] = []
         for feature in features:
             # Do download
-            downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
-            if downloaded_filename is not None:
-                downloaded_filenames.append(downloaded_filename)
-        return downloaded_filenames
+            self.download_feature_file(feature, file_type, download_dir)
 
-    def _ensure_server_directory(self, data_dir: Path) -> Path:
+    def ensure_server_directory(self, data_dir: Path) -> Path:
         """
         Build the server data directory path by appending the server name to the provided argument.
         Creates also that directory if it does not exist yet.
@@ -245,8 +184,6 @@ class RestoServer():
         :returns: the path to the server data directory
         :raises RestoClientDesignError: when called while this server parameters are undefined.
         """
-        if self.server_name is None:
-            raise RestoClientDesignError('cannot ensure data_dir when RestoServer is undefined')
         real_data_dir = data_dir / self.server_name
         real_data_dir.mkdir(parents=True, exist_ok=True)
         return real_data_dir
@@ -255,10 +192,7 @@ class RestoServer():
         """
         :param  with_stats: if True the collections statistics are shown.
         :returns: The server description as a tabulated listing
-        :raises RestoClientUserError: when the resto service is not initialized
         """
-        if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
         return self._resto_service.show(with_stats=with_stats)
 
     def get_collection(self, collection: Optional[str]=None) -> RestoCollection:
@@ -267,12 +201,11 @@ class RestoServer():
 
         :param collection: the name of the collection to retrieve
         :returns: the requested collection or the current one.
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
-        if self._resto_service is None:
-            raise RestoClientUserError('No resto service currently defined.')
         return self._resto_service.get_collection(collection=collection)
 
     def __str__(self) -> str:
-        msg_fmt = 'server_name: {}, current_collection: {}, username: {}, token: {}'
-        return msg_fmt.format(self._server_name, self.current_collection, self.username, self.token)
+        msg_fmt = 'server_name: {} \n{}{}'
+        return msg_fmt.format(self._server_name,
+                              str(self._resto_service),
+                              str(self._authentication_service))

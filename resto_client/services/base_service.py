@@ -38,7 +38,6 @@ class BaseService(ABC):
         :param service_access: Service access.
         :param auth_service: Authentication service associated to this service.
         :param parent_server: The server which uses this service.
-        :raises RestoClientDesignError: when service_access is not of the right type
         """
         self.service_access = service_access
         self._auth_service = auth_service
@@ -56,9 +55,16 @@ class BaseService(ABC):
         self._auth_service = auth_service
 
     def __str__(self) -> str:
-        result = str(self.service_access)
-        if self.auth_service == self:
-            result += '    associated authentication service : self'
-        else:
-            result += '    associated authentication service : {}'.format(self.auth_service)
-        return result
+        return str(self.service_access)
+
+    def get_base_url(self) -> str:
+        """
+        :returns: the base URL of the service.
+        """
+        return self.service_access.base_url
+
+    def get_protocol(self) -> str:
+        """
+        :returns: the protocol of the service.
+        """
+        return self.service_access.protocol

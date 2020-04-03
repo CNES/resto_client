@@ -14,9 +14,10 @@
 """
 from abc import ABC, abstractmethod
 
-from typing import Any
+from typing import Any, Optional, TYPE_CHECKING
 
-from resto_client.requests.base_request import BaseRequest
+if TYPE_CHECKING:
+    from resto_client.requests.base_request import BaseRequest  # @UnusedImport
 
 
 class RestoResponse(ABC):
@@ -24,17 +25,12 @@ class RestoResponse(ABC):
      Base class for all Resto Responses classes.
     """
 
-    def __init__(self, request: BaseRequest) -> None:
+    def __init__(self, request: 'BaseRequest') -> None:
         """
         Constructor
 
         :param request: the parent request of this response
-        :raises TypeError: if the first argument is not of the right type (BaseRequest)
         """
-        if not issubclass(type(request), BaseRequest):
-            msg_err = 'request argument type must derive from: {}. Found a {} type which is not.'
-            base_type_name = BaseRequest.__name__  # @UndefinedVariable
-            raise TypeError(msg_err.format(base_type_name, type(request).__name__))
         self._parent_request = request
 
     @property
@@ -49,3 +45,14 @@ class RestoResponse(ABC):
         """
         :returns: the response expressed as a Resto object
         """
+
+    @property
+    def detected_protocol(self) -> Optional[str]:
+        """
+        :returns: the protocol of this response
+        """
+        return self._parent_request.parent_service.service_access.detected_protocol
+
+    @detected_protocol.setter
+    def detected_protocol(self, protocol: Optional[str]) -> None:
+        self._parent_request.parent_service.service_access.detected_protocol = protocol

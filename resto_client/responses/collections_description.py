@@ -13,14 +13,14 @@
    limitations under the License.
 """
 import copy
-
 from typing import Optional
 
+from resto_client.base_exceptions import (InconsistentResponse,
+                                          IncomprehensibleResponse)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 
 from .resto_json_response import RestoJsonResponse
-from .resto_response_error import RestoResponseError
 
 
 OSDESCRIPTION_KEYS = ['ShortName', 'LongName', 'Description'
@@ -70,7 +70,7 @@ class CollectionsDescription(RestoJsonResponse):
         """
         Verify that the response is a valid resto response for this class and set the resto type
 
-        :raises RestoResponseError: if the dictionary does not contain a valid Resto response.
+        :raises InconsistentResponse: if the dictionary does not contain a valid Resto response.
         """
         detected_protocol = None
         # Find which kind of Resto server we could have
@@ -87,22 +87,22 @@ class CollectionsDescription(RestoJsonResponse):
                     if 'facets' in statistics_desc and 'count' in statistics_desc:
                         detected_protocol = 'theia_version'
 
-        self._parent_request.service_access.detected_protocol = detected_protocol
+        self.detected_protocol = detected_protocol
         if detected_protocol is None:
-            raise RestoResponseError('Dictionary does not contain a valid Resto response')
-        if self._parent_request.service_access.protocol != detected_protocol:
-            msg = 'Detected a {} response while waiting for a {} response.'
-            protocol = self._parent_request.service_access.protocol
-            raise RestoResponseError(msg.format(detected_protocol, protocol))
+            raise IncomprehensibleResponse('Dictionary does not contain a valid Resto response')
+        if self._parent_request.get_protocol() != detected_protocol:
+            msg_fmt = 'Detected a {} response while waiting for a {} response.'
+            msg = msg_fmt.format(detected_protocol, self._parent_request.get_protocol())
+            raise InconsistentResponse(msg)
 
     def normalize_response(self) -> None:
         """
         Normalize the original response in a response whose structure does not depend on the server.
         """
         result = None
-        if self._parent_request.service_access.detected_protocol == 'theia_version':
+        if self.detected_protocol == 'theia_version':
             result = copy.deepcopy(self._original_response)
-        elif self._parent_request.service_access.detected_protocol == 'peps_version':
+        elif self.detected_protocol == 'peps_version':
             result = {'collections': self._original_response['collections'],
                       'synthesis': {'name': '*',
                                     'osDescription': None,

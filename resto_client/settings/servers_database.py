@@ -13,7 +13,6 @@
    limitations under the License.
 """
 from pathlib import Path
-from typing import Optional
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.services.service_access import AuthenticationServiceAccess, RestoServiceAccess
@@ -51,6 +50,8 @@ WELL_KNOWN_SERVERS = {'kalideos': {RESTO_URL_KEY: 'https://www.kalideos.fr/resto
                                 AUTH_URL_KEY: 'https://theia.cnes.fr/atdistrib/services'
                                 '/authenticate/',
                                 AUTH_PROTOCOL_KEY: 'sso_theia'},
+                      # FIXME:
+                      # https://auth.creodias.eu/auth/realms/DIAS/protocol/openid-connect/token
                       'creodias': {RESTO_URL_KEY: 'https://finder.creodias.eu/resto/',
                                    RESTO_PROTOCOL_KEY: 'theia_version',
                                    AUTH_URL_KEY: 'https://finder.creodias.eu/resto/',
@@ -163,16 +164,18 @@ class ServersDatabase():
             msg = 'Server {} does not exist in the servers database'
             raise RestoClientUnexistingServer(msg.format(requested_server_name))
 
-    def check_server_name(self, server_name: str) -> Optional[str]:
+    def check_server_name(self, server_name: str) -> str:
         """
         Check that the server exists in the servers database and returns its canonical name.
 
         :param server_name: name of the server to retrieve in the database
-        :returns: the canonical name of the server or None if it does not exist in the database.
+        :returns: the canonical name of the server.
+        :raises RestoClientUnexistingServer: if no server with that name exists in the database
         """
-        canonical_server_name: Optional[str] = server_name.lower()
+        canonical_server_name = server_name.lower()
         if canonical_server_name not in self.db_servers:
-            canonical_server_name = None
+            msg = 'Server {} does not exist in the servers database'
+            raise RestoClientUnexistingServer(msg.format(canonical_server_name))
         return canonical_server_name
 
     def get_resto_service_protocol(self, server_name: str) -> str:
@@ -189,12 +192,11 @@ class ServersDatabase():
         Delete a server definition corresponding to the specified name.
 
         :param server_name: name of the server to delete in the database
-        :raises RestoClientUnexistingServer: when the server is unknown in the database.
+        :raises RestoClientUnexistingServer: if no server with that name exists in the database
         """
         canonical_server_name = self.check_server_name(server_name)
-        if canonical_server_name is not None:
-            del self.db_servers[canonical_server_name]
-            self.db_servers.save()
+        del self.db_servers[canonical_server_name]
+        self.db_servers.save()
 
     def create_server(self,
                       server_name: str,
@@ -222,15 +224,15 @@ class ServersDatabase():
             msg = 'Invalid server name type. Found {} instead of str'
             raise RestoClientUserError(msg.format(type(server_name)))
 
-        canonical_server_name = self.check_server_name(server_name)
-        if canonical_server_name is not None:
-            # Server already exist
+        try:
+            canonical_server_name = self.check_server_name(server_name)
             msg = 'Server {} already exists in the server database.'
             raise RestoClientUserError(msg.format(canonical_server_name))
-
-        self.db_servers[server_name.lower()] = ServerDescription(resto_access,
-                                                                 auth_access).as_descr()
-        self.db_servers.save()
+        except RestoClientUnexistingServer:
+            # server does not exist so we can create it
+            self.db_servers[server_name.lower()] = ServerDescription(resto_access,
+                                                                     auth_access).as_descr()
+            self.db_servers.save()
 
     def __str__(self) -> str:
         return str(self.db_servers)

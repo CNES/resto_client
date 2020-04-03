@@ -19,12 +19,12 @@ from warnings import warn
 
 from colorama import Fore, Style, colorama_text
 
-from resto_client.base_exceptions import RestoClientDesignError
+from resto_client.base_exceptions import (InconsistentResponse,
+                                          LicenseSignatureRequested,
+                                          RestoClientDesignError)
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
 from resto_client.entities.resto_criteria import RestoCriteria
-from resto_client.entities.resto_criteria_definition import (get_criteria_for_protocol,
-                                                             CriteriaDictType)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
 from resto_client.requests.collections_requests import (GetCollectionsRequest, GetCollectionRequest,
@@ -34,15 +34,16 @@ from resto_client.requests.features_requests import (DownloadAnnexesRequest,
                                                      DownloadQuicklookRequest,
                                                      DownloadThumbnailRequest,
                                                      SignLicenseRequest,
-                                                     LicenseSignatureRequested,
                                                      FeatureOnTape)
 from resto_client.requests.features_requests import DownloadRequestBase  # @UnusedImport
 from resto_client.requests.service_requests import DescribeRequest
+from resto_client.settings.resto_client_config import resto_client_print
 
 from .authentication_service import AuthenticationService
 from .base_service import BaseService
 from .resto_collections_manager import RestoCollectionsManager
 from .service_access import RestoServiceAccess
+
 
 if TYPE_CHECKING:
     from .resto_server import RestoServer  # @UnusedImport
@@ -89,7 +90,6 @@ class RestoService(BaseService):
         """
         Set the current collection
         :param collection_name: collection to use
-        :raises ValueError: when given collection not in server
         """
         self._collections_mgr.current_collection = collection_name
 
@@ -98,18 +98,11 @@ class RestoService(BaseService):
         :returns: The server description as a tabulated listing
         :param  with_stats: if True the collections statistics are shown.
         """
-        out_fmt = 'Server URL: {}\n'
-        out_str = out_fmt.format(self.service_access.base_url)
+        out_str = 'Server URL: {}\n'.format(self.get_base_url())
         out_str += str(self._collections_mgr)
         if with_stats:
             out_str += self._collections_mgr.str_statistics()
         return out_str
-
-    def get_supported_criteria(self) -> CriteriaDictType:
-        """
-        :returns: the supported criteria definition
-        """
-        return get_criteria_for_protocol(self.service_access.protocol)
 
 # ++++++++ From here we have the requests supported by the service ++++++++++++
 
@@ -131,7 +124,6 @@ class RestoService(BaseService):
 
         :param collection: the name of the collection to retrieve
         :returns: the requested collection or the current one.
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         return GetCollectionRequest(self, collection=collection_name).run()
@@ -145,10 +137,9 @@ class RestoService(BaseService):
         :param criteria: the criteria to use for the search
         :param collection: the name of the collection to search
         :returns: the result of the search
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        resto_criteria = RestoCriteria(self.service_access.protocol, **criteria)
+        resto_criteria = RestoCriteria(self.get_protocol(), **criteria)
         return SearchCollectionRequest(self, collection_name, criteria=resto_criteria).run()
 
     def get_feature_by_id(self,
@@ -160,13 +151,12 @@ class RestoService(BaseService):
         :param feature_id: the feature id (not uuid) to search for
         :param collection: the name of the collection to search
         :returns: the requested feature
-        :raises RestoClientUserError: if collection is None and no current collection defined.
         :raises IndexError: when the feature collection does not contain exactly one feature.
-        :raises ValueError: when the retrieved feature has not the right id (case where uuid
-                            incorrectly provided as argument)
+        :raises InconsistentResponse: when the retrieved feature has not the right id
+        (case where uuid incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
-        criteria = RestoCriteria(self.service_access.protocol, identifier=feature_id)
+        criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)
 
         feature_collection = \
             SearchCollectionRequest(self, collection_name, criteria=criteria).run()
@@ -179,8 +169,8 @@ class RestoService(BaseService):
         feature = feature_collection['features'][0]
         if feature_id not in (feature['properties']['productIdentifier'], feature['id']):
             msg = 'Retrieved feature (id : {} / uuid : {}) inconsistent with requested one ({})'
-            raise ValueError(msg.format(feature['properties']['productIdentifier'],
-                                        feature['id'], feature_id))
+            raise InconsistentResponse(msg.format(feature['properties']['productIdentifier'],
+                                                  feature['id'], feature_id))
         return feature
 
     def sign_license(self, license_id: str) -> bool:
@@ -189,14 +179,19 @@ class RestoService(BaseService):
 
         :param license_id: the identifier of the licnese to be signed.
         :returns: True if the license signature was successful
+        :raises InconsistentResponse: when the license has not been signed successfully
         """
-        signature = SignLicenseRequest(self, license_id).run()
+        signature_response = SignLicenseRequest(self, license_id).run()
 
-        if signature:
-            with colorama_text():
-                print(Fore.BLUE + Style.BRIGHT +
-                      'license {} signed successfully'.format(license_id) + Style.RESET_ALL)
-        return signature
+        if not signature_response.is_signed:
+            msg = 'Unable to sign license {}. Reason : {}'
+            raise InconsistentResponse(msg.format(license_id,
+                                                  signature_response.validation_message))
+
+        with colorama_text():
+            msg = 'license {} signed successfully'.format(license_id)
+            resto_client_print(Fore.BLUE + Style.BRIGHT + msg + Style.RESET_ALL)
+        return signature_response.is_signed
 
     DOWNLOAD_REQUEST_CLASSES: Dict[str, Type[DownloadRequestBase]]
     DOWNLOAD_REQUEST_CLASSES = {'product': DownloadProductRequest,
@@ -207,7 +202,7 @@ class RestoService(BaseService):
     def download_feature_file(self,
                               feature: RestoFeature,
                               file_type: str,
-                              download_dir: Path) -> Optional[str]:
+                              download_dir: Path) -> None:
         """
         Download one of the files associated to a feature : product, quicklook, thumbnail, annexes.
 
@@ -215,7 +210,6 @@ class RestoService(BaseService):
         :param file_type: the type of the file to donwload. Can be one of  'product', 'quicklook',
                           'thumbnail', 'annexes'.
         :param download_dir: the directory where downloaded file must be recorded.
-        :returns: the path to the download file.
         :raises RestoClientDesignError: when the file_type is not supported.
         """
         if file_type not in self.DOWNLOAD_REQUEST_CLASSES:
@@ -227,18 +221,21 @@ class RestoService(BaseService):
         download_req = download_req_cls(self, feature, download_directory=download_dir)
         # Do download
         try:
-            downloaded_filename = download_req.run()
+            download_req.run()
         except LicenseSignatureRequested as excp:
             # Launch request for signing license:
             self.sign_license(excp.error_response.license_to_sign)
             # Retry file download after license signature
-            downloaded_filename = self.download_feature_file(feature, file_type, download_dir)
+            self.download_feature_file(feature, file_type, download_dir)
         except FeatureOnTape as excp:
-            # Redo_feature to update the storage status
-            redo_feature = self.get_feature_by_id(feature.product_identifier)
             warn('Waiting 60 seconds for product transfert...')
             # Wait 60 second
             time.sleep(60)
+            # Redo_feature to update the storage status
+            redo_feature = self.get_feature_by_id(feature.product_identifier)
             # Retry file download after product staging
-            downloaded_filename = self.download_feature_file(redo_feature, file_type, download_dir)
-        return downloaded_filename
+            self.download_feature_file(redo_feature, file_type, download_dir)
+
+    def __str__(self) -> str:
+        msg_fmt = '{}current collection: {}\n'
+        return msg_fmt.format(super(RestoService, self).__str__(), str(self.current_collection))

@@ -13,7 +13,6 @@
    limitations under the License.
 """
 import argparse
-from contextlib import redirect_stdout
 import io
 from pathlib import Path
 import sys
@@ -21,13 +20,13 @@ from tempfile import TemporaryDirectory
 from typing import List
 import unittest
 
-from resto_client.base_exceptions import RestoClientError
 from resto_client.cli.parser.resto_client_parser import build_parser
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_SETTINGS
 from resto_client.cli.resto_server_persisted import (SERVER_KEY, USERNAME_KEY, COLLECTION_KEY,
                                                      TOKEN_KEY)
+import resto_client.settings.resto_client_config as resto_client_config
 
 
 class TestRestoClientCli(unittest.TestCase):
@@ -37,6 +36,7 @@ class TestRestoClientCli(unittest.TestCase):
 
     def setUp(self) -> None:
         RESTO_CLIENT_SETTINGS.clear()
+        resto_client_run(['set', 'verbosity', 'DEBUG'])
 
     def assert_not_in_settings(self, settings_key: str) -> None:
         """
@@ -88,7 +88,6 @@ class TestRestoClientCli(unittest.TestCase):
 
         :param base_filename: base file name
         :returns: the path to the file
-        :raises RestoClientError: when the download directory is not set.
         """
         return (Path(RESTO_CLIENT_SETTINGS[DOWNLOAD_DIR_KEY]) /
                 RESTO_CLIENT_SETTINGS[SERVER_KEY] / base_filename)
@@ -119,28 +118,23 @@ class TestRestoClientCli(unittest.TestCase):
         # verify removing of tmp_dir
         self.assertFalse(Path(tmp_dir).is_dir())
 
+    @staticmethod
+    def get_command_output(command: List[str]) -> str:
+        """
+        Runs the specified resto_client command and returns its output
 
-def catch_output_from_run(test_args: dict) -> str:
-    """
-    Launch resto_client_run and catch output for test
-
-    :param  test_args: dictionnary with cli verb, targeted collection, server name and product id
-    :returns: output of a run
-    :raises RestoClientError: when the mandatory key is not present in arguments
-    """
-    try:
-        arguments = test_args.pop('mandatory')
-    except KeyError:
-        msg_err = 'mandatory key is mandatory in test_args dict argument'
-        raise RestoClientError(msg_err)
-
-    for key, value in test_args.items():
-        new_item = '--{}={}'.format(key, value)
-        arguments.append(new_item)
-    with redirect_stdout(io.StringIO()) as out_string_io:
-        resto_client_run(arguments=arguments)
-    output = out_string_io.getvalue()  # type: ignore
-    return output
+        :param command: the command as a list of words
+        :returns: the command output
+        """
+        previous_stdout = resto_client_config.RESTO_CLIENT_STDOUT
+        new_stdout = io.StringIO()
+        resto_client_config.RESTO_CLIENT_STDOUT = new_stdout
+        resto_client_run(arguments=command)
+        output = new_stdout.getvalue()
+        new_stdout.close()
+        resto_client_config.RESTO_CLIENT_STDOUT = previous_stdout
+        print(output)
+        return output.strip()
 
 
 def print_parser_help(parser: argparse.ArgumentParser, arguments: List) -> None:

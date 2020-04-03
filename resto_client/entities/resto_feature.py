@@ -13,13 +13,18 @@
    limitations under the License.
 """
 import json
-from typing import Optional  # @NoMove
-
+from typing import Optional, Dict  # @NoMove
+from pathlib import Path
 
 import geojson
 from prettytable import PrettyTable
 
+from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
+
 from .resto_license import RestoFeatureLicense
+
+
+KNOWN_FILES_TYPES = ['product', 'quicklook', 'thumbnail', 'annexes']
 
 
 class RestoFeature(geojson.Feature):
@@ -32,14 +37,141 @@ class RestoFeature(geojson.Feature):
         Constructor.
 
         :param feature_descr: Feature description
-        :raises ValueError: When Feature type in descriptor is different from 'Feature'
+        :raises TypeError: When Feature type in descriptor is different from 'Feature'
         """
         if feature_descr['type'] != 'Feature':
-            raise ValueError('Cannot create a feature whose type is not Feature')
+            raise TypeError('Cannot create a feature whose type is not Feature')
         super(RestoFeature, self).__init__(id=feature_descr['id'],
                                            geometry=feature_descr['geometry'],
                                            properties=feature_descr['properties'])
         self.license = RestoFeatureLicense(feature_descr['properties'])
+        self.downloaded_files_paths: Dict[str, Path]
+        self.downloaded_files_paths = {}
+
+    def get_download_url(self, file_type: str) -> str:
+        """
+        Return the URL for downloading a file type associated to the feature.
+
+        :param file_type: code of the file type: must belong to KNOWN_FILES_TYPES
+        :returns: the URL for downloading this file type, as defined in the feature properties
+        :raises RestoClientDesignError: when file_type is unsupported
+        :raises RestoClientUserError: when no URL defined in the feature properties for the
+                                      requested file type.
+        """
+        if file_type not in KNOWN_FILES_TYPES:
+            msg = 'Unsupported file type: {}. Must be one of: {}.'
+            raise RestoClientDesignError(msg.format(file_type, KNOWN_FILES_TYPES))
+        url_to_download = None
+        if file_type == 'quicklook':
+            url_to_download = self.download_quicklook_url
+        if file_type == 'thumbnail':
+            url_to_download = self.download_thumbnail_url
+        if file_type == 'product':
+            url_to_download = self.download_product_url
+        if file_type == 'annexes':
+            url_to_download = self.download_annexes_url
+        if url_to_download is None:
+            msg = 'There is no {} to download for product {}.'
+            raise RestoClientUserError(msg.format(file_type, self.product_identifier))
+        return url_to_download
+
+    @property
+    def title(self) -> str:
+        """
+        :returns: the title
+        """
+        return self.properties['title']
+
+    @property
+    def description(self) -> str:
+        """
+        :returns: the description
+        """
+        return self.properties['description']
+
+    @property
+    def organisationName(self) -> str:
+        """
+        :returns: the organisationName
+        """
+        return self.properties['organisationName']
+
+    @property
+    def lang(self) -> str:
+        """
+        :returns: the associated language
+        """
+        return self.properties['lang']
+
+    @property
+    def parent_identifier(self) -> str:
+        """
+        :returns: the parentIdentifier
+        """
+        return self.properties['parentIdentifier']
+
+    @property
+    def platform(self) -> str:
+        """
+        :returns: the platform
+        """
+        return self.properties['platform']
+
+    @property
+    def instrument(self) -> str:
+        """
+        :returns: the instrument
+        """
+        return self.properties['instrument']
+
+    @property
+    def processing_level(self) -> str:
+        """
+        :returns: the processingLevel
+        """
+        return self.properties['processingLevel']
+
+    @property
+    def sensor_mode(self) -> str:
+        """
+        :returns: the sensorMode
+        """
+        return self.properties['sensorMode']
+
+    @property
+    def start_date(self) -> str:
+        """
+        :returns: the startDate
+        """
+        return self.properties['startDate']
+
+    @property
+    def completion_date(self) -> str:
+        """
+        :returns: the completionDate
+        """
+        return self.properties['completionDate']
+
+    @property
+    def updated(self) -> str:
+        """
+        :returns: the updated
+        """
+        return self.properties['updated']
+
+    @property
+    def resolution(self) -> str:
+        """
+        :returns: the resolution
+        """
+        return self.properties['resolution']
+
+    @property
+    def orbitNumber(self) -> str:
+        """
+        :returns: the orbitNumber
+        """
+        return self.properties['orbitNumber']
 
     @property
     def download_quicklook_url(self) -> str:
@@ -134,6 +266,13 @@ class RestoFeature(geojson.Feature):
         :returns: the feature productIdentifier.
         """
         return self.properties['productIdentifier']
+
+    @property
+    def product_type(self) -> str:
+        """
+        :returns: the feature productType.
+        """
+        return self.properties['productType']
 
     @property
     def storage(self) -> Optional[str]:

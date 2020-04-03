@@ -12,61 +12,46 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
 import tempfile
-from typing import Optional, Tuple, Union, TYPE_CHECKING  # @NoMove
 from warnings import warn
 
-from resto_client.base_exceptions import RestoClientDesignError
+from typing import Optional, Tuple, Union, TYPE_CHECKING, cast  # @NoMove
+from tqdm import tqdm
+
+from resto_client.base_exceptions import (RestoClientDesignError,
+                                          RestoResponseError,
+                                          FeatureOnTape, LicenseSignatureRequested,
+                                          IncomprehensibleResponse,
+                                          AccessDeniedError)
 from resto_client.entities.resto_feature import RestoFeature
 from resto_client.functions.utils import get_file_properties
 from resto_client.responses.download_error_response import DownloadErrorResponse
-from resto_client.responses.resto_response_error import RestoResponseError
 from resto_client.responses.sign_license_response import SignLicenseResponse
+from resto_client.services.service_access import RestoClientUnsupportedRequest
+from resto_client.settings.resto_client_config import resto_client_print
 
-from .anonymous_request import AnonymousRequest
-from .authentication_required_request import AuthenticationRequiredRequest
-from .utils import RestrictedProductError, download_file, get_response
+from .base_request import BaseRequest
+from .resto_json_request import RestoJsonRequest
 
 
 if TYPE_CHECKING:
     from resto_client.services.resto_service import RestoService  # @UnusedImport
 
 
-class LicenseSignatureRequested(RestoResponseError):
+class RestrictedProductError(AccessDeniedError):
     """
-    Exception raised when a license signature is requested before proceeding with the download.
-    """
-
-    def __init__(self, error_response: DownloadErrorResponse) -> None:
-        """
-        Constructor.
-
-        :param error_response: the error response as provided by resto, which contains the
-                               identifier of the license to sign.
-        """
-        super(LicenseSignatureRequested, self).__init__('user needs to sign a license')
-        self.error_response = error_response
-
-
-class FeatureOnTape(RestoResponseError):
-    """
-    Exception raised when a product requested is on tape
+    Exception used when a product exist but cannot be downloaded
     """
 
-    def __init__(self) -> None:
-        """
-        Constructor.
-        """
-        super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
-
-class SignLicenseRequest(AuthenticationRequiredRequest):
+class SignLicenseRequest(RestoJsonRequest):
     """
      Requests for signing a license
     """
     request_action = 'signing license'
+    resto_response_cls = SignLicenseResponse
 
     def __init__(self, service: 'RestoService', license_id: str) -> None:
         """
@@ -75,31 +60,16 @@ class SignLicenseRequest(AuthenticationRequiredRequest):
         :param service: resto service
         :param license_id: the license id which must be signed
         """
-        self._license_id = license_id
         super(SignLicenseRequest, self).__init__(service,
                                                  user=service.auth_service.username_b64,
                                                  license_id=license_id)
 
-    def run(self) -> bool:
-        """
-         Sign the license of a license_id product
-
-         :returns: True if the license has been signed
-         :raises RestoResponseError: when license signature was not accepted.
-        """
-
-        self.set_headers({'Accept': 'application/json'})
-        result = self.post()
-        response = SignLicenseResponse(self, result.json())
-
-        if not response.is_signed:
-            msg = 'Unable to sign license {}. Reason : {}'
-            raise RestoResponseError(msg.format(self._license_id, response.validation_message))
-
-        return response.as_resto_object()
+    def run(self) -> SignLicenseResponse:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(SignLicenseResponse, super(SignLicenseRequest, self).run())
 
 
-class DownloadRequestBase(ABC):
+class DownloadRequestBase(BaseRequest):
     """
      Base class for all file download requests downloading in the client download directory
     """
@@ -121,27 +91,32 @@ class DownloadRequestBase(ABC):
     def __init__(self,
                  service: 'RestoService',
                  feature: RestoFeature,
-                 download_directory: Path,
-                 headers: dict) -> None:
+                 download_directory: Path) -> None:
         """
         Constructor
 
         :param service: resto service
         :param  feature: resto feature
         :param download_directory: an existing directory path where download will occur
-        :param headers: dict for header to send in get_response
         """
         self._feature = feature
-        self._service = service
-        self._headers = headers
 
+        super(DownloadRequestBase, self).__init__(service=service)
         # product specific initialization
-        self._url_to_download = getattr(self._feature, 'download_{}_url'.format(self.file_type))
+        self._url_to_download = self._feature.get_download_url(self.file_type)
+
+        if self.file_type == 'product':
+            if self.parent_service.get_protocol() == 'theia_version':
+                self._url_to_download += "/?issuerId=theia"
         self._download_directory = download_directory
 
-    def get_filename(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
+    def run(self) -> RestoFeature:
+        # overidding BaseRequest method, in order to specify the right type returned by this request
+        return cast(RestoFeature, super(DownloadRequestBase, self).run())
+
+    def get_file_infos(self, content_type: str) -> Tuple[str, Path, str, Union[str, None]]:
         """
-        Returns filename and full filename according to the content type.
+        Returns filename, full filename, mimetype and encoding according to the content type.
 
         :param content_type: mimetype of the file to download
         :returns: filename and full file path of the file to record
@@ -150,12 +125,13 @@ class DownloadRequestBase(ABC):
         :raises RestoClientDesignError: when extension cannot be guessed from mimetype.
         """
         extension, mimetype, encoding = get_file_properties(content_type.strip())
-
         if extension is None:
             msg_excp = 'cannot guess the file extension from mimetype: {}'
             raise RestoClientDesignError(msg_excp.format(mimetype))
         if extension.lower() == '.jpe':
             extension = '.jpg'
+
+        # TODO: isolate this part in a generic function
         filename = '{}{}{}'.format(self._feature.product_identifier,
                                    self.filename_suffix, extension)
         full_file_path = self._download_directory / filename
@@ -170,38 +146,40 @@ class DownloadRequestBase(ABC):
 
         return filename, full_file_path, mimetype, encoding
 
-    def run(self) -> Optional[str]:
+    def finalize_request(self) -> None:
+        try:
+            super(DownloadRequestBase, self).finalize_request()
+        except RestoClientUnsupportedRequest:
+            # Nominal case as url for download is contained in the feature
+            pass
+
+    def get_url(self) -> str:
+        """
+        :returns: full url for this feature file download request
+        """
+        return self._url_to_download
+
+    def process_request_result(self) -> RestoFeature:
         """
          Download one of the different files available for a feature.
 
-        :returns: the name of the downloaded file
-        :raises RestoResponseError: when the response does not have one of the expected contents.
+        :returns: the downloaded RestoFeature updated with the downloaded_files_paths
+        :raises IncomprehensibleResponse: the response does not have one of the expected contents.
         :raises RestrictedProductError: when the product exists but cannot be downloaded.
         :raises LicenseSignatureRequested: when download is rejected because license must be signed
+        :raises FeatureOnTape: when the feature file is on tape and not available for download
         """
-        # If there is no file to download
-        if self._url_to_download is None:
-            msg = 'There is no {} to download for product {}.'
-            warn(msg.format(self.file_type, self._feature.product_identifier))
-            return None
-
-        if self.file_type == 'product':
-            if self._service.service_access.protocol == 'theia_version':
-                self._url_to_download += "/?issuerId=theia"
-
-        result = get_response(self._url_to_download, 'processing {} request'.format(self.file_type),
-                              headers=self._headers, stream=True)
-        content_type = result.headers.get('content-type')
+        content_type = self._request_result.headers.get('content-type')
 
         if content_type == 'application/json':
-            dict_json = result.json()
+            dict_json = self._request_result.json()
             try:
                 error_response = DownloadErrorResponse(self, dict_json).as_resto_object()
             except RestoResponseError as excp:
                 # Unexpected json content
                 msg_fmt = 'Cannot process json when downloading {} feature\nJson content:\n{}'
                 msg = msg_fmt.format(self._feature.product_identifier, dict_json)
-                raise RestoResponseError(msg) from excp
+                raise IncomprehensibleResponse(msg) from excp
             if error_response.download_need_license_signature:
                 # user needs to sign a license for this product
                 raise LicenseSignatureRequested(error_response)
@@ -210,9 +188,9 @@ class DownloadRequestBase(ABC):
                 raise RestrictedProductError(msg.format(self._feature.product_identifier))
 
         if content_type is None:
-            raise RestoResponseError('Cannot infer file extension with None content-type')
+            raise IncomprehensibleResponse('Cannot infer file extension with None content-type')
 
-        file_name, full_file_path, file_mimetype, _ = self.get_filename(content_type)
+        file_name, full_file_path, file_mimetype, _ = self.get_file_infos(content_type)
 
         if file_mimetype in ('image/jpeg', 'text/html', 'image/png'):
             # If it's a product on tape
@@ -223,7 +201,7 @@ class DownloadRequestBase(ABC):
                 # However download will not happen.
                 with tempfile.TemporaryDirectory() as tmp_dir:
                     tmp_file_path = Path(tmp_dir) / file_name
-                    download_file(result, tmp_file_path)
+                    self.download_file(tmp_file_path)
                 raise FeatureOnTape()
             # If it's a product waiting to be on disk
             if self.file_type == 'product' and self._feature.storage == 'staging':
@@ -231,19 +209,41 @@ class DownloadRequestBase(ABC):
                      "Try again later.")
                 raise FeatureOnTape()
             # If it's a Quicklook, Thumbnail or annexes
-            download_file(result, full_file_path)
+            self.download_file(full_file_path)
         # If it's a product
         elif content_type == self._feature.product_mimetype:
-            download_file(result, full_file_path, file_size=self._feature.product_size)
+            self.download_file(full_file_path, file_size=self._feature.product_size)
         else:
             msg = 'Unexpected content-type {} when downloading {}.'
-            raise RestoResponseError(msg.format(content_type, self._feature.product_identifier))
+            raise IncomprehensibleResponse(msg.format(content_type,
+                                                      self._feature.product_identifier))
 
-        # Download finished. Return the filename where download has been made.
-        return file_name
+        # Download finished. Write the file path where download has been made and
+        # return updated feature
+        self._feature.downloaded_files_paths[self.file_type] = full_file_path
+        return self._feature
+
+    def download_file(self, file_path: Path, file_size: Optional[int]=None) -> None:
+        """
+        method called when we know that we have a file to download
+        iterate a result created with GET with stream option and write it directly in a file
+        """
+        resto_client_print('downloading file: {}'.format(file_path))
+        # Get and Save the result's size if not given
+        if file_size is None:
+            file_size = int(self._request_result.headers.get('content-length', 0))
+
+        block_size = 1024
+
+        with open(file_path, 'wb') as file_desc:
+            # do iteration with progress bar using tqdm
+            progress_bar = tqdm(unit="B", total=file_size, unit_scale=True, desc='Downloading')
+            for block in self._request_result.iter_content(block_size):
+                progress_bar.update(len(block))
+                file_desc.write(block)
 
 
-class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase):
+class DownloadProductRequest(DownloadRequestBase):
     """
      Request for downloading the product file
     """
@@ -251,31 +251,8 @@ class DownloadProductRequest(AuthenticationRequiredRequest, DownloadRequestBase)
     filename_suffix = ''
     request_action = 'downloading product'
 
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
 
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AuthenticationRequiredRequest.__init__(self, service)
-        self.set_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the product file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-
-class DownloadQuicklookRequest(AnonymousRequest, DownloadRequestBase):
+class DownloadQuicklookRequest(DownloadRequestBase):
     """
      Request for downloading the quicklook file
     """
@@ -283,31 +260,8 @@ class DownloadQuicklookRequest(AnonymousRequest, DownloadRequestBase):
     filename_suffix = '_ql'
     request_action = 'downloading quicklook'
 
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
 
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AnonymousRequest.__init__(self, service)
-        self.set_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the quicklook file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-
-class DownloadThumbnailRequest(AnonymousRequest, DownloadRequestBase):
+class DownloadThumbnailRequest(DownloadRequestBase):
     """
      Request for downloading the thumbnail file
     """
@@ -315,57 +269,11 @@ class DownloadThumbnailRequest(AnonymousRequest, DownloadRequestBase):
     filename_suffix = '_th'
     request_action = 'downloading thumbnail'
 
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
 
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AnonymousRequest.__init__(self, service)
-        self.set_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the thumbnail file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
-
-
-class DownloadAnnexesRequest(AnonymousRequest, DownloadRequestBase):
+class DownloadAnnexesRequest(DownloadRequestBase):
     """
      Request for downloading the annexes file
     """
     file_type = 'annexes'
     filename_suffix = '_ann'
     request_action = 'downloading annexes'
-
-    def __init__(self,
-                 service: 'RestoService',
-                 feature: RestoFeature,
-                 download_directory: Path) -> None:
-        """
-        Constructor
-
-        :param service: resto service
-        :param  feature: resto feature
-        :param download_directory: directory where to download the file
-        """
-        AnonymousRequest.__init__(self, service)
-        self.set_headers()
-        DownloadRequestBase.__init__(self, service, feature, download_directory, self.headers)
-
-    def run(self) -> Optional[str]:
-        """
-         Download the annexes file.
-
-        :returns: the name of the downloaded file
-        """
-        return DownloadRequestBase.run(self)
