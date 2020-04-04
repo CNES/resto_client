@@ -61,6 +61,8 @@ def search_file_from_key(key: str) -> Path:
     :param  key: the geojson file
     :returns: geojson file associated
     """
+    if not key.endswith('.geojson'):
+        key += '.geojson'
     return PATH_AOI / key
 
 

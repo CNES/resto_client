@@ -134,10 +134,18 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
                                          get_from_args(MAXRECORDS_ARGNAME, args),
                                          get_from_args(PAGE_ARGNAME, args))
-    criteria_dict.update({REGION_ARGNAME: get_from_args(REGION_ARGNAME, args)})
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(
         args, debug_server=RestoClientParameters.is_debug())
+
+    # Add region criteria if given, else found persisted one
+    region = get_from_args(REGION_ARGNAME, args)
+    if not region:
+        region = client_params.region
+    criteria_dict.update({REGION_ARGNAME: region})
+    print(criteria_dict)
+
+    # Do search
     features_collection = resto_server.search_by_criteria(criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
