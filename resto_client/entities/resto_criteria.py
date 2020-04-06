@@ -116,7 +116,7 @@ class RestoCriteria(dict):
         """
         :returns: the criteria formatted as they must appear in the request URL
         """
-        criteria_url = ''
+        criteria_url = '_rc=true&'  # in order to have totalResults field filled with a right value.
         for key, value in self.items():
             criteria_url += f'{key}={value}&'
         return criteria_url

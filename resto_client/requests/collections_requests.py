@@ -12,7 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import TYPE_CHECKING, Optional, cast  # @NoMove
+from typing import TYPE_CHECKING, cast  # @NoMove
 
 from resto_client.entities.resto_collection import RestoCollection
 from resto_client.entities.resto_collections import RestoCollections
@@ -58,11 +58,9 @@ class SearchCollectionRequest(RestoJsonRequest):
         :param collection: collection name
         :param criteria: the criteria to use for the search
         """
-        # build criteria url part while asking total number of items
-        criteria_url = f'_rc=true&{criteria.as_url_str()}'
         super(SearchCollectionRequest, self).__init__(service,
                                                       collection=collection,
-                                                      criteria_url=criteria_url)
+                                                      criteria_url=criteria.as_url_str())
 
     def run(self) -> RestoFeatureCollection:
         # overidding BaseRequest method, in order to specify the right type returned by this request
