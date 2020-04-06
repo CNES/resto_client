@@ -143,7 +143,6 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     if not region:
         region = client_params.region
     criteria_dict.update({REGION_ARGNAME: region})
-    print(criteria_dict)
 
     # Do search
     features_collection = resto_server.search_by_criteria(criteria_dict)
