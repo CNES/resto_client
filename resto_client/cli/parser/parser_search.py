@@ -140,7 +140,7 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
 
     # Add region criteria if given, else found persisted one
     region = get_from_args(REGION_ARGNAME, args)
-    if not region:
+    if region is None:
         region = client_params.region
     criteria_dict.update({REGION_ARGNAME: region})
 
