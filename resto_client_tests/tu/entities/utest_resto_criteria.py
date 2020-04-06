@@ -169,3 +169,11 @@ class UTestRestoCriteria(unittest.TestCase):
             resto_criteria['wrong_crit'] = 1
         expected_msg = 'Criterion wrong_crit not supported by this resto server'
         self.assertIn(expected_msg, str(context.exception))
+
+    def test_n_as_url_str(self) -> None:
+        """
+        Unit test of as_url_str with standard criterion
+        """
+        resto_criteria = RestoCriteria('dotcloud', identifier='2010', startDate='2010-01-01')
+        self.assertEqual(resto_criteria.as_url_str(),
+                         '_rc=true&identifier=2010&startDate=2010-01-01&')
