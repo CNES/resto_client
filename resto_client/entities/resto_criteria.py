@@ -66,7 +66,7 @@ class RestoCriteria(dict):
             else:
                 for value_item in value:
                     test_criterion(key, value_item, auth_key_type)
-                    new_key = '{}[{}]'.format(key, value.index(value_item))
+                    new_key = f'{key}[{value.index(value_item)}]'
                     super(RestoCriteria, self).__setitem__(new_key, value_item)
         elif auth_key_type == 'group':
             if not isinstance(value, dict):
@@ -76,8 +76,8 @@ class RestoCriteria(dict):
                 try:
                     auth_key_type = self.supported_criteria[key][criterion]["type"]
                 except KeyError:
-                    msg = 'Criterion {} in {} not supported by this resto server'
-                    raise RestoClientUserError(msg.format(criterion, key))
+                    msg = f'Criterion {criterion} in {key} not supported by this resto server'
+                    raise RestoClientUserError(msg)
 
                 test_criterion(criterion, value_item, auth_key_type)
                 super(RestoCriteria, self).__setitem__(criterion, value_item)
@@ -112,6 +112,15 @@ class RestoCriteria(dict):
         for key, value in criteria_dict.items():
             self[key] = value
 
+    def as_url_str(self) -> str:
+        """
+        :returns: the criteria formatted as they must appear in the request URL
+        """
+        criteria_url = '_rc=true&'  # in order to have totalResults field filled with a right value.
+        for key, value in self.items():
+            criteria_url += f'{key}={value}&'
+        return criteria_url
+
     def _manage_geometry(self, region: Optional[str]=None) -> None:
         """
         Add the region file criteria if not already given and no id given
@@ -142,8 +151,7 @@ class RestoCriteria(dict):
                 if key.lower() == key_to_test.lower():
                     return key_to_test
             # if not found raise criterion error
-            msg = 'Criterion {} not supported by this resto server'.format(key)
-            msg += ', choose from the following list: '
-            msg += '{}'.format(list(self.supported_criteria.keys()))
+            msg = f'Criterion {key} not supported by this resto server, '
+            msg += f'choose from the following list: {list(self.supported_criteria.keys())}'
             raise RestoClientUserError(msg)
         return key
