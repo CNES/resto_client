@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
@@ -27,7 +28,7 @@ from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
 from resto_client.entities.resto_feature import KNOWN_FILES_TYPES
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.aoi_utils import find_region_choice
+from resto_client.functions.aoi_utils import str_region_choice
 from resto_client.settings.resto_client_config import resto_client_print
 from resto_client.settings.servers_database import DB_SERVERS
 
@@ -36,7 +37,6 @@ from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
                             collection_option_parser, CliFunctionReturnType)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME, JSON_ARGNAME)
-from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 
 
 def display_features_on_lines(features_to_display: RestoFeatureCollection) -> str:
@@ -205,11 +205,8 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
     parser_search.add_argument('--criteria', dest=CRITERIA_ARGNAME, nargs='+',
                                help='search criteria (format --criteria=key:value)')
 
-    region_choices = find_region_choice()
-    parser_search.add_argument('--region', dest=REGION_ARGNAME, type=str.lower,
-                               choices=region_choices,
-                               help='add region criteria using .geojson, see set '
-                               'region for more info')
+    parser_search.add_argument('--region', dest=REGION_ARGNAME,
+                               help=str_region_choice())
     parser_search.add_argument('--maxrecords', dest=MAXRECORDS_ARGNAME, type=int,
                                help='maximum records to show')
     parser_search.add_argument('--page', dest=PAGE_ARGNAME, type=int,

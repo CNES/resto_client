@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from pathlib import Path
+
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
@@ -171,6 +173,17 @@ class UTestCliSearch(TestRestoClientCli):
                    '--collection=KALCNES', '--server=kalideos']
         output = self.get_command_output(command)
         id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn('{}'.format(id_kalideos), output)
+
+        path_here = Path(__file__).parent
+        test_path = path_here.parent.parent.parent / 'resto_client' / 'zones' / 'Alpes.geojson'
+        test_path_str = str(test_path)
+        input_region = f'--region={test_path_str}'
+        command = ['search', '--criteria', 'platform:SPOT 4', input_region,
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193246286290231
         self.assertIn('One result found with id : ', output)
         self.assertIn('{}'.format(id_kalideos), output)
 

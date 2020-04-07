@@ -16,7 +16,6 @@ import argparse
 from pathlib import Path
 from typing import Optional
 
-from resto_client.base_exceptions import RestoClientUserError
 from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 
@@ -63,19 +62,17 @@ def _check_region(key_region: str) -> str:
     Check function used by region setter as a callback. Check that the region key belongs to
     the list of known regions, and normalize it.
 
-    :param key_region: key of region geojson file to register
+    :param key_region: key of region geojson file to register or file's path
     :returns: the normalized key (lowercase ending with .geojson).
-    :raises RestoClientUserError: when no geojson file found with key_region.
+    :raises NotADirectoryError: when the argument does not point to a valid file
     """
-    # Normalize key_region: lowercase which ends with .geojson
-    key_region = key_region.lower()
-    if not key_region.endswith('.geojson'):
-        key_region = key_region + '.geojson'
     # verify that normalized key exists in the list of known regions
     if key_region not in list_all_geojson():
-        msg = 'No {} file found in configuration directory.'
-        raise RestoClientUserError(msg.format(key_region))
-    return key_region
+        if Path(key_region).is_file():
+            return str(Path(key_region))
+        raise NotADirectoryError(key_region)
+    # Normalize key_region: lowercase which ends with .geojson
+    return key_region.lower()
 
 
 DOWNLOAD_DIR_KEY = 'download_dir'

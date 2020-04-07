@@ -16,7 +16,7 @@ import argparse
 
 from resto_client.cli.resto_client_parameters import RestoClientParameters, ALLOWED_VERBOSITY
 from resto_client.cli.resto_server_persisted import RestoServerPersisted
-from resto_client.functions.aoi_utils import find_region_choice
+from resto_client.functions.aoi_utils import str_region_choice
 
 from .parser_common import CliFunctionReturnType
 from .parser_settings import (SERVER_ARGNAME, ACCOUNT_ARGNAME, COLLECTION_ARGNAME,
@@ -142,9 +142,7 @@ def add_set_region_parser(sub_parser_set: argparse._SubParsersAction) -> None:
                                           'subsequent search requests.',
                                           epilog='Region can be one of the regions described by'
                                           ' geojson files in the internal zones database.')
-    region_choices = find_region_choice()
-    subparser.add_argument(REGION_ARGNAME, choices=region_choices, type=str.lower,
-                           help='name of the region to use from the predefined zones database')
+    subparser.add_argument(REGION_ARGNAME, help=str_region_choice())
     subparser.set_defaults(func=cli_set_client_parameter)
 
 

@@ -14,7 +14,7 @@
 """
 import unittest
 
-from resto_client.functions.aoi_utils import LowerList, list_all_geojson, find_region_choice
+from resto_client.functions.aoi_utils import LowerList, list_all_geojson, str_region_choice
 
 
 class UTestAOIUtils(unittest.TestCase):
@@ -36,24 +36,21 @@ class UTestAOIUtils(unittest.TestCase):
         Unit test of list_all_geojson function in nominal cases
         """
         test_geojson_list = list_all_geojson()
-        expected_list = ['alpes.geojson', 'alsace.geojson', 'bretagne.geojson', 'reunion.geojson']
+        expected_list = ['alpes', 'alsace', 'bretagne', 'reunion']
         # prevent bad sortet list
         test_geojson_list.sort()
         expected_list.sort()
         self.assertEqual(type(test_geojson_list), list)
         self.assertEqual(test_geojson_list, expected_list)
 
-    def test_n_test_find_region_choice(self) -> None:
+    def test_n_test_str_region_choice(self) -> None:
         """
-        Unit test of find_region_choice function in nominal cases
+        Unit test of str_region_choice function in nominal cases
         """
-        test_region_list = find_region_choice()
-        expected_list = ['alpes', 'alsace', 'bretagne', 'reunion']
+        test_region_list = str_region_choice()
+        expected_list = sorted(['alpes', 'alsace', 'bretagne', 'reunion'])
         # prevent bad sortet list
-        test_region_list.sort()
-        expected_list.sort()
-        self.assertEqual(type(test_region_list), LowerList)
-        self.assertEqual(test_region_list, expected_list)
+        self.assertIn(str(expected_list), test_region_list)
 
     def test_d_lower_list(self) -> None:
         """
