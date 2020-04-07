@@ -204,9 +204,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                                     download_dir_option_parser()])
     parser_search.add_argument('--criteria', dest=CRITERIA_ARGNAME, nargs='+',
                                help='search criteria (format --criteria=key:value)')
-
-    parser_search.add_argument('--region', dest=REGION_ARGNAME,
-                               help=str_region_choice())
+    parser_search.add_argument('--region', dest=REGION_ARGNAME, help=str_region_choice())
     parser_search.add_argument('--maxrecords', dest=MAXRECORDS_ARGNAME, type=int,
                                help='maximum records to show')
     parser_search.add_argument('--page', dest=PAGE_ARGNAME, type=int,

@@ -73,7 +73,7 @@ def str_region_choice() -> str:
     :returns: str of possible input for region
     """
     region_list = sorted(LowerList(list_all_geojson()))
-    return f'region can be either a Path or from the following list {region_list}'
+    return f'region can be either a Path or from the predefined zones in database : {region_list}'
 
 
 def geojson_zone_to_bbox(geojson_path: Path) -> BaseGeometry:

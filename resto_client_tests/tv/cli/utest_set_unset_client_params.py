@@ -14,11 +14,12 @@
 """
 from pathlib import Path
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
-
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
+
 
 HERE = Path(__file__).parent
 TEST_PATH = HERE.parent.parent.parent / 'resto_client' / 'zones' / 'Alpes.geojson'
@@ -84,9 +85,10 @@ class UTestSetClientParams(TestRestoClientCli):
         Unit test of set region in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
-        with self.assertRaises(NotADirectoryError) as context:
+        with self.assertRaises(RestoClientUserError) as context:
             resto_client_run(arguments=['set', 'region', 'JaimeLaBretagne'])
-        self.assertEqual('JaimeLaBretagne', str(context.exception))
+        expect_output = 'JaimeLaBretagne is not a valid geojson file path'
+        self.assertEqual(expect_output, str(context.exception))
 
     def test_d_set_verbosity(self) -> None:
         """

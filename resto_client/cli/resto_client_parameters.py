@@ -16,6 +16,7 @@ import argparse
 from pathlib import Path
 from typing import Optional
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.functions.aoi_utils import list_all_geojson
 from resto_client.generic.property_decoration import managed_getter, managed_setter
 
@@ -59,20 +60,22 @@ def _check_verbosity(verbosity: str) -> str:
 
 def _check_region(key_region: str) -> str:
     """
-    Check function used by region setter as a callback. Check that the region key belongs to
-    the list of known regions, and normalize it.
+    Check function used by region setter as a callback. Check that the region key is a Path
+    or belongs to the list of known regions, and normalize it.
 
-    :param key_region: key of region geojson file to register or file's path
+    :param key_region: key of region geojson file to register or a file path
     :returns: the normalized key (lowercase ending with .geojson).
-    :raises NotADirectoryError: when the argument does not point to a valid file
+    :raises RestoClientUserError: when the argument does not point to a valid geojson file
     """
-    # verify that normalized key exists in the list of known regions
-    if key_region not in list_all_geojson():
-        if Path(key_region).is_file():
-            return str(Path(key_region))
-        raise NotADirectoryError(key_region)
-    # Normalize key_region: lowercase which ends with .geojson
-    return key_region.lower()
+    # verify that key exists in the list of known regions
+    if key_region in list_all_geojson():
+        # Normalize key_region: lowercase
+        return key_region.lower()
+
+    if Path(key_region).is_file() and key_region.endswith('.geojson'):
+        return key_region
+    msg_err = f'{key_region} is not a valid geojson file path'
+    raise RestoClientUserError(msg_err)
 
 
 DOWNLOAD_DIR_KEY = 'download_dir'
