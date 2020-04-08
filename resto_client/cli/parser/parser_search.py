@@ -131,13 +131,13 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
-                                         get_from_args(MAXRECORDS_ARGNAME, args),
-                                         get_from_args(PAGE_ARGNAME, args))
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(
         args, debug_server=RestoClientParameters.is_debug())
 
+    criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
+                                         get_from_args(MAXRECORDS_ARGNAME, args),
+                                         get_from_args(PAGE_ARGNAME, args))
     # Add region criteria if given, else found persisted one
     region = get_from_args(REGION_ARGNAME, args)
     if region is None:
