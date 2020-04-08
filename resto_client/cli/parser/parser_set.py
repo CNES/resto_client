@@ -140,7 +140,7 @@ def add_set_region_parser(sub_parser_set: argparse._SubParsersAction) -> None:
     subparser = sub_parser_set.add_parser('region', help='Set region/AOI for search',
                                           description='Set the region/area of interest to use in '
                                           'subsequent search requests.',
-                                          epilog='Region can be the path of a a geojson file or '
+                                          epilog='Region can be the path of a geojson file or '
                                           'one of the regions described in the internal zones '
                                           'database.')
     subparser.add_argument(REGION_ARGNAME, help=str_region_choice())
