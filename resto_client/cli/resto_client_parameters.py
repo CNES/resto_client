@@ -68,7 +68,7 @@ def _check_region(key_region: str) -> str:
     :raises RestoClientUserError: when the argument does not point to a valid geojson file
     """
     # verify that key exists in the list of known regions
-    if key_region in list_all_geojson():
+    if key_region.lower() in list_all_geojson():
         # Normalize key_region: lowercase
         return key_region.lower()
 
