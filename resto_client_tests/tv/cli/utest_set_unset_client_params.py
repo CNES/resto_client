@@ -38,8 +38,8 @@ class UTestSetClientParams(TestRestoClientCli):
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'region', 'bretagne'])
         self.assert_setting_equal(REGION_KEY, 'bretagne')
-        # With region already persisted
-        resto_client_run(arguments=['set', 'region', 'alpes'])
+        # With region already persisted and test unsesitivity
+        resto_client_run(arguments=['set', 'region', 'aLpes'])
         self.assert_setting_equal(REGION_KEY, 'alpes')
         # With a path as args
         resto_client_run(arguments=['set', 'region', str(TEST_PATH)])

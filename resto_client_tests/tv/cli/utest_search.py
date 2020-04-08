@@ -211,14 +211,6 @@ class UTestCliSearch(TestRestoClientCli):
         self.assertIn('One result found with id : ', output)
         self.assertIn(f'{id_kalideos}', output)
 
-        resto_client_run(arguments=['set', 'region', 'AlPes'])
-        command = ['search', '--criteria', 'platform:SPOT 4',
-                   '--collection=KALCNES', '--server=kalideos']
-        output = self.get_command_output(command)
-        id_kalideos = 2193246286290231
-        self.assertIn('One result found with id : ', output)
-        self.assertIn(f'{id_kalideos}', output)
-
     def test_d_search(self) -> None:
         """
         Unit test of search in degraded cases (no result found)
