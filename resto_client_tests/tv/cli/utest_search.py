@@ -187,6 +187,17 @@ class UTestCliSearch(TestRestoClientCli):
         self.assertIn('One result found with id : ', output)
         self.assertIn('{}'.format(id_kalideos), output)
 
+    def test_n_search_with_region_case_unsensitive(self) -> None:
+        """
+        Unit test of search with region extended
+        """
+        command = ['search', '--criteria', 'platform:SPOT 4', '--region=breTagne',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn('{}'.format(id_kalideos), output)
+
     def test_n_search_set_region(self) -> None:
         """
         Unit test of search with region already set
@@ -197,6 +208,14 @@ class UTestCliSearch(TestRestoClientCli):
                    '--collection=KALCNES', '--server=kalideos']
         output = self.get_command_output(command)
         id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn('{}'.format(id_kalideos), output)
+
+        resto_client_run(arguments=['set', 'region', 'AlPes'])
+        command = ['search', '--criteria', 'platform:SPOT 4',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193246286290231
         self.assertIn('One result found with id : ', output)
         self.assertIn('{}'.format(id_kalideos), output)
 
