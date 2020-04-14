@@ -48,7 +48,7 @@ def list_all_geojson() -> List[str]:
 
     :returns: list of file in lower_case
     """
-    list_file = [f.name for f in PATH_AOI.iterdir() if f.suffix == '.geojson']
+    list_file = [f.stem for f in PATH_AOI.iterdir() if f.suffix == '.geojson']
     # prepare test by lower all name
     list_file = [element.lower() for element in list_file]
     return list_file
@@ -61,18 +61,19 @@ def search_file_from_key(key: str) -> Path:
     :param  key: the geojson file
     :returns: geojson file associated
     """
+    if not key.endswith('.geojson'):
+        key += '.geojson'
     return PATH_AOI / key
 
 
-def find_region_choice() -> LowerList:
+def str_region_choice() -> str:
     """
-    Cut all .geojson extension in the list geojson file
+    str ready to be displayed explaining possible region choices
 
-    :returns: the list of region choices file without .geojson extension
+    :returns: str of possible input for region
     """
-    list_to_cut = list_all_geojson()
-    cut_list = [f[0:-8] for f in list_to_cut if f.endswith('.geojson')]
-    return LowerList(cut_list)
+    region_list = sorted(LowerList(list_all_geojson()))
+    return f'region can be either a Path or from the predefined zones in database : {region_list}'
 
 
 def geojson_zone_to_bbox(geojson_path: Path) -> BaseGeometry:

@@ -69,7 +69,7 @@ class CollectionsDescription(RestoJsonResponse):
     def identify_response(self) -> None:
         """
         Verify that the response is a valid resto response for this class and set the resto type
-
+        :raises IncomprehensibleResponse: if no knowned protocol detected
         :raises InconsistentResponse: if the dictionary does not contain a valid Resto response.
         """
         detected_protocol = None

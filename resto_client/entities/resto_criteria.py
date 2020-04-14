@@ -12,8 +12,10 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from typing import (Optional, Any)  # @NoMove @UnusedImport
+from typing import (Optional, Any, Union)  # @NoMove @UnusedImport
 
+
+from pathlib import Path
 
 from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
 from resto_client.entities.resto_criteria_definition import (test_criterion,
@@ -82,10 +84,10 @@ class RestoCriteria(dict):
                 test_criterion(criterion, value_item, auth_key_type)
                 super(RestoCriteria, self).__setitem__(criterion, value_item)
         elif auth_key_type == 'region':
-            if isinstance(value, (str, type(None))):
+            if isinstance(value, (str, Path, type(None))):
                 self._manage_geometry(region=value)
             else:
-                raise RestoClientDesignError('region must be a str or None')
+                raise RestoClientDesignError('region must be a str, a path or None')
 
     def update(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -121,7 +123,7 @@ class RestoCriteria(dict):
             criteria_url += f'{key}={value}&'
         return criteria_url
 
-    def _manage_geometry(self, region: Optional[str]=None) -> None:
+    def _manage_geometry(self, region: Optional[Union[str, Path]]=None) -> None:
         """
         Add the region file criteria if not already given and no id given
 
@@ -133,7 +135,10 @@ class RestoCriteria(dict):
                 del self['geometry']
         # else if geometry already given we won't overwrite it
         elif 'geometry' not in self and region is not None:
-            geojson_file = search_file_from_key(region)
+            if isinstance(region, Path):
+                geojson_file = region
+            else:
+                geojson_file = search_file_from_key(region)
             shape_bbox = geojson_zone_to_bbox(geojson_file)
             geometry_criteria = str(shape_bbox)
             self['geometry'] = geometry_criteria

@@ -90,7 +90,7 @@ class RestoFeature(geojson.Feature):
         return self.properties['description']
 
     @property
-    def organisationName(self) -> str:
+    def organisation_name(self) -> str:
         """
         :returns: the organisationName
         """
@@ -167,7 +167,7 @@ class RestoFeature(geojson.Feature):
         return self.properties['resolution']
 
     @property
-    def orbitNumber(self) -> str:
+    def orbit_number(self) -> str:
         """
         :returns: the orbitNumber
         """

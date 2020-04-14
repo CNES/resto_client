@@ -12,6 +12,7 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 from argparse import Namespace, RawDescriptionHelpFormatter
 import argparse
 from copy import deepcopy
@@ -27,7 +28,7 @@ from resto_client.cli.resto_server_persisted import RestoServerPersisted
 from resto_client.entities.resto_criteria_definition import get_criteria_for_protocol
 from resto_client.entities.resto_feature import KNOWN_FILES_TYPES
 from resto_client.entities.resto_feature_collection import RestoFeatureCollection
-from resto_client.functions.aoi_utils import find_region_choice
+from resto_client.functions.aoi_utils import str_region_choice
 from resto_client.settings.resto_client_config import resto_client_print
 from resto_client.settings.servers_database import DB_SERVERS
 
@@ -36,7 +37,6 @@ from .parser_common import (credentials_options_parser, EPILOG_CREDENTIALS,
                             collection_option_parser, CliFunctionReturnType)
 from .parser_settings import (REGION_ARGNAME, CRITERIA_ARGNAME, MAXRECORDS_ARGNAME,
                               PAGE_ARGNAME, DOWNLOAD_ARGNAME, JSON_ARGNAME)
-from typing import Optional, Dict, Any  # @UnusedImport @NoMove
 
 
 def display_features_on_lines(features_to_display: RestoFeatureCollection) -> str:
@@ -131,13 +131,20 @@ def cli_search_collection(args: Namespace) -> CliFunctionReturnType:
     :param args: arguments parsed by the CLI parser
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
-    criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
-                                         get_from_args(MAXRECORDS_ARGNAME, args),
-                                         get_from_args(PAGE_ARGNAME, args))
-    criteria_dict.update({REGION_ARGNAME: get_from_args(REGION_ARGNAME, args)})
     client_params = RestoClientParameters.build_from_argparse(args)
     resto_server = RestoServerPersisted.build_from_argparse(
         args, debug_server=RestoClientParameters.is_debug())
+
+    criteria_dict = criteria_args_fitter(get_from_args(CRITERIA_ARGNAME, args),
+                                         get_from_args(MAXRECORDS_ARGNAME, args),
+                                         get_from_args(PAGE_ARGNAME, args))
+    # Add region criteria if given, else found persisted one
+    region = get_from_args(REGION_ARGNAME, args)
+    if region is None:
+        region = client_params.region
+    criteria_dict.update({REGION_ARGNAME: region})
+
+    # Do search
     features_collection = resto_server.search_by_criteria(criteria_dict)
 
     msg_no_result = Fore.MAGENTA + Style.BRIGHT + 'No result '
@@ -197,12 +204,7 @@ def add_search_subparser(sub_parsers: argparse._SubParsersAction) -> None:
                                                     download_dir_option_parser()])
     parser_search.add_argument('--criteria', dest=CRITERIA_ARGNAME, nargs='+',
                                help='search criteria (format --criteria=key:value)')
-
-    region_choices = find_region_choice()
-    parser_search.add_argument('--region', dest=REGION_ARGNAME, type=str.lower,
-                               choices=region_choices,
-                               help='add region criteria using .geojson, see set '
-                               'region for more info')
+    parser_search.add_argument('--region', dest=REGION_ARGNAME, help=str_region_choice())
     parser_search.add_argument('--maxrecords', dest=MAXRECORDS_ARGNAME, type=int,
                                help='maximum records to show')
     parser_search.add_argument('--page', dest=PAGE_ARGNAME, type=int,

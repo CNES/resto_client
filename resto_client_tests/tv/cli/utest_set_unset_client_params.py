@@ -14,11 +14,15 @@
 """
 from pathlib import Path
 
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client.cli.resto_client_parameters import VERBOSITY_KEY, REGION_KEY, DOWNLOAD_DIR_KEY
 from resto_client.cli.resto_client_settings import RESTO_CLIENT_DEFAULT_DOWNLOAD_DIR
-
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
+
+
+HERE = Path(__file__).parent
+TEST_PATH = HERE.parent.parent.parent / 'resto_client' / 'zones' / 'Alpes.geojson'
 
 
 class UTestSetClientParams(TestRestoClientCli):
@@ -33,10 +37,13 @@ class UTestSetClientParams(TestRestoClientCli):
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'region', 'bretagne'])
-        self.assert_setting_equal(REGION_KEY, 'bretagne.geojson')
-        # With region already persisted
-        resto_client_run(arguments=['set', 'region', 'alpes'])
-        self.assert_setting_equal(REGION_KEY, 'alpes.geojson')
+        self.assert_setting_equal(REGION_KEY, 'bretagne')
+        # With region already persisted and test unsesitivity
+        resto_client_run(arguments=['set', 'region', 'aLpes'])
+        self.assert_setting_equal(REGION_KEY, 'alpes')
+        # With a path as args
+        resto_client_run(arguments=['set', 'region', str(TEST_PATH)])
+        self.assert_setting_equal(REGION_KEY, str(TEST_PATH))
 
     def test_n_set_download_dir(self) -> None:
         """
@@ -78,11 +85,10 @@ class UTestSetClientParams(TestRestoClientCli):
         Unit test of set region in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
-        with self.assertRaises(SystemExit) as context:
+        with self.assertRaises(RestoClientUserError) as context:
             resto_client_run(arguments=['set', 'region', 'JaimeLaBretagne'])
-        # should raise this exception after a argparse.ArgumentError
-        # because argument region: invalid choice
-        self.assertEqual('2', str(context.exception))
+        expect_output = 'JaimeLaBretagne is not a valid geojson file path'
+        self.assertEqual(expect_output, str(context.exception))
 
     def test_d_set_verbosity(self) -> None:
         """

@@ -12,6 +12,8 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
+from pathlib import Path
+
 from resto_client.base_exceptions import RestoClientUserError
 from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
@@ -30,11 +32,11 @@ class UTestCliSearch(TestRestoClientCli):
         :param collection : server's collection
         :param feature_id : identifier of a resto feature
         """
-        output = self.get_command_output(['search', '--criteria=identifier:{}'.format(feature_id),
-                                          '--collection={}'.format(collection),
-                                          '--server={}'.format(server_name)])
+        output = self.get_command_output(['search', f'--criteria=identifier:{feature_id}',
+                                          f'--collection={collection}',
+                                          f'--server={server_name}'])
         self.assertIn('One result found with id : ', output)
-        self.assertIn('{}'.format(feature_id), output)
+        self.assertIn(f'{feature_id}', output)
 
     def test_n_search_kalideos(self) -> None:
         """
@@ -86,10 +88,10 @@ class UTestCliSearch(TestRestoClientCli):
         Unit test of search in nominal cases when criteria has a wrong case
         """
         id_kalideos = '2482882741373125'
-        output = self.get_command_output(['search', '--criteria=idenTIFier:{}'.format(id_kalideos),
+        output = self.get_command_output(['search', f'--criteria=idenTIFier:{id_kalideos}',
                                           '--collection=KALCNES', '--server=kalideos'])
         self.assertIn('One result found with id : ', output)
-        self.assertIn('{}'.format(id_kalideos), output)
+        self.assertIn(f'{id_kalideos}', output)
 
     def test_n_search_multi(self) -> None:
         """
@@ -163,6 +165,52 @@ class UTestCliSearch(TestRestoClientCli):
         self.assertIn(' 3 results ', output)
         self.assertIn('beginning at index 1', output)
 
+    def test_n_search_with_region(self) -> None:
+        """
+        Unit test of search with region
+        """
+        command = ['search', '--criteria', 'platform:SPOT 4', '--region=bretagne',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn(f'{id_kalideos}', output)
+
+        path_here = Path(__file__).parent
+        test_path = path_here.parent.parent.parent / 'resto_client' / 'zones' / 'Alpes.geojson'
+        test_path_str = str(test_path)
+        input_region = f'--region={test_path_str}'
+        command = ['search', '--criteria', 'platform:SPOT 4', input_region,
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193246286290231
+        self.assertIn('One result found with id : ', output)
+        self.assertIn(f'{id_kalideos}', output)
+
+    def test_n_search_with_region_case_unsensitive(self) -> None:
+        """
+        Unit test of search with region extended
+        """
+        command = ['search', '--criteria', 'platform:SPOT 4', '--region=breTagne',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn(f'{id_kalideos}', output)
+
+    def test_n_search_set_region(self) -> None:
+        """
+        Unit test of search with region already set
+        """
+
+        resto_client_run(arguments=['set', 'region', 'bretagne'])
+        command = ['search', '--criteria', 'platform:SPOT 4',
+                   '--collection=KALCNES', '--server=kalideos']
+        output = self.get_command_output(command)
+        id_kalideos = 2193020092357640
+        self.assertIn('One result found with id : ', output)
+        self.assertIn(f'{id_kalideos}', output)
+
     def test_d_search(self) -> None:
         """
         Unit test of search in degraded cases (no result found)
@@ -172,7 +220,7 @@ class UTestCliSearch(TestRestoClientCli):
         command = ['search', '--criteria=identifiers:wrong_id', '--collection=KALCNES']
         output = self.get_command_output(command)
         exp_crit = {'identifiers': 'wrong_id', 'region': None}
-        expt_output = "No result found with criteria : {}".format(exp_crit)
+        expt_output = f'No result found with criteria : {exp_crit}'
         self.assertIn(expt_output, output)
 
         # Wong type of criteria given
@@ -194,7 +242,7 @@ class UTestCliSearch(TestRestoClientCli):
             resto_client_run(arguments=command)
         expected_msg = 'Criterion bad_criteria not supported by this resto server,'
         self.assertIn(expected_msg, str(ctxt.exception))
-        self.assertIn("'incidenceAngle", str(ctxt.exception))
+        self.assertIn('incidenceAngle', str(ctxt.exception))
 
     def test_d_search_lat_and_long(self) -> None:
         """
