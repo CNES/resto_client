@@ -66,7 +66,8 @@ class VTestCliShow(TestRestoClientCli):
 
     def test_n_show_other_collection(self) -> None:
         """
-        Validation test of show collection in nominal cases : another collection on the current server
+        Validation test of show collection in nominal cases : another collection on the current
+        server
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])

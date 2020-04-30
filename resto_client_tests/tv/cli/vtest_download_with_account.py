@@ -12,10 +12,10 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from resto_client.tv.cli_accounts import (USER_THEIA, PWD_THEIA,
-                                          USER_PEPS, PWD_PEPS,
-                                          USER_DRUPAL, PWD_DRUPAL)
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
+from resto_client_tests.tv.test_accounts import (USER_THEIA, PWD_THEIA,
+                                                 USER_PEPS, PWD_PEPS,
+                                                 USER_DRUPAL, PWD_DRUPAL)
 
 
 class VTestCliDownloadWithAccount(TestRestoClientCli):
