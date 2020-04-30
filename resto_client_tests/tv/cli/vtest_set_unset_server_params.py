@@ -21,15 +21,15 @@ from resto_client.settings.servers_database import WELL_KNOWN_SERVERS
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestSetServerParams(TestRestoClientCli):
+class VTestSetServerParams(TestRestoClientCli):
     """
-    Unit Tests of the cli set of RestoServerPersisted parameters
+    Validation Tests of the cli set of RestoServerPersisted parameters
     server, account, collection
     """
 
     def test_n_set_server(self) -> None:
         """
-        Unit test of set server in nominal cases
+        Validation test of set server in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # Test setting of all default server
@@ -41,7 +41,7 @@ class UTestSetServerParams(TestRestoClientCli):
 
     def test_n_set_account(self) -> None:
         """
-        Unit test of set account in nominal cases
+        Validation test of set account in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -56,7 +56,7 @@ class UTestSetServerParams(TestRestoClientCli):
 
     def test_n_set_collection(self) -> None:
         """
-        Unit test of set collection in nominal cases
+        Validation test of set collection in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -69,7 +69,7 @@ class UTestSetServerParams(TestRestoClientCli):
 
     def test_n_set_server_reinit(self) -> None:
         """
-        Unit test of set server with already saved parameters in nominal cases
+        Validation test of set server with already saved parameters in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # First set server with parameters
@@ -85,14 +85,14 @@ class UTestSetServerParams(TestRestoClientCli):
 
     def test_n_set_server_mono_col(self) -> None:
         """
-        Unit test of set server with a server with one collection in nominal cases
+        Validation test of set server with a server with one collection in nominal cases
         """
         resto_client_run(arguments=['set', 'server', 'ro'])
         self.assert_setting_equal(COLLECTION_KEY, 'ROHAITI')
 
     def test_d_set_server(self) -> None:
         """
-        Unit test of set server in degraded cases
+        Validation test of set server in degraded cases
         """
         with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['set', 'server', 'bad_server'])
@@ -101,7 +101,7 @@ class UTestSetServerParams(TestRestoClientCli):
 
     def test_d_set_account(self) -> None:
         """
-        Unit test of set account in degraded cases
+        Validation test of set account in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(RestoClientNoPersistedServer):
@@ -111,7 +111,7 @@ class UTestSetServerParams(TestRestoClientCli):
 
     def test_d_set_collection(self) -> None:
         """
-        Unit test of set collection in degraded cases
+        Validation test of set collection in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -120,15 +120,15 @@ class UTestSetServerParams(TestRestoClientCli):
         self.assertEqual('No collection found with name Bad_Collection', str(context.exception))
 
 
-class UTestUnsetServerParams(TestRestoClientCli):
+class VTestUnsetServerParams(TestRestoClientCli):
     """
-    Unit Tests of the cli unset of RestoServerPersisted parameters
+    Validation Tests of the cli unset of RestoServerPersisted parameters
     server, account, collection
     """
 
     def test_n_unset_server(self) -> None:
         """
-        Unit test of unset server in nominal cases
+        Validation test of unset server in nominal cases
         """
         # With server persisted and no account persisted
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -144,7 +144,7 @@ class UTestUnsetServerParams(TestRestoClientCli):
 
     def test_n_unset_server_noserver(self) -> None:
         """
-        Unit test of unset server if there is no server in nominal cases
+        Validation test of unset server if there is no server in nominal cases
         """
         with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['unset', 'server'])
@@ -154,7 +154,7 @@ class UTestUnsetServerParams(TestRestoClientCli):
 
     def test_n_unset_account(self) -> None:
         """
-        Unit test of unset account in nominal cases
+        Validation test of unset account in nominal cases
         """
         # With no server persisted
         with self.assertRaises(RestoClientUserError) as ctxt:
@@ -171,7 +171,7 @@ class UTestUnsetServerParams(TestRestoClientCli):
 
     def test_n_unset_collection(self) -> None:
         """
-        Unit test of unset collection in nominal cases
+        Validation test of unset collection in nominal cases
         """
         # With no server persisted
         with self.assertRaises(RestoClientUserError) as ctxt:

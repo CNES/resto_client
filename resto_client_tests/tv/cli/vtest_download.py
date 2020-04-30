@@ -17,14 +17,14 @@ from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliDownload(TestRestoClientCli):
+class VTestCliDownload(TestRestoClientCli):
     """
-    Unit Tests of the cli download module
+    Validation Tests of the cli download module
     """
 
     def test_n_download_annexes(self) -> None:
         """
-        Unit test of download annexes
+        Validation test of download annexes
         """
         command = ['download', 'annexes', '1363714904970542',
                    '--collection=KALCNES', '--server=kaliDEOS']
@@ -32,7 +32,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_n_download_quicklook(self) -> None:
         """
-        Unit test of download quicklook
+        Validation test of download quicklook
         """
         id_kalideos = '1363714904970542'
         id_theia = 'OSO_20180101_VECTOR_departement_92'
@@ -50,7 +50,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_n_download_thumbnail(self) -> None:
         """
-        Unit test of download thumbnail
+        Validation test of download thumbnail
         """
         id_kalideos = '1363714904970542'
         id_theia = 'OSO_20180101_VECTOR_departement_92'
@@ -66,7 +66,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_d_download_quicklook_no_ql(self) -> None:
         """
-        Unit test of download quicklook if no quicklook for the given ID
+        Validation test of download quicklook if no quicklook for the given ID
         """
         id_creodias = '/eodata/Sentinel-1/SAR/RAW/2019/12/02/'\
             'S1B_EW_RAW__0SDH_20191202T133518_20191202T133616_019186_024392_47A1.SAFE'
@@ -81,7 +81,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_d_download_thumbnail(self) -> None:
         """
-        Unit test of download thumbnail if no thumbnail for the given ID
+        Validation test of download thumbnail if no thumbnail for the given ID
         """
         id_creodias = '/eodata/Sentinel-1/SAR/RAW/2019/12/02/'\
             'S1B_EW_RAW__0SDH_20191202T133518_20191202T133616_019186_024392_47A1.SAFE'
@@ -96,7 +96,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_d_download_no_result(self) -> None:
         """
-        Unit test of download annexes,thumbnail, quicklook with no result for a given id
+        Validation test of download annexes,thumbnail, quicklook with no result for a given id
         """
         for download_file in ['annexes', 'quicklook', 'thumbnail']:
             with self.subTest(file_type=download_file):
@@ -108,7 +108,7 @@ class UTestCliDownload(TestRestoClientCli):
 
     def test_d_down_prod_wrong_account(self) -> None:
         """
-        Unit test of download product when wrong username/password given
+        Validation test of download product when wrong username/password given
         """
         command = ['download', 'product', '715640488937144',
                    '--username=wrong_username', '--password=wrong_password',

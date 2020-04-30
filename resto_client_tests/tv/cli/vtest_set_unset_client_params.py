@@ -25,15 +25,15 @@ HERE = Path(__file__).parent
 TEST_PATH = HERE.parent.parent.parent / 'resto_client' / 'zones' / 'Alpes.geojson'
 
 
-class UTestSetClientParams(TestRestoClientCli):
+class VTestSetClientParams(TestRestoClientCli):
     """
-    Unit Tests of the cli set of RestoClientParameters
+    Validation Tests of the cli set of RestoClientParameters
     download_dir, region, verbosity
     """
 
     def test_n_set_region(self) -> None:
         """
-        Unit test of set region in nominal cases
+        Validation test of set region in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         resto_client_run(arguments=['set', 'region', 'bretagne'])
@@ -47,7 +47,7 @@ class UTestSetClientParams(TestRestoClientCli):
 
     def test_n_set_download_dir(self) -> None:
         """
-        Unit test of set download directory in nominal cases
+        Validation test of set download directory in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # get an existing directory for test
@@ -61,7 +61,7 @@ class UTestSetClientParams(TestRestoClientCli):
 
     def test_n_set_verbosity(self) -> None:
         """
-        Unit test of set verbosity in nominal cases
+        Validation test of set verbosity in nominal cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         self.assert_setting_equal(VERBOSITY_KEY, 'DEBUG')
@@ -71,7 +71,7 @@ class UTestSetClientParams(TestRestoClientCli):
 
     def test_d_set_download_dir(self) -> None:
         """
-        Unit test of set download directory in degraded cases
+        Validation test of set download directory in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(NotADirectoryError) as context:
@@ -82,7 +82,7 @@ class UTestSetClientParams(TestRestoClientCli):
 
     def test_d_set_region(self) -> None:
         """
-        Unit test of set region in degraded cases
+        Validation test of set region in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(RestoClientUserError) as context:
@@ -92,7 +92,7 @@ class UTestSetClientParams(TestRestoClientCli):
 
     def test_d_set_verbosity(self) -> None:
         """
-        Unit test of set verbosity in degraded cases
+        Validation test of set verbosity in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         with self.assertRaises(SystemExit) as context:
@@ -102,15 +102,15 @@ class UTestSetClientParams(TestRestoClientCli):
         self.assertEqual('2', str(context.exception))
 
 
-class UTestUnsetClientParams(TestRestoClientCli):
+class VTestUnsetClientParams(TestRestoClientCli):
     """
-    Unit Tests of the cli unset of RestoClientParameters
+    Validation Tests of the cli unset of RestoClientParameters
     download_dir, region, verbosity
     """
 
     def test_n_unset_region(self) -> None:
         """
-        Unit test of unset region in nominal cases
+        Validation test of unset region in nominal cases
         """
         # With region already persisted
         resto_client_run(arguments=['set', 'region', 'bretagne'])
@@ -122,7 +122,7 @@ class UTestUnsetClientParams(TestRestoClientCli):
 
     def test_n_unset_download_dir(self) -> None:
         """
-        Unit test of unset download directory in nominal cases
+        Validation test of unset download directory in nominal cases
         """
         # With download directory already persisted
         directory_test = str(Path.home())
@@ -136,7 +136,7 @@ class UTestUnsetClientParams(TestRestoClientCli):
 
     def test_n_unset_verbosity(self) -> None:
         """
-        Unit test of unset verbosity in nominal cases
+        Validation test of unset verbosity in nominal cases
         """
         # With verbosity already persisted
         resto_client_run(arguments=['set', 'verbosity', 'NORMAL'])
