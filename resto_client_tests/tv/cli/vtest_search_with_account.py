@@ -14,7 +14,7 @@
 """
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
-from .cli_accounts import USER_DRUPAL, PWD_DRUPAL
+from resto_client_tests.tv.cli_accounts import USER_DRUPAL, PWD_DRUPAL
 
 
 class VTestCliSearchWithAccount(TestRestoClientCli):
