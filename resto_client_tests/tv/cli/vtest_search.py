@@ -19,9 +19,9 @@ from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliSearch(TestRestoClientCli):
+class VTestCliSearch(TestRestoClientCli):
     """
-    Unit Tests of the cli search module
+    Validation Tests of the cli search module
     """
 
     def do_search_one_feature(self, server_name: str, collection: str, feature_id: str) -> None:
@@ -40,13 +40,13 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_kalideos(self) -> None:
         """
-        Unit test of search in nominal cases for kalideos
+        Validation test of search in nominal cases for kalideos
         """
         self.do_search_one_feature('kalideos', 'KALCNES', '2482882741373125')
 
     def test_n_search_peps(self) -> None:
         """
-        Unit test of search in nominal cases for peps
+        Validation test of search in nominal cases for peps
         """
         self.do_search_one_feature(
             'peps', 'S2',
@@ -54,7 +54,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_creodias(self) -> None:
         """
-        Unit test of search in nominal cases for creodias
+        Validation test of search in nominal cases for creodias
         """
         id_creo = ('/eodata/Envisat/Meris/FRS/2012/04/08/' +
                    'MER_FRS_1PPEPA20120408_105857_000005063113_00267_52867_0978.N1')
@@ -62,14 +62,14 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_theia(self) -> None:
         """
-        Unit test of search in nominal cases for theia
+        Validation test of search in nominal cases for theia
         """
         self.do_search_one_feature('theia', 'SENTINEL2',
                                    'SENTINEL2B_20190917-113018-467_L2A_T30STJ_D')
 
     def test_n_search_cop_nci(self) -> None:
         """
-        Unit test of search in nominal cases for cop_nci
+        Validation test of search in nominal cases for cop_nci
         """
         id_cop_nci = ('S3B_SL_2_WST____20191203T063311_20191203T063611_' +
                       '20191203T073554_0179_033_006_0540_MAR_O_NR_003')
@@ -77,7 +77,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_sent_hub(self) -> None:
         """
-        Unit test of search in nominal cases for sent_hub
+        Validation test of search in nominal cases for sent_hub
         """
         self.do_search_one_feature(
             'sent_hub', 'Sentinel2',
@@ -85,7 +85,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_case_unsensitive(self) -> None:
         """
-        Unit test of search in nominal cases when criteria has a wrong case
+        Validation test of search in nominal cases when criteria has a wrong case
         """
         id_kalideos = '2482882741373125'
         output = self.get_command_output(['search', f'--criteria=idenTIFier:{id_kalideos}',
@@ -95,7 +95,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_multi(self) -> None:
         """
-        Unit test of search with multi criteria in nominal cases
+        Validation test of search with multi criteria in nominal cases
         """
         command = ['search', '--criteria', 'platform:SPOT 4', 'platform:DRONE',
                    '--collection=KALCNES', '--server=Kalideos']
@@ -110,7 +110,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_several_result(self) -> None:
         """
-        Unit test of set server with several result in nominal cases
+        Validation test of set server with several result in nominal cases
         """
         command = ['search', '--criteria=productMode:SBS', '--collection=KALCNES',
                    '--server=Kalideos']
@@ -125,7 +125,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_several_res_page(self) -> None:
         """
-        Unit test of set server with several result in nominal cases
+        Validation test of set server with several result in nominal cases
         with page and maxrecords
         """
         command = ['search', '--criteria=productMode:SBS', '--page=2', '--maxrecords=2',
@@ -141,7 +141,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_d_search_several_pages(self) -> None:
         """
-        Unit test of set server with several result in degraded cases
+        Validation test of set server with several result in degraded cases
         """
         command = ['search', '--criteria=productMode:SBS', '--page=3', '--maxrecords=2',
                    '--collection=KALCNES', '--server=Kalideos']
@@ -151,7 +151,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_with_radius(self) -> None:
         """
-        Unit test of search with raidus in degraded cases
+        Validation test of search with raidus in degraded cases
         """
         # radius without longitude or latitude
         command = ['search', '--criteria', 'radius:1485', 'lon:-1.76', 'lat:48.15',
@@ -167,7 +167,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_with_region(self) -> None:
         """
-        Unit test of search with region
+        Validation test of search with region
         """
         command = ['search', '--criteria', 'platform:SPOT 4', '--region=bretagne',
                    '--collection=KALCNES', '--server=kalideos']
@@ -187,9 +187,9 @@ class UTestCliSearch(TestRestoClientCli):
         self.assertIn('One result found with id : ', output)
         self.assertIn(f'{id_kalideos}', output)
 
-    def test_n_search_with_region_case_unsensitive(self) -> None:
+    def test_n_search_with_region_case(self) -> None:
         """
-        Unit test of search with region extended
+        Validation test of search with region given as case unsensitive
         """
         command = ['search', '--criteria', 'platform:SPOT 4', '--region=breTagne',
                    '--collection=KALCNES', '--server=kalideos']
@@ -200,7 +200,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_set_region(self) -> None:
         """
-        Unit test of search with region already set
+        Validation test of search with region already set
         """
 
         resto_client_run(arguments=['set', 'region', 'bretagne'])
@@ -213,7 +213,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_d_search(self) -> None:
         """
-        Unit test of search in degraded cases (no result found)
+        Validation test of search in degraded cases (no result found)
         """
         # No result found
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -233,7 +233,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_d_search_bad_criteria(self) -> None:
         """
-        Unit test of search in degraded cases (criteria not found)
+        Validation test of search in degraded cases (criteria not found)
         """
         # No result found
         resto_client_run(arguments=['set', 'server', 'kalideos'])
@@ -246,7 +246,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_d_search_lat_and_long(self) -> None:
         """
-        Unit test of search in degraded cases (latitude present without longitude)
+        Validation test of search in degraded cases (latitude present without longitude)
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # latitude without longitude
@@ -259,7 +259,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_d_search_with_radius(self) -> None:
         """
-        Unit test of search in degraded cases (with radius)
+        Validation test of search in degraded cases (with radius)
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # radius without longitude or latitude
@@ -272,7 +272,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_download_ql(self) -> None:
         """
-        Unit test of search in nominal cases when quicklook download is triggered after search
+        Validation test of search in nominal cases when quicklook download is triggered after search
         """
         command = ['search', '--criteria=identifiers:1355444872323826',
                    '--collection=ROHAITI', '--server=ro',
@@ -281,7 +281,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_download_th(self) -> None:
         """
-        Unit test of search in nominal cases when thumbnail download is triggered after search
+        Validation test of search in nominal cases when thumbnail download is triggered after search
         """
         command = ['search', '--criteria=identifiers:1355444872323826',
                    '--collection=ROHAITI', '--server=ro',
@@ -290,7 +290,7 @@ class UTestCliSearch(TestRestoClientCli):
 
     def test_n_search_download_ann(self) -> None:
         """
-        Unit test of search in nominal cases when annexes download is triggered after search
+        Validation test of search in nominal cases when annexes download is triggered after search
         """
         command = ['search', '--criteria=identifiers:10159402351973898',
                    '--collection=KALCNES', '--server=kalideos',

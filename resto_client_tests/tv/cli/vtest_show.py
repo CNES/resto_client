@@ -17,14 +17,14 @@ from resto_client.cli.resto_client_cli import resto_client_run
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliShow(TestRestoClientCli):
+class VTestCliShow(TestRestoClientCli):
     """
-    Unit Tests of the cli show module
+    Validation Tests of the cli show module
     """
 
     def test_n_show_server(self) -> None:
         """
-        Unit test of show server in nominal cases
+        Validation test of show server in nominal cases
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         output1 = self.get_command_output(['show', 'server'])
@@ -37,7 +37,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_n_show_server_stats(self) -> None:
         """
-        Unit test of show server in nominal cases
+        Validation test of show server in nominal cases
         """
         output = self.get_command_output(['show', 'server', 'kalideos', '--stats'])
         expect_out = (['No statistics available for KALCNES',
@@ -47,7 +47,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_n_show_collection(self) -> None:
         """
-        Unit test of show collection in nominal cases: nothing persisted
+        Validation test of show collection in nominal cases: nothing persisted
         """
         output = self.get_command_output(['show', 'collection',
                                           'KALHAITI', '--server=kalideos'])
@@ -56,7 +56,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_n_show_current_collection(self) -> None:
         """
-        Unit test of show collection in nominal cases : current collection
+        Validation test of show collection in nominal cases : current collection
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
@@ -66,7 +66,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_n_show_other_collection(self) -> None:
         """
-        Unit test of show collection in nominal cases : another collection on the current server
+        Validation test of show collection in nominal cases : another collection on the current server
         """
         resto_client_run(arguments=['set', 'server', 'kalideos'])
         resto_client_run(arguments=['set', 'collection', 'KALCNES'])
@@ -76,7 +76,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_n_show_settings(self) -> None:
         """
-        Unit test of show settings in nominal cases
+        Validation test of show settings in nominal cases
         """
         output = self.get_command_output(['show', 'settings'])
         second_line = output.splitlines()[1]
@@ -84,7 +84,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_n_show_feature(self) -> None:
         """
-        Unit test of show feature in nominal cases
+        Validation test of show feature in nominal cases
         With Kalideos and Creodias
         """
         output = self.get_command_output(['show', 'feature', '1363714904970542',
@@ -101,7 +101,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_d_show_server(self) -> None:
         """
-        Unit test of show server in degraded cases (no result found)
+        Validation test of show server in degraded cases (no result found)
         """
         with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['show', 'server'])
@@ -110,7 +110,7 @@ class UTestCliShow(TestRestoClientCli):
 
     def test_d_show_collection(self) -> None:
         """
-        Unit test of show collection in degraded cases (no result found)
+        Validation test of show collection in degraded cases (no result found)
         """
         with self.assertRaises(RestoClientUserError) as ctxt:
             resto_client_run(arguments=['show', 'collection', 'oups', '--server=kalideos'])

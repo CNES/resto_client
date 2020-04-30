@@ -21,22 +21,22 @@ from resto_client.settings.servers_database import (DB_SERVERS,
 from resto_client_tests.resto_client_cli_test import TestRestoClientCli
 
 
-class UTestCliConfigureServer(TestRestoClientCli):
+class VTestCliConfigureServer(TestRestoClientCli):
     """
-    Unit Tests of the cli configure_server module
+    Validation Tests of the cli configure_server module
     create,delete,show, edit (not implemented)
     """
 
     def test_n_config_server_show(self) -> None:
         """
-        Unit test of config_server show in nominal cases
+        Validation test of config_server show in nominal cases
         """
         output = self.get_command_output(['configure_server', 'show'])
         self.assertIn('Settings from : resto_client_server_settings.json', output)
 
     def test_n_config_server_create_del(self) -> None:
         """
-        Unit test of config_server create in nominal cases
+        Validation test of config_server create in nominal cases
         """
         resto_client_run(arguments=['configure_server', 'create', 'kalid',
                                     'https://www.kalideos.fr/resto2', 'dotcloud',
@@ -53,7 +53,7 @@ class UTestCliConfigureServer(TestRestoClientCli):
 
     def test_d_config_server_create(self) -> None:
         """
-        Unit test of config_server create in degraded cases
+        Validation test of config_server create in degraded cases
         """
         resto_client_run(arguments=['set', 'verbosity', 'DEBUG'])
         # if server already exist
@@ -75,7 +75,7 @@ class UTestCliConfigureServer(TestRestoClientCli):
 
     def test_d_config_server_edit(self) -> None:
         """
-        Unit test of config_server edit in degraded cases cause not implemented
+        Validation test of config_server edit in degraded cases cause not implemented
         """
         # configure_server edit not implemented yet
         with self.assertRaises(RestoClientDesignError) as context:
