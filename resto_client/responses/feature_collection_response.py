@@ -54,6 +54,6 @@ class FeatureCollectionResponse(RestoJsonResponseSimple):
 
     def as_resto_object(self) -> RestoFeatureCollection:
         """
-        :returns: the response expressed as a :class:`RestoFeatureCollection` object
+        :returns: the response expressed as a Resto object
         """
         return RestoFeatureCollection(self._normalized_response)

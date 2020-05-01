@@ -65,7 +65,8 @@ class BaseRequest(Authenticator):
 
         :param service: service
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
-        :raises TypeError: if the service argument is not derived from :class:`BaseService`.
+        :raises TypeError: if the service argument is not derived from
+                           :class:`~resto_client.services.base_service.BaseService`.
         """
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
