@@ -33,7 +33,6 @@ def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
     download sub-commands.
 
     :param args: arguments parsed by the CLI parser
-    :type args: :class:`argparse.Namespace`
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     client_params = RestoClientParameters.build_from_argparse(args)
