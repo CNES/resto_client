@@ -153,7 +153,7 @@ class RestoService(BaseService):
         :returns: the requested feature
         :raises IndexError: when the feature collection does not contain exactly one feature.
         :raises InconsistentResponse: when the retrieved feature has not the right id
-        (case where uuid incorrectly provided as argument)
+                                      (case where uuid incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)

@@ -139,7 +139,7 @@ class BaseRequest(Authenticator):
     @abstractmethod
     def run(self) -> RestoRequestResult:
         """
-        THis is the main method of the request runner. Subclasses should override this method
+        This is the main method of the request runner. Subclasses should override this method
         only for specifying the right return type that they are committed to return and which
         may differ from one request to the other.
 
@@ -155,7 +155,7 @@ class BaseRequest(Authenticator):
         A special processing is done for what concerns exception handling:
 
         1- if request preparation raises a RestoClientEmulatedResponse, the request response
-           is directly returned from the 'result' attribute of that exception
+        is directly returned from the 'result' attribute of that exception
         2- TBD
 
         :returns: an object of one the types defined by RestoRequestResult,

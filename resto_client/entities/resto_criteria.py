@@ -32,8 +32,8 @@ class RestoCriteria(dict):
         """
         Constructor
 
-        :param resto_protocol : name of the resto protocol or None for common criteria.
-        :param dict kwargs : dictionary in keyword=value form
+        :param resto_protocol: name of the resto protocol or None for common criteria.
+        :param dict kwargs: dictionary in keyword=value form
         """
         self.supported_criteria = get_criteria_for_protocol(resto_protocol)
 
