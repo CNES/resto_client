@@ -57,8 +57,9 @@ class AuthenticationTokenService(BaseService):
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """
-        super().__init__(auth_access, cast('AuthenticationService', self),
-                         parent_server=parent_server)
+        super(AuthenticationTokenService, self).__init__(auth_access,
+                                                         cast('AuthenticationService', self),
+                                                         parent_server=parent_server)
         self._token_value: Optional[str] = None
 
     @property
