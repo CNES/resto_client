@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -12,9 +14,9 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from urllib.parse import urlparse, urlunparse
 from mimetypes import guess_extension, MimeTypes
 from typing import Optional, Tuple, Union
+from urllib.parse import urlparse, urlunparse
 
 
 def contract_url(full_url: str) -> str:

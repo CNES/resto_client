@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -13,12 +15,12 @@
    limitations under the License.
 
 
-   Define version informations for the package.
+Define version informations for the package.
 
-   This definition is made in a module separate from <package>.__init__.py, in order to avoid
-   systematic version computation, even when no access to __version__ or __updated__ is needed.
+This definition is made in a module separate from <package>.__init__.py, in order to avoid
+systematic version computation, even when no access to __version__ or __updated__ is needed.
 
-   Those needing access to these symbols shall import this module on their own.
+Those needing access to these symbols shall import this module on their own.
 """
 __version__ = "v0.5.0"
 __updated__ = "03.04.2020"

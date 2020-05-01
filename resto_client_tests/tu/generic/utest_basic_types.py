@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -16,9 +18,9 @@ import unittest
 
 from shapely.errors import WKTReadingError
 
+from resto_client.base_exceptions import RestoClientDesignError
 from resto_client.generic.basic_types import (GeometryWKT, DateYMD, SquareInterval, TestList,
                                               AscOrDesc, Polarisation, DateYMDInterval, URLType)
-from resto_client.base_exceptions import RestoClientDesignError
 
 
 class UTestBasicTypes(unittest.TestCase):
