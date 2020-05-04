@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -30,8 +32,6 @@ class RestoFeatureCollection(geojson.FeatureCollection):
 
     def __init__(self, feature_coll_descr: dict) -> None:
         """
-        Constructor
-
         :param feature_coll_descr: Feature collection description
         :raises TypeError: When type in descriptor is different from 'FeatureCollection'
         """

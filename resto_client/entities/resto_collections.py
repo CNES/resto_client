@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +20,7 @@ from prettytable import PrettyTable
 
 from resto_client.base_exceptions import RestoClientUserError
 
-from .resto_collection import RestoCollection
+from .resto_collection import RestoCollection, COLLECTION_FIELDS_NAMES
 
 
 class RestoCollections():
@@ -31,9 +33,6 @@ class RestoCollections():
     """
 
     def __init__(self) -> None:
-        """
-        Constructor
-        """
         self._synthesis: Optional[RestoCollection] = None
         self._collections: Dict[str, RestoCollection] = {}
 
@@ -142,7 +141,7 @@ class RestoCollections():
             msg_err = 'Unknown collection to annotate: {}. Known collections: {}'
             raise ValueError(msg_err.format(annotate, self.names))
         collections_table = PrettyTable()
-        collections_table.field_names = RestoCollection.table_field_names
+        collections_table.field_names = COLLECTION_FIELDS_NAMES
         for collection in self._collections.values():
             collection_fields = collection.get_table_row()
             if collection_fields[0] == annotate:

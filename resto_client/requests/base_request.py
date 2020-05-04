@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -40,7 +42,7 @@ RestoRequestResult = Union[RestoEntities, RestoResponse, RestoJsonResponseSimple
 
 class BaseRequest(Authenticator):
     """
-     Base class for all service Requests
+     Base class for all Requests
     """
 
     @property
@@ -59,11 +61,10 @@ class BaseRequest(Authenticator):
 
     def __init__(self, service: BaseService, **url_kwargs: str) -> None:
         """
-        Constructor
-
         :param service: service
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
-        :raises TypeError: if the service argument is not derived from :class:`BaseService`.
+        :raises TypeError: if the service argument is not derived from
+                           :class:`~resto_client.services.base_service.BaseService`.
         """
         if not isinstance(service, BaseService):
             msg_err = 'Argument type must derive from <BaseService>. Found {}'
@@ -139,7 +140,7 @@ class BaseRequest(Authenticator):
     @abstractmethod
     def run(self) -> RestoRequestResult:
         """
-        THis is the main method of the request runner. Subclasses should override this method
+        This is the main method of the request runner. Subclasses should override this method
         only for specifying the right return type that they are committed to return and which
         may differ from one request to the other.
 
@@ -155,7 +156,7 @@ class BaseRequest(Authenticator):
         A special processing is done for what concerns exception handling:
 
         1- if request preparation raises a RestoClientEmulatedResponse, the request response
-           is directly returned from the 'result' attribute of that exception
+        is directly returned from the 'result' attribute of that exception
         2- TBD
 
         :returns: an object of one the types defined by RestoRequestResult,

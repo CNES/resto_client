@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -59,8 +61,6 @@ class RestoService(BaseService):
                  auth_service: AuthenticationService,
                  parent_server: 'RestoServer') -> None:
         """
-        Constructor
-
         :param resto_access: access to resto service.
         :param auth_service: Authentication service associated to this resto service.
         :param parent_server: Server which uses this service.
@@ -153,7 +153,7 @@ class RestoService(BaseService):
         :returns: the requested feature
         :raises IndexError: when the feature collection does not contain exactly one feature.
         :raises InconsistentResponse: when the retrieved feature has not the right id
-        (case where uuid incorrectly provided as argument)
+                                      (case where uuid incorrectly provided as argument)
         """
         collection_name = self._collections_mgr.ensure_collection(collection)
         criteria = RestoCriteria(self.get_protocol(), identifier=feature_id)

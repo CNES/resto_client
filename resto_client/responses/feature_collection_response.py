@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -52,6 +54,6 @@ class FeatureCollectionResponse(RestoJsonResponseSimple):
 
     def as_resto_object(self) -> RestoFeatureCollection:
         """
-        :returns: the response expressed as a :class:`RestoFeatureCollection` object
+        :returns: the response expressed as a Resto object
         """
         return RestoFeatureCollection(self._normalized_response)

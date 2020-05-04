@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -13,38 +15,52 @@
    limitations under the License.
 
 
-resto_client Command Line Interface (CLI)
+This is the main module which implements the **resto_client** Command Line Interface (CLI).
 
-Implemented commands (without options):
+Implemented commands:
 
-SET:
-    > resto_client set server <server_url> ...
-    > resto_client set account <account_id> ...
-    > resto_client set collection <collection> ...
+SET::
 
-UNSET:
+    > resto_client set server <server_name>
+    > resto_client set account <account_id>
+    > resto_client set collection <collection_name>
+    > resto_client set download_dir <download directory>
+    > resto_client set region <region_name>
+    > resto_client set verbosity <NORMAL|DEBUG>
+
+UNSET::
+
     > resto_client unset server
     > resto_client unset account
     > resto_client unset collection
+    > resto_client unset download_dir
+    > resto_client unset region
+    > resto_client unset verbosity
 
-SHOW:
-    > resto_client show collections ...
-    > resto_client show collection <collection> ...
-    > resto_client show feature <collection> <feature_id> ...
+SHOW::
 
-DOWNLOAD:
-    > resto_client download product <collection> <feature_id> ...
-    > resto_client download quicklook <collection> <feature_id> ...
-    > resto_client download thumbnail <collection> <feature_id> ...
-    > resto_client download annexes <collection> <feature_id> ...
+    > resto_client show settings
+    > resto_client show server ...
+    > resto_client show collection <collection_name> ...
+    > resto_client show feature <feature_id> ...
 
-SEARCH:
-    > resto_client search <collection> ...
+SEARCH::
 
+    > resto_client search ...
 
-Expected commands (without options):
+DOWNLOAD::
 
-    TBD
+    > resto_client download product <feature_id> ...
+    > resto_client download quicklook <feature_id> ...
+    > resto_client download thumbnail <feature_id> ...
+    > resto_client download annexes <feature_id> ...
+
+CONFIGURE_SERVER::
+
+    > resto_client configure_server create <server_name> ...
+    > resto_client configure_server delete <server_name>
+    > resto_client configure_server show
+
 """
 import sys
 from typing import Sequence, Optional  # @NoMove
@@ -61,10 +77,10 @@ from resto_client.settings.resto_client_config import resto_client_print
 
 def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
     """
-    Command line interface to access collections from resto.
+    resto_client CLI runner.
 
     :param arguments: list of arguments
-    :raises RestoClientError: when in debug mode to check the whole exception.
+    :raises RestoClientError: when an application error is not caught and printed out.
     """
     arg_parser = build_parser()
 
@@ -90,7 +106,7 @@ def resto_client_run(arguments: Optional[Sequence[str]]=None) -> None:
 
 def main(arguments: Optional[Sequence[str]]=None) -> None:
     """
-    Command line interface to access collections from resto.
+    Main entry point to resto_client Command Line Interface.
 
     :param arguments: list of arguments
     """

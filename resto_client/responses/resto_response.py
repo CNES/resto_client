@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -22,13 +24,11 @@ if TYPE_CHECKING:
 
 class RestoResponse(ABC):
     """
-     Base class for all Resto Responses classes.
+     Abstract base class for all Resto Responses.
     """
 
     def __init__(self, request: 'BaseRequest') -> None:
         """
-        Constructor
-
         :param request: the parent request of this response
         """
         self._parent_request = request

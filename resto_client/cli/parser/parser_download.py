@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -31,7 +33,6 @@ def cli_download_files(args: argparse.Namespace) -> CliFunctionReturnType:
     download sub-commands.
 
     :param args: arguments parsed by the CLI parser
-    :type args: :class:`argparse.Namespace`
     :returns: the resto client parameters and the resto server possibly built by this command.
     """
     client_params = RestoClientParameters.build_from_argparse(args)

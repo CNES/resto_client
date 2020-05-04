@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -25,7 +27,7 @@ if TYPE_CHECKING:
 
 class BaseService(ABC):
     """
-    An abstract base class for all services
+    Abstract base class of all services
     """
 
     def __init__(self,
@@ -33,8 +35,6 @@ class BaseService(ABC):
                  auth_service: 'AuthenticationService',
                  parent_server: 'RestoServer') -> None:
         """
-        Constructor
-
         :param service_access: Service access.
         :param auth_service: Authentication service associated to this service.
         :param parent_server: The server which uses this service.

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -20,16 +22,16 @@ from prettytable import PrettyTable
 from .resto_license import RestoCollectionLicense
 from .resto_statistics import RestoStatistics
 
+COLLECTION_FIELDS_NAMES = ['Collection name', 'Status', 'Model', 'License Id', 'License name']
+
 
 class RestoCollection():
     """
-     Class representing a Resto collection
+     Class holding the description of a Resto collection
     """
 
     def __init__(self, collection_descr: dict) -> None:
         """
-        Constructor
-
         :param collection_descr: description of the collection
         """
         self._collection_descr = copy.deepcopy(collection_descr)
@@ -96,8 +98,6 @@ class RestoCollection():
 
     """
 
-    table_field_names = ['Collection name', 'Status', 'Model', 'License Id', 'License name']
-
     def get_table_row(self) -> List[Optional[str]]:
         """
         :returns: attributes to be displayed in the tabulated dump of a collection
@@ -108,6 +108,6 @@ class RestoCollection():
     def __str__(self) -> str:
         collection_table = PrettyTable()
         collection_table.title = "Collection's Characteristics"
-        collection_table.field_names = self.table_field_names
+        collection_table.field_names = COLLECTION_FIELDS_NAMES
         collection_table.add_row(self.get_table_row())
         return collection_table.get_string()

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -118,9 +120,6 @@ class FeatureOnTape(RestoClientEvent):
     """
 
     def __init__(self) -> None:
-        """
-        Constructor.
-        """
         super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
@@ -131,8 +130,6 @@ class LicenseSignatureRequested(RestoClientEvent):
 
     def __init__(self, error_response: 'DownloadErrorResponse') -> None:
         """
-        Constructor.
-
         :param error_response: the error response as provided by resto, which contains the
                                identifier of the license to sign.
         """

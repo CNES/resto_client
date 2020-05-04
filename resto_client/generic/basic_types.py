@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -24,28 +26,24 @@ from resto_client.base_exceptions import RestoClientDesignError
 
 class DateYMD():  # pylint: disable=too-few-public-methods
     """
-    A class to test input Date in order to have a proper YYYY-MM-DD format
+    A class to test that a string has a proper YYYY-MM-DD format for a date
     """
 
     def __init__(self, date_text: str) -> None:
         """
-        Test the input in order to have a proper %Y-%m-%d format
-
-        :param date_text: date in str format to test
+        :param date_text: string to test
         """
         datetime.strptime(date_text, "%Y-%m-%d").strftime('%Y-%m-%d')
 
 
 class DateYMDInterval():  # pylint: disable=too-few-public-methods
     """
-    A class to test input Date Interval in order to have a proper format
+    A class to test that a string has a proper %Y-%m-%d:%Y-%m-%d format for a date interval.
     """
 
     def __init__(self, date_interval_text: str) -> None:
         """
-        Test the input in order to have a proper %Y-%m-%d:%Y-%m-%d format
-
-        :param date_interval_text: date interval in str format to test
+        :param date_interval_text: string to test
         :raises ValueError: when argument does not have 2 components or when one of them is not
                             a DateYMD.
         """
@@ -69,14 +67,12 @@ class DateYMDInterval():  # pylint: disable=too-few-public-methods
 
 class GeometryWKT():  # pylint: disable=too-few-public-methods
     """
-    A class to test input geometry in order to have a proper WKT format
+    A class to test that a string has a proper geometry WKT format
     """
 
     def __init__(self, geometry_input: str) -> None:
         """
-        Test the input in order to have a proper %Y-%m-%d format
-
-        :param geometry_input: geometry in str format to test
+        :param geometry_input: string to test
         :raises WKTReadingError: geometry has not a wkt format
         """
         try:
@@ -88,15 +84,13 @@ class GeometryWKT():  # pylint: disable=too-few-public-methods
 
 class SquareInterval():  # pylint: disable=too-few-public-methods
     """
-    A class to test input Interval in order to have a proper format surounded by square backet
-    ex : [n1,n2[
+    A class to test that a string has a proper format for an interval on numbers surrounded by
+    square backets e.g. : [n1,n2[
     """
 
     def __init__(self, str_interval: str) -> None:
         """
-        Constructor
-
-        :param str_interval: interval in str format to test
+        :param str_interval: string to test
         :raises ValueError: if format not respected
         """
         accpt_car = ('[', ']')
@@ -118,13 +112,12 @@ class SquareInterval():  # pylint: disable=too-few-public-methods
 
 class TestList():  # pylint: disable=too-few-public-methods
     """
-    A class to test input exist in tuple
+    A class to test that a string belongs to a set of enumerated values.
     """
 
     def __init__(self, str_input: str, accepted: Sequence[str]) -> None:
         """
-        Constructor
-        :param str_input: input to test
+        :param str_input: string to test
         :param accepted: accepted values for input
         :raises ValueError: if format not respected
         """
@@ -134,14 +127,12 @@ class TestList():  # pylint: disable=too-few-public-methods
 
 class AscOrDesc(TestList):  # pylint: disable=too-few-public-methods
     """
-    A class to test input is 'ascending' or 'descending'
+    A class to test that a string is equal to 'ascending' or 'descending'
     """
 
     def __init__(self, str_input: str) -> None:
         """
-        Constructor
-
-        :param str_input: input to test
+        :param str_input: string to test
         """
         accpt_tuple = ('ascending', 'descending')
         super(AscOrDesc, self).__init__(str_input=str_input, accepted=accpt_tuple)
@@ -149,14 +140,12 @@ class AscOrDesc(TestList):  # pylint: disable=too-few-public-methods
 
 class Polarisation(TestList):  # pylint: disable=too-few-public-methods
     """
-    A class to test input has a accepted polarisation type
+    A class to test that a string contains a legitimate value for polarization.
     """
 
     def __init__(self, str_input: str) -> None:
         """
-        Constructor
-
-        :param str str_input: input to test
+        :param str str_input: string to test
         """
         accpt_tuple = ('HH', 'VV', 'HH HV', 'VV VH')
         super(Polarisation, self).__init__(str_input=str_input, accepted=accpt_tuple)
@@ -164,14 +153,12 @@ class Polarisation(TestList):  # pylint: disable=too-few-public-methods
 
 class URLType():  # pylint: disable=too-few-public-methods
     """
-    A class to make sure input is an url
+    A class to test that a string is an url
     """
 
     def __init__(self, url: str, url_purpose: Optional[str]="Unknown") -> None:
         """
-        Test the input in order to have a proper URL
-
-        :param url: URL in str format to test
+        :param url: string to test
         :param url_purpose: purpose of the URL
         :raises RestoClientDesignError: if url is not a proper URL
         """

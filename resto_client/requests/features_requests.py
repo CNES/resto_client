@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -55,8 +57,6 @@ class SignLicenseRequest(RestoJsonRequest):
 
     def __init__(self, service: 'RestoService', license_id: str) -> None:
         """
-        Constructor
-
         :param service: resto service
         :param license_id: the license id which must be signed
         """
@@ -71,7 +71,7 @@ class SignLicenseRequest(RestoJsonRequest):
 
 class DownloadRequestBase(BaseRequest):
     """
-     Base class for all file download requests downloading in the client download directory
+     Base class for all requests downloading files into the client download directory
     """
 
     @property
@@ -93,8 +93,6 @@ class DownloadRequestBase(BaseRequest):
                  feature: RestoFeature,
                  download_directory: Path) -> None:
         """
-        Constructor
-
         :param service: resto service
         :param  feature: resto feature
         :param download_directory: an existing directory path where download will occur

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -25,7 +27,7 @@ if TYPE_CHECKING:
 
 class Authenticator(ABC):
     """
-     Base class for all requests managing the request Authentication
+     Base class for all requests needing Authentication
     """
 
     @property
@@ -51,8 +53,6 @@ class Authenticator(ABC):
 
     def __init__(self, service: 'AuthenticationService') -> None:
         """
-        Constructor
-
         :param service: authentication service
         """
         self.auth_service = service

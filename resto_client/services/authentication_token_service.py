@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -38,7 +40,7 @@ class RestoClientNoToken(RestoClientDesignError):
 
 class AuthenticationTokenService(BaseService):
     """
-    Class implementing a service for managing the token for a connexion.
+    Class implementing a service for managing the token for a connection.
     """
 
     @abstractmethod
@@ -50,13 +52,12 @@ class AuthenticationTokenService(BaseService):
     def __init__(self, auth_access: AuthenticationServiceAccess,
                  parent_server: 'RestoServer') -> None:
         """
-        Constructor
-
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """
-        super().__init__(auth_access, cast('AuthenticationService', self),
-                         parent_server=parent_server)
+        super(AuthenticationTokenService, self).__init__(auth_access,
+                                                         cast('AuthenticationService', self),
+                                                         parent_server=parent_server)
         self._token_value: Optional[str] = None
 
     @property

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -29,13 +31,11 @@ KNOWN_FILES_TYPES = ['product', 'quicklook', 'thumbnail', 'annexes']
 
 class RestoFeature(geojson.Feature):
     """
-     Class representing a Resto feature.
+     Class holding a Resto feature.
     """
 
     def __init__(self, feature_descr: dict) -> None:
         """
-        Constructor.
-
         :param feature_descr: Feature description
         :raises TypeError: When Feature type in descriptor is different from 'Feature'
         """

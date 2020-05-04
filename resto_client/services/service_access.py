@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -73,8 +75,6 @@ class ServiceAccess(ABC):
                  service_url: str,
                  service_protocol: str) -> None:
         """
-        Constructor.
-
         :param service_url: the URL at which the service is available.
         :param service_protocol: the protocol implemented by the service.
         """

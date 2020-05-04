@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -28,13 +30,11 @@ if TYPE_CHECKING:
 
 class RestoJsonResponse(RestoResponse):
     """
-     Json responses received from Resto.
+     Abstract base class for responses received in Json format.
     """
 
     def __init__(self, request: 'BaseRequest', response: dict) -> None:
         """
-        Constructor
-
         :param request: the parent request of this response
         :param response: the response received from the server and structured as a dict.
         """

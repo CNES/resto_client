@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -31,9 +33,6 @@ class AuthenticationAccount(ABC):
     asking_input: Dict[str, Callable] = {'shown': input, 'hidden': getpass}
 
     def __init__(self, server_name: str) -> None:
-        """
-        Constructor
-        """
         self._username: Optional[str] = None
         self._password: Optional[str] = None
         self.server_name = server_name

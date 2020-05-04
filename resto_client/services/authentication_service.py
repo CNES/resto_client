@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -33,8 +35,6 @@ class AuthenticationService(AuthenticationTokenService, AuthenticationAccount):
     def __init__(self, auth_access: AuthenticationServiceAccess,
                  parent_server: 'RestoServer') -> None:
         """
-        Constructor
-
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -12,9 +14,9 @@
    or implied. See the License for the specific language governing permissions and
    limitations under the License.
 """
-from urllib.parse import urlparse, urlunparse
 from mimetypes import guess_extension, MimeTypes
 from typing import Optional, Tuple, Union
+from urllib.parse import urlparse, urlunparse
 
 
 def contract_url(full_url: str) -> str:
@@ -56,9 +58,7 @@ def get_file_properties(content_type: str) -> Tuple[Optional[str], str, Union[st
     and return correct content_type and encoding
 
     :param content_type: content_type stripped to check
-    :returns: extension
-    :returns: mimetype
-    :returns: encoding
+    :returns: the file extension, mimetype and encoding
     """
     mimetype = content_type
     split_content = content_type.split(';')

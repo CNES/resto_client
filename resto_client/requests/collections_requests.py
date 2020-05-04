@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -52,8 +54,6 @@ class SearchCollectionRequest(RestoJsonRequest):
 
     def __init__(self, service: 'RestoService', collection: str, criteria: RestoCriteria) -> None:
         """
-        Constructor
-
         :param service: resto service
         :param collection: collection name
         :param criteria: the criteria to use for the search

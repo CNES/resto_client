@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+.. admonition:: License
+
    Copyright 2019 CNES
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -19,15 +21,13 @@ from prettytable import PrettyTable
 
 class RestoStatistics():  # pylint: disable=too-few-public-methods
     """
-     Class representing statistics on a Resto collection or on a set of collections
+     Class holding statistics on a Resto collection or on a set of collections
     """
 
     def __init__(self,
                  statistics_descr: Union[dict, None],
                  parent: Optional[str]='unknown collection(s)') -> None:
         """
-        Constructor
-
         :param statistics_descr: description of the statistics
         :param parent: name of the collection or set of collections for these statistics. Default:
                        `'unknown collection(s)'`
