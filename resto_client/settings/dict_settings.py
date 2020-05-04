@@ -23,13 +23,11 @@ from prettytable import PrettyTable
 
 class DictSettingsJson(dict):
     """
-    A class to hold settings in a dictionary which can be read and written as json.
+    A dictionary holding settings which can be read and written as json.
     """
 
     def __init__(self, filepath: Path, defaults: Optional[dict]=None) -> None:
         """
-        Constructor
-
         :param filepath: path to the json file where the settings are stored.
         :param defaults: a dictionary of entries to store in the settings if no file found.
         """

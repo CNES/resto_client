@@ -31,13 +31,11 @@ KNOWN_FILES_TYPES = ['product', 'quicklook', 'thumbnail', 'annexes']
 
 class RestoFeature(geojson.Feature):
     """
-     Class representing a Resto feature.
+     Class holding a Resto feature.
     """
 
     def __init__(self, feature_descr: dict) -> None:
         """
-        Constructor.
-
         :param feature_descr: Feature description
         :raises TypeError: When Feature type in descriptor is different from 'Feature'
         """

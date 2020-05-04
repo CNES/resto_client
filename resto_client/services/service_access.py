@@ -75,8 +75,6 @@ class ServiceAccess(ABC):
                  service_url: str,
                  service_protocol: str) -> None:
         """
-        Constructor.
-
         :param service_url: the URL at which the service is available.
         :param service_protocol: the protocol implemented by the service.
         """

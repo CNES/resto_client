@@ -33,9 +33,6 @@ class AuthenticationAccount(ABC):
     asking_input: Dict[str, Callable] = {'shown': input, 'hidden': getpass}
 
     def __init__(self, server_name: str) -> None:
-        """
-        Constructor
-        """
         self._username: Optional[str] = None
         self._password: Optional[str] = None
         self.server_name = server_name

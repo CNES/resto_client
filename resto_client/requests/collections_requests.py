@@ -54,8 +54,6 @@ class SearchCollectionRequest(RestoJsonRequest):
 
     def __init__(self, service: 'RestoService', collection: str, criteria: RestoCriteria) -> None:
         """
-        Constructor
-
         :param service: resto service
         :param collection: collection name
         :param criteria: the criteria to use for the search

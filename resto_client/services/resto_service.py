@@ -61,8 +61,6 @@ class RestoService(BaseService):
                  auth_service: AuthenticationService,
                  parent_server: 'RestoServer') -> None:
         """
-        Constructor
-
         :param resto_access: access to resto service.
         :param auth_service: Authentication service associated to this resto service.
         :param parent_server: Server which uses this service.

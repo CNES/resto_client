@@ -98,8 +98,6 @@ class ServerDescription():
                  resto_access: RestoServiceAccess,
                  auth_access: AuthenticationServiceAccess) -> None:
         """
-        Constructor.
-
         :param resto_access: description of the resto service access
         :param auth_access: description of the authentication service access
         :raises RestoClientDesignError: when the arguments are not of the right types.
@@ -140,13 +138,11 @@ class ServerDescription():
 
 class ServersDatabase():
     """
-    Class representing the whole servers definition database.
+    Class holding the whole servers definition database.
     """
 
     def __init__(self, db_path: Path) -> None:
         """
-        Constructor.
-
         :param db_path: the path to the database where servers definitions are stored.
         """
         self.db_servers = DictSettingsJson(db_path, defaults=WELL_KNOWN_SERVERS)

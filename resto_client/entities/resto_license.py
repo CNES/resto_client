@@ -19,13 +19,11 @@ from prettytable import PrettyTable
 
 class RestoLicense(dict):
     """
-     Class representing a license as given by Resto, either on a collection or on a feature
+     Class holding a license as provided by Resto, either on a collection or on a feature
     """
 
     def __init__(self, item_description: dict) -> None:
         """
-        Constructor.
-
         :param item_description: feature properties or collection item into which license
                                  information can be found.
         """
@@ -115,11 +113,11 @@ class RestoLicense(dict):
 
 class RestoCollectionLicense(RestoLicense):
     """
-     Class representing a license associated to a collection.
+     Class holding a license associated to a collection.
     """
 
 
 class RestoFeatureLicense(RestoLicense):
     """
-     Class representing a license associated to a feature
+     Class holding a license associated to a feature
     """

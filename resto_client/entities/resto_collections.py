@@ -33,9 +33,6 @@ class RestoCollections():
     """
 
     def __init__(self) -> None:
-        """
-        Constructor
-        """
         self._synthesis: Optional[RestoCollection] = None
         self._collections: Dict[str, RestoCollection] = {}
 

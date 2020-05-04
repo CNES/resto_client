@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 class Authenticator(ABC):
     """
-     Base class for all requests managing the request Authentication
+     Base class for all requests needing Authentication
     """
 
     @property
@@ -53,8 +53,6 @@ class Authenticator(ABC):
 
     def __init__(self, service: 'AuthenticationService') -> None:
         """
-        Constructor
-
         :param service: authentication service
         """
         self.auth_service = service

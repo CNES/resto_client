@@ -32,8 +32,6 @@ class RestoFeatureCollection(geojson.FeatureCollection):
 
     def __init__(self, feature_coll_descr: dict) -> None:
         """
-        Constructor
-
         :param feature_coll_descr: Feature collection description
         :raises TypeError: When type in descriptor is different from 'FeatureCollection'
         """

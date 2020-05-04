@@ -27,13 +27,11 @@ from resto_client.functions.aoi_utils import search_file_from_key, geojson_zone_
 
 class RestoCriteria(dict):
     """
-    A class to hold criteria in a dictionary which can be read and written by the API.
+    Dictionary holding criteria which can be read and written by the API.
     """
 
     def __init__(self, resto_protocol: Optional[str], **kwargs: str) -> None:
         """
-        Constructor
-
         :param resto_protocol: name of the resto protocol or None for common criteria.
         :param dict kwargs: dictionary in keyword=value form
         """

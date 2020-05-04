@@ -42,7 +42,7 @@ RestoRequestResult = Union[RestoEntities, RestoResponse, RestoJsonResponseSimple
 
 class BaseRequest(Authenticator):
     """
-     Base class for all service Requests
+     Base class for all Requests
     """
 
     @property
@@ -61,8 +61,6 @@ class BaseRequest(Authenticator):
 
     def __init__(self, service: BaseService, **url_kwargs: str) -> None:
         """
-        Constructor
-
         :param service: service
         :param url_kwargs: keyword arguments which must be inserted into the URL pattern.
         :raises TypeError: if the service argument is not derived from

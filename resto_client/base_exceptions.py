@@ -120,9 +120,6 @@ class FeatureOnTape(RestoClientEvent):
     """
 
     def __init__(self) -> None:
-        """
-        Constructor.
-        """
         super(FeatureOnTape, self).__init__('Moving feature from tape to disk')
 
 
@@ -133,8 +130,6 @@ class LicenseSignatureRequested(RestoClientEvent):
 
     def __init__(self, error_response: 'DownloadErrorResponse') -> None:
         """
-        Constructor.
-
         :param error_response: the error response as provided by resto, which contains the
                                identifier of the license to sign.
         """

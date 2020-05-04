@@ -27,13 +27,11 @@ COLLECTION_FIELDS_NAMES = ['Collection name', 'Status', 'Model', 'License Id', '
 
 class RestoCollection():
     """
-     Class representing a Resto collection
+     Class holding the description of a Resto collection
     """
 
     def __init__(self, collection_descr: dict) -> None:
         """
-        Constructor
-
         :param collection_descr: description of the collection
         """
         self._collection_descr = copy.deepcopy(collection_descr)

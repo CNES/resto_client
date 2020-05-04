@@ -40,7 +40,7 @@ class RestoClientNoToken(RestoClientDesignError):
 
 class AuthenticationTokenService(BaseService):
     """
-    Class implementing a service for managing the token for a connexion.
+    Class implementing a service for managing the token for a connection.
     """
 
     @abstractmethod
@@ -52,8 +52,6 @@ class AuthenticationTokenService(BaseService):
     def __init__(self, auth_access: AuthenticationServiceAccess,
                  parent_server: 'RestoServer') -> None:
         """
-        Constructor
-
         :param auth_access: access to the authentication server.
         :param parent_server: Server which uses this service.
         """

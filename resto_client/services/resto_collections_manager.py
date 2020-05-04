@@ -26,9 +26,6 @@ class RestoCollectionsManager():
     """
 
     def __init__(self) -> None:
-        """
-        Constructor
-        """
         self._collections_set: Optional[RestoCollections] = None
         self._current_collection: Optional[str] = None
 
