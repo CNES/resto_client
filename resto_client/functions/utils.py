@@ -58,9 +58,7 @@ def get_file_properties(content_type: str) -> Tuple[Optional[str], str, Union[st
     and return correct content_type and encoding
 
     :param content_type: content_type stripped to check
-    :returns: extension
-    :returns: mimetype
-    :returns: encoding
+    :returns: the file extension, mimetype and encoding
     """
     mimetype = content_type
     split_content = content_type.split(';')
