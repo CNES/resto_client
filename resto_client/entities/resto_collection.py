@@ -22,6 +22,8 @@ from prettytable import PrettyTable
 from .resto_license import RestoCollectionLicense
 from .resto_statistics import RestoStatistics
 
+COLLECTION_FIELDS_NAMES = ['Collection name', 'Status', 'Model', 'License Id', 'License name']
+
 
 class RestoCollection():
     """
@@ -98,8 +100,6 @@ class RestoCollection():
 
     """
 
-    table_field_names = ['Collection name', 'Status', 'Model', 'License Id', 'License name']
-
     def get_table_row(self) -> List[Optional[str]]:
         """
         :returns: attributes to be displayed in the tabulated dump of a collection
@@ -110,6 +110,6 @@ class RestoCollection():
     def __str__(self) -> str:
         collection_table = PrettyTable()
         collection_table.title = "Collection's Characteristics"
-        collection_table.field_names = self.table_field_names
+        collection_table.field_names = COLLECTION_FIELDS_NAMES
         collection_table.add_row(self.get_table_row())
         return collection_table.get_string()
