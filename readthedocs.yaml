@@ -32,4 +32,4 @@ formats: all
 python:
   version: 3
   install:
-    - requirements: docs/doc_sphinx/sphinx_requirements.txt
+    - requirements: doc/doc_sphinx/sphinx_requirements.txt
