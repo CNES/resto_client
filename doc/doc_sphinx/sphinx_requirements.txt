@@ -17,3 +17,5 @@
 sphinx>=3.0
 sphinx-rtd-theme>=0.4
 sphinxcontrib-apidoc>=0.3
+
+shapely>=1.6
