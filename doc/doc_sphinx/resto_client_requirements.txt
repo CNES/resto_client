@@ -12,10 +12,12 @@
 #  or implied. See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Requirements for building resto_client Sphinx documentation in a python3 environment.
+# Requirements needed by Sphinx when it import resto_client modules for building documentation.
 
-sphinx>=3.0
-sphinx-rtd-theme>=0.4
-sphinxcontrib-apidoc>=0.3
-
--r resto_client_requirements.txt
+requests
+tqdm
+geojson
+ptable
+appdirs
+shapely
+colorama
