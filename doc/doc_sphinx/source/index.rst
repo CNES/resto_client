@@ -41,6 +41,8 @@ resto_client API
    api_doc/modules.rst
 
 
+   servers_db_design.rst
+   
 Indices and tables
 ------------------
 
