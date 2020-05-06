@@ -6,7 +6,7 @@
 [![PyPI - Format](https://img.shields.io/pypi/format/resto_client)](https://pypi.org/project/resto_client/#files)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/resto_client)](https://pypistats.org/packages/resto-client)
 [![GitHub contributors](https://img.shields.io/github/contributors/CNES/resto_client)](https://github.com/CNES/resto_client/graphs/contributors)
-[![ReadTheDocs](https://readthedocs.org/projects/resto-client/badge/?version=latest)](https://resto-client.readthedocs.io/en/latest/)
+[![Documentation status](https://readthedocs.org/projects/resto-client/badge/?version=latest)](https://resto-client.readthedocs.io/en/latest/)
 
 **resto_client** is a python package which gives you access to several remote sensing image servers which are based on the [resto](https://github.com/jjrom/resto/tree/2.x) open source server.
 
