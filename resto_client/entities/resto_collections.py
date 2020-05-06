@@ -41,13 +41,9 @@ class RestoCollections():
         Add a new collection in this collections set.
 
         :param collection: a collection to add in this set of collections.
-        :raises TypeError: if collection is not of the right type.
         :raises IndexError: if a collection with same name already exists in the set of collections.
         :raises NotImplementedError: when a collection already exists with same lowercased name.
         """
-        if not isinstance(collection, RestoCollection):
-            msg_err = 'collection argument must be of RestoCollection type. Found {} instead.'
-            raise TypeError(msg_err.format(type(collection)))
         # FIXME: use self.normalize_name
         if collection.name in self._collections:
             raise IndexError('A collection with name {} already exists.'.format(collection.name))
@@ -75,11 +71,7 @@ class RestoCollections():
     def synthesis(self, synthesis: Optional[RestoCollection]) -> None:
         """
         :param synthesis: the synthesis of this set of collections.
-        :raises TypeError: if synthesis is not of the right type.
         """
-        if not isinstance(synthesis, (RestoCollection, type(None))):
-            msg_err = 'synthesis must be None or of RestoCollection type. Found {} instead.'
-            raise TypeError(msg_err.format(type(synthesis)))
         self._synthesis = synthesis
 
     @property
