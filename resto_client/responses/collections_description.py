@@ -15,7 +15,7 @@
    limitations under the License.
 """
 import copy
-from typing import Optional
+from typing import Optional, Union
 
 from resto_client.base_exceptions import (InconsistentResponse,
                                           IncomprehensibleResponse)
@@ -29,17 +29,17 @@ OSDESCRIPTION_KEYS = ['ShortName', 'LongName', 'Description'
                       'Tags', 'Developer', 'Contact', 'Query', 'Attribution']
 
 
-def rebuild_os_description(opensearch_description: dict) -> Optional[dict]:
+def rebuild_os_description(opensearch_description: Union[dict, None]) -> Optional[dict]:
     """
     Rebuild a normalized osDescription from an existing one or create a sensible one.
 
     If osDescription is multi-lingual, retain only one language, preferably english
 
-    :param opensearch_description: the osDescription field to process
+    :param opensearch_description: the osDescription field to process (possibly None)
     :returns: osDescription english fields
     """
     normalized_osdescription = None
-    if isinstance(opensearch_description, dict):
+    if opensearch_description is not None:
         if any([os_key in opensearch_description for os_key in OSDESCRIPTION_KEYS]):
             normalized_osdescription = copy.deepcopy(opensearch_description)
         elif 'en' in opensearch_description:

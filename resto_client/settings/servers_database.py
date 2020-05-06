@@ -16,7 +16,7 @@
 """
 from pathlib import Path
 
-from resto_client.base_exceptions import RestoClientUserError, RestoClientDesignError
+from resto_client.base_exceptions import RestoClientUserError
 from resto_client.services.service_access import AuthenticationServiceAccess, RestoServiceAccess
 from resto_client.settings.dict_settings import DictSettingsJson
 
@@ -100,14 +100,7 @@ class ServerDescription():
         """
         :param resto_access: description of the resto service access
         :param auth_access: description of the authentication service access
-        :raises RestoClientDesignError: when the arguments are not of the right types.
         """
-        if not isinstance(resto_access, RestoServiceAccess):
-            msg = 'resto_access must be of RestoServiceAccess type. Found {} instead.'
-            raise RestoClientDesignError(msg.format(type(resto_access)))
-        if not isinstance(auth_access, AuthenticationServiceAccess):
-            msg = 'resto_access must be of AuthenticationServiceAccess type. Found {} instead.'
-            raise RestoClientDesignError(msg.format(type(auth_access)))
         self.resto_access = resto_access
         self.auth_access = auth_access
 
@@ -206,22 +199,8 @@ class ServersDatabase():
         :param server_name: name of the server to create in the database. A None value is rejected.
         :param resto_access: Access parameters to the resto service
         :param auth_access: Access parameters to the authentication service
-        :raises RestoClientUserError: raised in several circumstances:
-                                      - when a server already exist with this name
-                                      - when the server name is not a valid str
-        :raises RestoClientDesignError: when resto_access or auth_access are not ServiceAccess
-                                        instances.
+        :raises RestoClientUserError: when a server already exist with this name
         """
-        if not isinstance(resto_access, RestoServiceAccess):
-            msg = 'resto_access must be of RestoServiceAccess type. Found {} instead.'
-            raise RestoClientDesignError(msg.format(type(resto_access)))
-        if not isinstance(auth_access, AuthenticationServiceAccess):
-            msg = 'auth_access must be of AuthenticationServiceAccess type. Found {} instead.'
-            raise RestoClientDesignError(msg.format(type(auth_access)))
-        if not isinstance(server_name, str):
-            msg = 'Invalid server name type. Found {} instead of str'
-            raise RestoClientUserError(msg.format(type(server_name)))
-
         try:
             canonical_server_name = self.check_server_name(server_name)
             msg = 'Server {} already exists in the server database.'
